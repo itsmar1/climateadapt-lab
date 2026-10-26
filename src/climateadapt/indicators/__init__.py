@@ -1,0 +1,1 @@
+"""Deterministic, tested environmental indicator calculations."""
