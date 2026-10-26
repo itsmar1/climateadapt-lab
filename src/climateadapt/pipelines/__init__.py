@@ -1,0 +1,1 @@
+"""Analysis pipelines that combine data connectors with tested indicators."""

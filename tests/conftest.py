@@ -15,6 +15,9 @@ from climateadapt.data.chirps import ChirpsMonthlyStore
 
 WEST, NORTH, RES, WIDTH, HEIGHT = -10.0, 31.0, 0.05, 40, 40
 BASE_URL = "https://example.test/products/CHIRPS/v3.0"
+# Cell (5, 7) holds r*100 + c + offset = 507 + offset, which season_routes uses.
+SAMPLED_CELL = (5, 7)
+SAMPLED_CELL_BASE_VALUE = 507.0
 
 
 @pytest.fixture
@@ -77,6 +80,27 @@ def tif_factory(tmp_path) -> Callable[..., bytes]:
         return path.read_bytes()
 
     return make
+
+
+@pytest.fixture
+def season_routes(tif_factory) -> Callable[..., dict[str, bytes]]:
+    """Build a route table of synthetic monthly files for the sampled cell (5, 7).
+
+    ``pairs`` is an iterable of (year, month); ``value_fn(year, month)`` gives the mm value
+    that cell should hold; ``missing`` is a set of (year, month) whose cell is nodata.
+    """
+
+    def build(pairs, value_fn, missing=frozenset()) -> dict[str, bytes]:
+        routes: dict[str, bytes] = {}
+        for year, month in sorted(set(pairs)):
+            overrides = {SAMPLED_CELL: -9999.0} if (year, month) in missing else None
+            routes[f"chirps-v3.0.{year:04d}.{month:02d}.tif"] = tif_factory(
+                offset=value_fn(year, month) - SAMPLED_CELL_BASE_VALUE,
+                overrides=overrides,
+            )
+        return routes
+
+    return build
 
 
 @pytest.fixture
