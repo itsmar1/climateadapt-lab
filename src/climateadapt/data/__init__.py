@@ -1,0 +1,1 @@
+"""Environmental data connectors with coverage checks, caching, and provenance."""
