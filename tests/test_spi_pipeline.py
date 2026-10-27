@@ -112,7 +112,7 @@ def test_short_reference_period_is_flagged(env, season_routes):
         season_routes(pairs, synthetic), reference_start_year=2001, min_reference_years=20
     )
 
-    result = chirps_spi(client, **{k: v for k, v in params.items() if k != "min_reference_years"})
+    result = chirps_spi(client, **params)
 
     assert result.reference_years_used == 20
     assert any("only 20 usable years" in text for text in result.limitations)
