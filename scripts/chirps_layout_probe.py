@@ -1,10 +1,14 @@
 """Inspect CHIRPS GeoTIFF layout, and test whether remote single-pixel reads work.
 
     # Local, no network: layout and nodata tag of an already cached file
-    uv run python scripts/chirps_layout_probe.py local "data/cache/chirps_v3/monthly_global/chirps-v3.0.2024.01.tif"
+    # Run:
+    # uv run python scripts/chirps_layout_probe.py local \
+    #     "data/cache/chirps_v3/monthly_global/chirps-v3.0.2024.01.tif"
 
     # Network, tiny range requests (no full download):
-    uv run python scripts/chirps_layout_probe.py remote --year 2024 --month 1 --lat 30.43 --lon -9.61
+    # Run:
+    # uv run python scripts/chirps_layout_probe.py remote \
+    #     --year 2024 --month 1 --lat 30.43 --lon -9.61
 
 Purpose: find out whether we can read one pixel per file remotely (kilobytes) instead of
 downloading ~22 MB files. Send me the output.
@@ -51,7 +55,11 @@ def cmd_local(args: argparse.Namespace) -> int:
 def cmd_remote(args: argparse.Namespace) -> int:
     settings = get_settings()
     month = YearMonth(args.year, args.month)
-    url = f"{settings.chirps_base_url.rstrip('/')}/{MONTHLY_GLOBAL_TIF_PATH}/{monthly_filename(month)}"
+    url = (
+        f"{settings.chirps_base_url.rstrip('/')}/"
+        f"{MONTHLY_GLOBAL_TIF_PATH}/"
+        f"{monthly_filename(month)}"
+    )
     print(f"GDAL /vsicurl/ read of {url}")
     options = {
         "GDAL_DISABLE_READDIR_ON_OPEN": "EMPTY_DIR",

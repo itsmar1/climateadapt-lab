@@ -580,7 +580,13 @@ class Era5LandMonthlyStore:
         download_path = raw_dir / f"{key}.download"
         nc_path = raw_dir / f"{key}.nc"
 
-        logger.info("Requesting %s %s for years %s months %s", DATASET_ID, spec.cds_name, years, month_numbers)
+        logger.info(
+            "Requesting %s %s for years %s months %s",
+            DATASET_ID,
+            spec.cds_name,
+            years,
+            month_numbers,
+        )
         succeeded = False
         try:
             self._downloader.download(DATASET_ID, request, download_path)
@@ -778,7 +784,9 @@ def day_weighted_mean_temperature_c(series: Era5PointSeries) -> float:
         raise ValueError(f"Expected a temperature series (degC), got {series.units!r}.")
     entries = _complete_values(series)
     weights = [days_in_month(year, month) for year, month, _ in entries]
-    total = math.fsum(value * weight for (_, _, value), weight in zip(entries, weights, strict=True))
+    total = math.fsum(
+        value * weight for (_, _, value), weight in zip(entries, weights, strict=True)
+    )
     return total / sum(weights)
 
 

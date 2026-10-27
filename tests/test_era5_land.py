@@ -351,7 +351,8 @@ def test_html_instead_of_netcdf_is_rejected(tmp_path, make_client):
 def test_grid_too_far_from_the_point_is_rejected(make_client):
     def far_away(request, target):
         dataset = xr.Dataset(
-            {"t2m": (["valid_time", "latitude", "longitude"], np.full((1, 2, 2), 285.0), {"units": "K"})},
+            {"t2m": (["valid_time", "latitude", "longitude"], 
+                     np.full((1, 2, 2), 285.0), {"units": "K"})},
             coords={
                 "valid_time": np.array([np.datetime64("2024-01-01T00:00:00", "ns")]),
                 "latitude": [10.1, 10.0],
@@ -414,7 +415,8 @@ def _manual_series(variable, units, entries):
         grid_point_longitude=0.0,
         values=[
             Era5MonthValue(
-                year=y, month=m, value=v, status="ok" if v is not None else "missing_value", notes=[]
+                year=y, month=m, value=v, status="ok" 
+                if v is not None else "missing_value", notes=[]
             )
             for y, m, v in entries
         ],
