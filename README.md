@@ -1,27 +1,32 @@
 # ClimateAdapt Lab
 
 Evidence-grounded AI agent for agricultural drought adaptation (Meta Global Developer AI
-Hackathon project). **Status: Milestone 1** - tested CHIRPS v3 and ERA5-Land point connectors
-and a CHIRPS-based rainfall-anomaly endpoint. SPI and further indicators are Milestone 2.
+Hackathon project). **Status:** Milestones 0-2 are implemented (tested data connectors and
+precipitation/temperature indicators). The retrieval, recommendation, agent, and UI layers
+are not built yet.
 
 ## Scientific scope and limitations
 
-- Implemented indicator: a simple precipitation **percentage anomaly**
-  `((observed_total - baseline_mean) / baseline_mean) * 100`. It is a prototype, **not** a
-  calibrated drought index, and must not be used alone to classify drought severity. It is
-  mean-based and can mislead on skewed rainfall records.
-- Data sources: CHIRPS v3 Final (monthly, 0.05 degree, 60S-60N, 1981-present) and ERA5-Land
-  monthly means (0.1 degree grid, 1950-present, reanalysis). Coverage, units, and
-  limitations are returned with every result. No global validation is claimed.
-- **Products can disagree strongly.** In one real test the two precipitation products agreed on
-  the 3-month total only to within the same order of magnitude and disagreed month by month.
-  Use `scripts/compare_chirps_era5.py` and treat disagreement as uncertainty.
-- Missing values are never converted to zero and never partially summed.
-- ERA5-Land has no value at masked (for example sea) grid points. Default: months are reported
-  as missing. Opt-in `--land-fallback-km` uses the nearest valid neighbour and always reports
-  the substitution.
-- A point exactly on a CHIRPS cell edge or corner is flagged, because the cell used is
-  arbitrary. Use points that are not multiples of 0.05 degrees.
+- Indicators implemented: precipitation **percentage anomaly**, **SPI** (gamma fit per calendar
+  month, WMO-No. 1090), and an ERA5-Land **temperature window anomaly** (degC difference,
+  standardized anomaly, empirical percentile). All are *relative to a reference period*. None
+  measures drought impact, and none returns severity labels.
+- The percentage anomaly is mean-based and can mislead on skewed rainfall records. SPI is more
+  appropriate, but its gamma fit is not goodness-of-fit tested; `scripts/spi_diagnostics.py`
+  reports how sensitive SPI is to that assumption.
+- Data: CHIRPS v3 Final (monthly, 0.05 degree, 60S-60N, 1981-present) and ERA5-Land monthly
+  means (0.1 degree reanalysis, 1950-present). Coverage, units, provenance, and limitations are
+  returned with every result. No global validation is claimed.
+- **Products can disagree.** In one real test (Jan-Mar 2024, one point) CHIRPS and ERA5-Land
+  gave SPI-3 of -0.52 and -0.38 with a 0.77 yearly correlation, but quite different monthly
+  totals. Use `scripts/spi_compare.py` and treat disagreement as uncertainty.
+- Missing values are never converted to zero and never partially summed. Reference years with
+  incomplete windows are excluded and reported, never imputed.
+- ERA5-Land has no value at masked (for example sea) grid points. By default months are
+  reported as missing. The opt-in `--land-fallback-km` uses the nearest valid neighbour and
+  always reports the substitution.
+- A point exactly on a CHIRPS cell edge or corner is flagged. Use points that are not
+  multiples of 0.05 degrees.
 
 ## Setup (repo root, PowerShell)
 
@@ -31,6 +36,9 @@ copy .env.example .env
 uv run pytest
 uv run ruff check .
 ```
+
+The suite takes about 4-5 minutes (it builds many synthetic rasters). Optionally run in
+parallel: `uv run --with pytest-xdist pytest -n auto`.
 
 ## Run the API
 
@@ -44,40 +52,43 @@ Docs: http://127.0.0.1:8000/docs
 |---|---|
 | `GET /health` | Liveness and version |
 | `POST /v1/analysis/rainfall-anomaly` | Prototype anomaly from user-supplied totals |
-| `POST /v1/analysis/chirps-rainfall-anomaly` | Anomaly computed from CHIRPS v3 Final |
+| `POST /v1/analysis/chirps-rainfall-anomaly` | Percentage anomaly computed from CHIRPS v3 Final |
+| `POST /v1/analysis/chirps-spi` | SPI from CHIRPS v3 Final (default reference 1991-2020) |
 
-## CHIRPS access modes
-
-`CLIMATEADAPT_CHIRPS_ACCESS` selects how CHIRPS is read:
-
-- `remote` (default): one pixel per month via HTTP range requests. A real 33-month pipeline run
-  took about 30 s cold. Provenance records the server's size, ETag, and Last-Modified (no
-  file hash, because the file is never downloaded).
-- `download`: whole ~22 MB monthly files, cached with a SHA-256 provenance sidecar.
-  Slower (about 35 s per file on the verified connection) but archival-grade.
-
-`CLIMATEADAPT_PREFETCH_WORKERS` (1-8, default 4) sets parallel remote reads. Set
-`CLIMATEADAPT_ALLOW_DOWNLOADS=false` for cache-only, reproducible runs.
+ERA5-Land indicators are CLI-only for now (CDS request latency is unpredictable).
 
 ## Scripts
 
 ```powershell
-# CHIRPS anomaly (also warms the cache)
+# CHIRPS
 uv run python scripts/chirps_anomaly.py --lat 30.43 --lon -9.61 --observed-start 2024-01 --window-months 3 --baseline-start-year 2011 --baseline-end-year 2020
-
-# CHIRPS access check and point series
+uv run python scripts/chirps_spi.py --lat 30.43 --lon -9.61 --target-end 2024-03 --timescale 3
 uv run python scripts/chirps_cli.py probe --year 2024 --month 1
-uv run python scripts/chirps_cli.py series --lat 30.43 --lon -9.61 --start 2024-01 --end 2024-03
 
-# ERA5-Land (needs CDS credentials, below); add --land-fallback-km 15 if the point is masked
-uv run python scripts/era5land_cli.py series --variable total_precipitation --lat 30.43 --lon -9.61 --start 2024-01 --end 2024-03
+# ERA5-Land (needs CDS credentials, below)
+uv run python scripts/era5land_cli.py series --variable total_precipitation --lat 30.43 --lon -9.61 --start 2024-01 --end 2024-03 --land-fallback-km 15
+uv run python scripts/temperature_anomaly.py --lat 30.43 --lon -9.61 --target-end 2024-03 --timescale 3 --land-fallback-km 15
 
-# Side-by-side product comparison
+# Cross-product checks and diagnostics
 uv run python scripts/compare_chirps_era5.py --lat 30.43 --lon -9.61 --start 2024-01 --end 2024-03 --land-fallback-km 15
+uv run python scripts/spi_compare.py --lat 30.43 --lon -9.61 --target-end 2024-03 --timescale 3 --land-fallback-km 15
+uv run python scripts/spi_diagnostics.py --source chirps --lat 30.43 --lon -9.61 --target-end 2024-03 --timescale 3
 
 # Inspect a downloaded ERA5-Land NetCDF (no network)
 uv run python scripts/inspect_nc.py "data\cache\era5_land\raw\<file>.nc"
 ```
+
+ERA5-Land variables: `2m_temperature`, `total_precipitation`,
+`volumetric_soil_water_layer_1/2/3` (0-7, 7-28, 28-100 cm). Layer 4 is excluded because its
+documented depth is contested.
+
+## CHIRPS access modes
+
+`CLIMATEADAPT_CHIRPS_ACCESS`: `remote` (default) reads one pixel per month with HTTP range
+requests (a real 33-month run took about 30 s cold; provenance stores size, ETag, and
+Last-Modified). `download` fetches whole ~22 MB monthly files with SHA-256 provenance.
+`CLIMATEADAPT_PREFETCH_WORKERS` (1-8) sets parallel remote reads.
+`CLIMATEADAPT_ALLOW_DOWNLOADS=false` forces cache-only, reproducible runs.
 
 ## ERA5-Land credentials (one-time)
 
@@ -92,14 +103,20 @@ uv run python scripts/inspect_nc.py "data\cache\era5_land\raw\<file>.nc"
    present" and accept its terms of use. Requests fail until you do.
 
 Never commit your token. Tests never need credentials or network access.
-
-## Configuration
-
-See `.env.example`. Real data is cached under `data/cache/` (git-ignored).
+`CLIMATEADAPT_CDS_RETRY_MAX`, `CLIMATEADAPT_CDS_SLEEP_MAX_SECONDS`, and
+`CLIMATEADAPT_CDS_TIMEOUT_SECONDS` bound cdsapi's retries (applied only if your installed
+cdsapi exposes those options; otherwise a warning is logged).
 
 ## Error behaviour
 
 All errors use `{"detail": [{"loc": [], "msg": "...", "type": "<code>"}]}` with codes:
 `outside_coverage` (422), `data_not_available` (404), `missing_data` (422),
-`insufficient_baseline` (422), `download_error` (502), `data_integrity_error` (502).
-Invalid requests are 422. A zero baseline returns 200 with `status: "undefined"`.
+`insufficient_baseline` (422), `insufficient_reference` (422), `download_error` (502),
+`data_integrity_error` (502). Invalid requests are 422. A zero baseline returns 200 with
+`status: "undefined"`.
+
+## Known limitations
+
+Cached CHIRPS remote values are not revalidated against ETag changes (CHC revised at least one
+file after release). The SPI gamma fit is not goodness-of-fit tested and there are no SPI
+category labels. Soil water, retrieval, recommendation, agent, and UI layers are still to do.
