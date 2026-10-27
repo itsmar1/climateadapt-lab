@@ -142,6 +142,18 @@ def _convert_precipitation(raw: float, month: YearMonth) -> tuple[float, list[st
     return mean_daily_accumulation_m_to_monthly_mm(value, month.year, month.month), notes
 
 
+SOIL_WATER_UNITS = frozenset({"m**3 m**-3", "m3 m-3", "m^3 m^-3", "m3/m3"})
+
+
+def _convert_soil_water(raw: float, month: YearMonth) -> tuple[float, list[str]]:
+    """Volumetric soil water (m3/m3) needs no conversion; implausible values are rejected."""
+    if not 0.0 <= raw <= 1.0:
+        raise DataIntegrityError(
+            f"Implausible volumetric soil water {raw} m3/m3 for {month}; refusing to use it."
+        )
+    return raw, []
+
+
 @dataclass(frozen=True)
 class VariableSpec:
     cds_name: str
@@ -168,6 +180,30 @@ VARIABLES: dict[str, VariableSpec] = {
         output_units="mm/month",
         description="Monthly total precipitation derived from the mean daily accumulation",
         convert=_convert_precipitation,
+    ),
+    "volumetric_soil_water_layer_1": VariableSpec(
+        cds_name="volumetric_soil_water_layer_1",
+        file_short_names=("swvl1",),
+        file_units=SOIL_WATER_UNITS,
+        output_units="m3/m3",
+        description="Monthly mean volumetric soil water, layer 1 (0-7 cm)",
+        convert=_convert_soil_water,
+    ),
+    "volumetric_soil_water_layer_2": VariableSpec(
+        cds_name="volumetric_soil_water_layer_2",
+        file_short_names=("swvl2",),
+        file_units=SOIL_WATER_UNITS,
+        output_units="m3/m3",
+        description="Monthly mean volumetric soil water, layer 2 (7-28 cm)",
+        convert=_convert_soil_water,
+    ),
+    "volumetric_soil_water_layer_3": VariableSpec(
+        cds_name="volumetric_soil_water_layer_3",
+        file_short_names=("swvl3",),
+        file_units=SOIL_WATER_UNITS,
+        output_units="m3/m3",
+        description="Monthly mean volumetric soil water, layer 3 (28-100 cm)",
+        convert=_convert_soil_water,
     ),
 }
 
@@ -1028,6 +1064,25 @@ def day_weighted_mean_temperature_c(series: Era5PointSeries) -> float:
     """Mean temperature over the window, weighting each month by its number of days."""
     if series.units != "degC":
         raise ValueError(f"Expected a temperature series (degC), got {series.units!r}.")
+    entries = _complete_values(series)
+    weights = [days_in_month(year, month) for year, month, _ in entries]
+    weighted = math.fsum(
+        value * weight for (_, _, value), weight in zip(entries, weights, strict=True)
+    )
+    return weighted / sum(weights)
+
+
+def day_weighted_mean(series: Era5PointSeries) -> float:
+    """Day-weighted mean over the window for a STATE variable (temperature, soil water).
+
+    Not for precipitation totals (use ``total_precipitation_mm``). Strict: any missing month
+    raises MissingDataError.
+    """
+    if series.units == "mm/month":
+        raise ValueError(
+            "A day-weighted mean is not meaningful for monthly precipitation totals; "
+            "use total_precipitation_mm."
+        )
     entries = _complete_values(series)
     weights = [days_in_month(year, month) for year, month, _ in entries]
     weighted = math.fsum(

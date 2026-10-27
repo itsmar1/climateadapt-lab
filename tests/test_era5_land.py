@@ -499,5 +499,5 @@ def test_build_client_uses_configured_data_dir(tmp_path):
 
 
 def test_variable_table_is_consistent():
-    assert set(VARIABLES) == {"2m_temperature", "total_precipitation"}
+    assert {"2m_temperature", "total_precipitation"} <= set(VARIABLES)
     assert VARIABLES["total_precipitation"].output_units == "mm/month"

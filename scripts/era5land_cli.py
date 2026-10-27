@@ -3,6 +3,7 @@
     uv run python scripts/era5land_cli.py series --variable total_precipitation \
         --lat 30.43 --lon -9.61 --start 2024-01 --end 2024-03
 
+Variables: 2m_temperature, total_precipitation, volumetric_soil_water_layer_1/2/3.
 If the nearest grid point is masked (no value in any month), add --land-fallback-km 15 to
 use the nearest valid neighbouring grid point within 15 km. This is opt-in and always
 reported. First run submits a CDS request (queue time varies) and caches the result.
@@ -17,7 +18,7 @@ from climateadapt.config import get_settings
 from climateadapt.data.era5_land import (
     VARIABLES,
     build_era5_land_client,
-    day_weighted_mean_temperature_c,
+    day_weighted_mean,
     total_precipitation_mm,
 )
 from climateadapt.data.errors import DataAccessError, MissingDataError
@@ -51,14 +52,14 @@ def cmd_series(args: argparse.Namespace) -> int:
         else:
             print(f"land fallback not used: {info.reason}")
     for value in series.values:
-        shown = "MISSING" if value.value is None else f"{value.value:.3f}"
+        shown = "MISSING" if value.value is None else f"{value.value:.4f}"
         print(f"  {value.year:04d}-{value.month:02d}  {shown:>10} {series.units}")
 
     try:
         if series.variable == "total_precipitation":
             print(f"window total: {total_precipitation_mm(series):.2f} mm")
         else:
-            print(f"day-weighted window mean: {day_weighted_mean_temperature_c(series):.2f} degC")
+            print(f"day-weighted window mean: {day_weighted_mean(series):.4f} {series.units}")
     except MissingDataError as exc:
         print(f"window aggregate: not computed ({exc})")
 
