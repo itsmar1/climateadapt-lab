@@ -1,4 +1,4 @@
-"""FastAPI application: health check, prototype rainfall anomaly, CHIRPS-based anomaly."""
+"""FastAPI application: health, prototype anomaly, CHIRPS anomaly, and CHIRPS SPI."""
 
 from __future__ import annotations
 
@@ -23,17 +23,20 @@ from climateadapt.data.errors import (
 )
 from climateadapt.data.periods import YearMonth
 from climateadapt.indicators.rainfall import InvalidPrecipitationError
+from climateadapt.indicators.spi import InsufficientReferenceError
 from climateadapt.pipelines.rainfall_anomaly import (
     ChirpsRainfallAnomalyResult,
     InsufficientBaselineError,
     chirps_rainfall_anomaly,
 )
+from climateadapt.pipelines.spi import ChirpsSpiResult, chirps_spi
 from climateadapt.schemas import (
     HealthResponse,
     RainfallAnalysisRequest,
     RainfallAnalysisResponse,
 )
 from climateadapt.schemas_chirps import ChirpsRainfallAnomalyRequest
+from climateadapt.schemas_spi import ChirpsSpiRequest
 
 # Domain error -> (HTTP status, machine-readable code). All error bodies share one shape:
 # {"detail": [{"loc": [...], "msg": "...", "type": "<code>"}]}
@@ -42,6 +45,7 @@ _DOMAIN_ERRORS: list[tuple[type[Exception], int, str]] = [
     (DataNotAvailableError, 404, "data_not_available"),
     (MissingDataError, 422, "missing_data"),
     (InsufficientBaselineError, 422, "insufficient_baseline"),
+    (InsufficientReferenceError, 422, "insufficient_reference"),
     (DownloadError, 502, "download_error"),
     (DataIntegrityError, 502, "data_integrity_error"),
 ]
@@ -95,8 +99,9 @@ def create_app() -> FastAPI:
         version=__version__,
         description=(
             "Evidence-grounded agricultural drought adaptation decision support. "
-            "Current indicators are simple precipitation percentage anomalies; they are "
-            "not calibrated drought indices and do not classify drought severity."
+            "Indicators are precipitation-only (percentage anomaly, SPI); they describe "
+            "rainfall relative to a reference period and do not measure drought impact or "
+            "classify severity."
         ),
     )
 
@@ -127,7 +132,7 @@ def create_app() -> FastAPI:
         description=(
             "Compares the observed calendar-month window total with the mean of the same "
             "window over the baseline years, at the CHIRPS grid cell containing the point. "
-            "The first request for a period may download many monthly files and be slow; "
+            "The first request for a period reads many monthly values and may be slow; "
             "later requests use the local cache. Not a drought-severity classification."
         ),
     )
@@ -143,6 +148,34 @@ def create_app() -> FastAPI:
             window_months_count=request.window_months,
             baseline_start_year=request.baseline_start_year,
             baseline_end_year=request.baseline_end_year,
+        )
+
+    @app.post(
+        "/v1/analysis/chirps-spi",
+        response_model=ChirpsSpiResult,
+        tags=["analysis"],
+        summary="Standardized Precipitation Index (SPI) from CHIRPS v3 Final",
+        description=(
+            "SPI for the window ending at target_end_month, calibrated on the reference "
+            "period (gamma distribution per calendar month; WMO-No. 1090). Precipitation "
+            "only: it does not measure agricultural drought impact and no severity labels "
+            "are returned. A cold request reads about timescale x reference-years monthly "
+            "values and may take a minute or more."
+        ),
+    )
+    def chirps_spi_endpoint(
+        request: ChirpsSpiRequest,
+        client: Annotated[ChirpsV3Client, Depends(get_chirps_client)],
+    ) -> ChirpsSpiResult:
+        return chirps_spi(
+            client,
+            latitude=request.latitude,
+            longitude=request.longitude,
+            target_end_month=YearMonth.parse(request.target_end_month),
+            timescale_months=request.timescale_months,
+            reference_start_year=request.reference_start_year,
+            reference_end_year=request.reference_end_year,
+            min_reference_years=request.min_reference_years,
         )
 
     return app
