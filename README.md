@@ -1,20 +1,27 @@
 # ClimateAdapt Lab
 
 Evidence-grounded AI agent for agricultural drought adaptation (Meta Global Developer AI
-Hackathon project). **Status: Milestone 1 in progress** - tested CHIRPS v3 and ERA5-Land
-point connectors and a CHIRPS-based rainfall-anomaly endpoint.
+Hackathon project). **Status: Milestone 1** - tested CHIRPS v3 and ERA5-Land point connectors
+and a CHIRPS-based rainfall-anomaly endpoint. SPI and further indicators are Milestone 2.
 
 ## Scientific scope and limitations
 
 - Implemented indicator: a simple precipitation **percentage anomaly**
   `((observed_total - baseline_mean) / baseline_mean) * 100`. It is a prototype, **not** a
   calibrated drought index, and must not be used alone to classify drought severity. It is
-  mean-based and can mislead on skewed rainfall records. SPI comes in Milestone 2.
+  mean-based and can mislead on skewed rainfall records.
 - Data sources: CHIRPS v3 Final (monthly, 0.05 degree, 60S-60N, 1981-present) and ERA5-Land
-  monthly means (0.1 degree grid, 1950-present, reanalysis). Their coverage, units, and
+  monthly means (0.1 degree grid, 1950-present, reanalysis). Coverage, units, and
   limitations are returned with every result. No global validation is claimed.
+- **Products can disagree strongly.** In one real test the two precipitation products agreed on
+  the 3-month total only to within the same order of magnitude and disagreed month by month.
+  Use `scripts/compare_chirps_era5.py` and treat disagreement as uncertainty.
 - Missing values are never converted to zero and never partially summed.
-- Real data is cached under `data/cache/` (git-ignored) with provenance and SHA-256 hashes.
+- ERA5-Land has no value at masked (for example sea) grid points. Default: months are reported
+  as missing. Opt-in `--land-fallback-km` uses the nearest valid neighbour and always reports
+  the substitution.
+- A point exactly on a CHIRPS cell edge or corner is flagged, because the cell used is
+  arbitrary. Use points that are not multiples of 0.05 degrees.
 
 ## Setup (repo root, PowerShell)
 
@@ -39,21 +46,37 @@ Docs: http://127.0.0.1:8000/docs
 | `POST /v1/analysis/rainfall-anomaly` | Prototype anomaly from user-supplied totals |
 | `POST /v1/analysis/chirps-rainfall-anomaly` | Anomaly computed from CHIRPS v3 Final |
 
-A cold CHIRPS request downloads many ~22 MB files and can take many minutes. Warm the cache
-first with the CLI, then call the API.
+## CHIRPS access modes
+
+`CLIMATEADAPT_CHIRPS_ACCESS` selects how CHIRPS is read:
+
+- `remote` (default): one pixel per month via HTTP range requests. A real 33-month pipeline run
+  took about 30 s cold. Provenance records the server's size, ETag, and Last-Modified (no
+  file hash, because the file is never downloaded).
+- `download`: whole ~22 MB monthly files, cached with a SHA-256 provenance sidecar.
+  Slower (about 35 s per file on the verified connection) but archival-grade.
+
+`CLIMATEADAPT_PREFETCH_WORKERS` (1-8, default 4) sets parallel remote reads. Set
+`CLIMATEADAPT_ALLOW_DOWNLOADS=false` for cache-only, reproducible runs.
 
 ## Scripts
 
 ```powershell
-# CHIRPS anomaly (also warms the cache). Use points that are NOT on a multiple of 0.05 degrees.
+# CHIRPS anomaly (also warms the cache)
 uv run python scripts/chirps_anomaly.py --lat 30.43 --lon -9.61 --observed-start 2024-01 --window-months 3 --baseline-start-year 2011 --baseline-end-year 2020
 
-# CHIRPS access checks
+# CHIRPS access check and point series
 uv run python scripts/chirps_cli.py probe --year 2024 --month 1
-uv run python scripts/chirps_layout_probe.py local "data/cache/chirps_v3/monthly_global/chirps-v3.0.2024.01.tif"
+uv run python scripts/chirps_cli.py series --lat 30.43 --lon -9.61 --start 2024-01 --end 2024-03
 
-# ERA5-Land (needs CDS credentials, below)
+# ERA5-Land (needs CDS credentials, below); add --land-fallback-km 15 if the point is masked
 uv run python scripts/era5land_cli.py series --variable total_precipitation --lat 30.43 --lon -9.61 --start 2024-01 --end 2024-03
+
+# Side-by-side product comparison
+uv run python scripts/compare_chirps_era5.py --lat 30.43 --lon -9.61 --start 2024-01 --end 2024-03 --land-fallback-km 15
+
+# Inspect a downloaded ERA5-Land NetCDF (no network)
+uv run python scripts/inspect_nc.py "data\cache\era5_land\raw\<file>.nc"
 ```
 
 ## ERA5-Land credentials (one-time)
@@ -72,9 +95,7 @@ Never commit your token. Tests never need credentials or network access.
 
 ## Configuration
 
-See `.env.example` (`CLIMATEADAPT_DATA_DIR`, `CLIMATEADAPT_ALLOW_DOWNLOADS`,
-`CLIMATEADAPT_HTTP_TIMEOUT_SECONDS`, `CLIMATEADAPT_CHIRPS_BASE_URL`). Set
-`CLIMATEADAPT_ALLOW_DOWNLOADS=false` for cache-only, reproducible runs.
+See `.env.example`. Real data is cached under `data/cache/` (git-ignored).
 
 ## Error behaviour
 
