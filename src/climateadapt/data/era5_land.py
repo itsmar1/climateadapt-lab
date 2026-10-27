@@ -8,10 +8,14 @@ Design notes
   Missing months are grouped by identical month-sets, so requests never ask for months that
   were not needed (and never for unpublished months).
 * Per-month point records (JSON, with full provenance) are cached; the raw NetCDF is kept
-  too. A cached record is reused only if it parses and matches the request.
+  too. Each record stores the nearest grid point AND its surrounding 3x3 neighbourhood
+  (raw values), so an optional land fallback can be decided from the cache alone.
 * Unit handling is explicit and tested: temperature K -> degC; total precipitation is a
   monthly mean of DAILY accumulations (m/day) and is converted to mm/month using the number
   of days in the month. File units are verified before any conversion.
+* ERA5-Land has no values at masked (e.g. sea) grid points. By default such months are
+  reported as missing. With ``land_fallback_max_km`` set, the nearest neighbouring grid point
+  that has values in EVERY month is used instead, and the substitution is reported loudly.
 * The CDS client is behind a small protocol, so everything except the real network call is
   tested offline. Credentials are read by cdsapi from ~/.cdsapirc; this module never sees
   or stores them.
@@ -29,6 +33,7 @@ import zipfile
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
+from numbers import Real
 from pathlib import Path
 from typing import Any, Literal, Protocol
 
@@ -51,6 +56,7 @@ from climateadapt.data.errors import (
     MissingDataError,
 )
 from climateadapt.data.periods import YearMonth, iter_months
+from climateadapt.geo import haversine_km
 from climateadapt.indicators.units import (
     days_in_month,
     kelvin_to_celsius,
@@ -66,6 +72,10 @@ AREA_HALF_WIDTH_DEG = 0.15  # request box half-width; guarantees several 0.1 deg
 GRID_MATCH_TOLERANCE_DEG = 0.075  # nearest grid point must be this close on each axis
 NEGATIVE_NOISE_TOLERANCE_M_PER_DAY = 1e-6  # engineering assumption, see _convert_precipitation
 MAX_NETCDF_BYTES = 200 * 1024 * 1024
+# The cached neighbourhood is the 3x3 block around the nearest grid point, so no candidate is
+# farther than ~24 km from the requested point (at the equator). 25 km is therefore the
+# largest meaningful fallback radius.
+LAND_FALLBACK_MAX_KM_LIMIT = 25.0
 
 CITATION = (
     "Mu\u00f1oz Sabater, J. (2019): ERA5-Land monthly averaged data from 1950 to present. "
@@ -182,6 +192,16 @@ class Era5Provenance(BaseModel):
     license_note: str
 
 
+class NeighbourValue(BaseModel):
+    """Raw (file-unit) value at a grid point next to the nearest one."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    latitude: float
+    longitude: float
+    raw_value: float | None
+
+
 class Era5MonthRecord(BaseModel):
     """One cached point-month, with everything needed to trace it."""
 
@@ -200,6 +220,7 @@ class Era5MonthRecord(BaseModel):
     value: float | None
     units: str
     notes: list[str]
+    neighbours: list[NeighbourValue]
     provenance: Era5Provenance
 
 
@@ -211,6 +232,22 @@ class Era5MonthValue(BaseModel):
     value: float | None
     status: Literal["ok", "missing_value"]
     notes: list[str]
+
+
+class LandFallback(BaseModel):
+    """Report of the optional nearest-land fallback (present only when it was requested)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    max_distance_km: float
+    used: bool
+    reason: str
+    nearest_grid_point_latitude: float
+    nearest_grid_point_longitude: float
+    selected_grid_point_latitude: float | None
+    selected_grid_point_longitude: float | None
+    distance_km: float | None
+    warning: str | None
 
 
 class Era5PointSeries(BaseModel):
@@ -228,6 +265,7 @@ class Era5PointSeries(BaseModel):
     values: list[Era5MonthValue]
     provenance: list[Era5Provenance]
     limitations: list[str]
+    land_fallback: LandFallback | None = None
 
 
 # ---------------------------------------------------------------- NetCDF extraction
@@ -238,11 +276,23 @@ _LON_NAMES = ("longitude", "lon")
 
 
 @dataclass(frozen=True)
+class ExtractedNeighbour:
+    latitude: float
+    longitude: float
+    values: dict[YearMonth, float | None]
+
+
+@dataclass(frozen=True)
 class ExtractedPoint:
     grid_latitude: float
     grid_longitude: float
     units: str
     values: dict[YearMonth, float | None]
+    neighbours: list[ExtractedNeighbour]
+
+
+def _wrap_longitude(longitude: float) -> float:
+    return round(((longitude + 180.0) % 360.0) - 180.0, 6)
 
 
 def _pick_variable(dataset: xr.Dataset, spec: VariableSpec) -> str:
@@ -265,10 +315,23 @@ def _pick_name(dataset: xr.Dataset, candidates: tuple[str, ...], what: str) -> s
     raise DataIntegrityError(f"NetCDF file has no {what} coordinate (tried {candidates}).")
 
 
+def _month_values(month_index: np.ndarray, raw: np.ndarray) -> dict[YearMonth, float | None]:
+    values: dict[YearMonth, float | None] = {}
+    for index, value in zip(month_index, raw, strict=True):
+        month = YearMonth(int(1970 + index // 12), int(index % 12 + 1))
+        if month in values:
+            raise DataIntegrityError(f"Duplicate time step for {month} in the NetCDF file.")
+        number = float(value)
+        if math.isinf(number):
+            raise DataIntegrityError(f"Infinite value at {month} in the NetCDF file.")
+        values[month] = None if math.isnan(number) else number
+    return values
+
+
 def extract_point(
     nc_path: Path, spec: VariableSpec, latitude: float, longitude: float
 ) -> ExtractedPoint:
-    """Read the nearest grid point's monthly series from a CDS NetCDF file."""
+    """Read the nearest grid point (and its surrounding points) from a CDS NetCDF file."""
     try:
         dataset = xr.open_dataset(nc_path)
     except (OSError, ValueError) as exc:
@@ -321,6 +384,23 @@ def extract_point(
         raw = np.asarray(point.transpose(time_name).values, dtype="float64")
         times = np.asarray(data[time_name].values)
 
+        neighbour_raw: list[tuple[float, float, np.ndarray]] = []
+        for d_lat in (-1, 0, 1):
+            for d_lon in (-1, 0, 1):
+                if d_lat == 0 and d_lon == 0:
+                    continue
+                i, j = lat_idx + d_lat, lon_idx + d_lon
+                if not (0 <= i < lats.shape[0] and 0 <= j < lons.shape[0]):
+                    continue
+                cell = data.isel({lat_name: i, lon_name: j}).transpose(time_name)
+                neighbour_raw.append(
+                    (
+                        round(float(lats[i]), 6),
+                        _wrap_longitude(float(lons[j])),
+                        np.asarray(cell.values, dtype="float64"),
+                    )
+                )
+
     if raw.ndim != 1 or raw.shape[0] != times.shape[0]:
         raise DataIntegrityError("Unexpected array shape after selecting the grid point.")
     if not np.issubdtype(times.dtype, np.datetime64):
@@ -329,22 +409,22 @@ def extract_point(
         raise DataIntegrityError("Time coordinate contains invalid (NaT) entries.")
 
     month_index = times.astype("datetime64[M]").astype("int64")
-    values: dict[YearMonth, float | None] = {}
-    for index, value in zip(month_index, raw, strict=True):
-        month = YearMonth(int(1970 + index // 12), int(index % 12 + 1))
-        if month in values:
-            raise DataIntegrityError(f"Duplicate time step for {month} in the NetCDF file.")
-        number = float(value)
-        if math.isinf(number):
-            raise DataIntegrityError(f"Infinite value at {month} in the NetCDF file.")
-        values[month] = None if math.isnan(number) else number
+    neighbours: list[ExtractedNeighbour] = []
+    for n_lat, n_lon, n_raw in neighbour_raw:
+        if n_raw.ndim != 1 or n_raw.shape[0] != times.shape[0]:
+            raise DataIntegrityError("Unexpected array shape for a neighbouring grid point.")
+        neighbours.append(
+            ExtractedNeighbour(
+                latitude=n_lat, longitude=n_lon, values=_month_values(month_index, n_raw)
+            )
+        )
 
-    grid_lon = round(((float(lons[lon_idx]) + 180.0) % 360.0) - 180.0, 6)
     return ExtractedPoint(
         grid_latitude=round(float(lats[lat_idx]), 6),
-        grid_longitude=grid_lon,
+        grid_longitude=_wrap_longitude(float(lons[lon_idx])),
         units=str(units),
-        values=values,
+        values=_month_values(month_index, raw),
+        neighbours=neighbours,
     )
 
 
@@ -518,7 +598,8 @@ class Era5LandMonthlyStore:
         try:
             record = Era5MonthRecord.model_validate_json(path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
-            logger.warning("Unreadable cached record %s; ignoring it.", path)
+            # Includes records written by older versions (no neighbourhood): re-fetched.
+            logger.warning("Unreadable or outdated cached record %s; ignoring it.", path)
             return None
         if (
             record.variable != spec.cds_name
@@ -645,6 +726,14 @@ class Era5LandMonthlyStore:
                     value=value,
                     units=spec.output_units,
                     notes=notes,
+                    neighbours=[
+                        NeighbourValue(
+                            latitude=n.latitude,
+                            longitude=n.longitude,
+                            raw_value=n.values.get(month),
+                        )
+                        for n in extracted.neighbours
+                    ],
                     provenance=provenance,
                 )
                 _atomic_write_text(
@@ -675,6 +764,141 @@ class Era5LandMonthlyStore:
         return False
 
 
+# ---------------------------------------------------------------- land fallback
+
+
+@dataclass(frozen=True)
+class _Replacement:
+    latitude: float
+    longitude: float
+    values: list[Era5MonthValue]
+
+
+def _validate_fallback_km(value: object) -> float | None:
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, Real) or not math.isfinite(float(value)):
+        raise ValueError(f"land_fallback_max_km must be a finite number, got {value!r}.")
+    km = float(value)
+    if not 0 < km <= LAND_FALLBACK_MAX_KM_LIMIT:
+        raise ValueError(
+            f"land_fallback_max_km must be greater than 0 and at most "
+            f"{LAND_FALLBACK_MAX_KM_LIMIT:g} km (the cached neighbourhood is a 3x3 block of "
+            f"0.1 degree cells), got {km}."
+        )
+    return km
+
+
+def _land_fallback(
+    spec: VariableSpec,
+    records: list[Era5MonthRecord],
+    latitude: float,
+    longitude: float,
+    max_km: float,
+) -> tuple[LandFallback, _Replacement | None]:
+    """Decide the fallback from cached neighbourhood data (never from a fresh download)."""
+    first = records[0]
+    nearest_lat, nearest_lon = first.grid_point_latitude, first.grid_point_longitude
+
+    def report(**fields: Any) -> LandFallback:
+        return LandFallback(
+            max_distance_km=max_km,
+            nearest_grid_point_latitude=nearest_lat,
+            nearest_grid_point_longitude=nearest_lon,
+            **fields,
+        )
+
+    missing_months = sum(1 for r in records if r.value is None)
+    if missing_months == 0:
+        return (
+            report(
+                used=False,
+                reason="The nearest grid point has data in every month.",
+                selected_grid_point_latitude=None,
+                selected_grid_point_longitude=None,
+                distance_km=None,
+                warning=None,
+            ),
+            None,
+        )
+    if missing_months < len(records):
+        return (
+            report(
+                used=False,
+                reason=(
+                    "The nearest grid point is missing in only some months; the fallback is "
+                    "applied only when it is missing in every month (a static mask)."
+                ),
+                selected_grid_point_latitude=None,
+                selected_grid_point_longitude=None,
+                distance_km=None,
+                warning=None,
+            ),
+            None,
+        )
+
+    tables = [{(n.latitude, n.longitude): n.raw_value for n in r.neighbours} for r in records]
+    candidates: list[tuple[float, tuple[float, float], list[float]]] = []
+    for key in tables[0]:
+        if not all(key in table for table in tables):
+            continue
+        raws = [table[key] for table in tables]
+        complete = [raw for raw in raws if raw is not None]
+        if len(complete) != len(raws):
+            continue
+        distance = haversine_km(latitude, longitude, key[0], key[1])
+        if distance <= max_km:
+            candidates.append((distance, key, complete))
+
+    if not candidates:
+        return (
+            report(
+                used=False,
+                reason=(
+                    f"No neighbouring grid point within {max_km:g} km has values for every "
+                    "month."
+                ),
+                selected_grid_point_latitude=None,
+                selected_grid_point_longitude=None,
+                distance_km=None,
+                warning=None,
+            ),
+            None,
+        )
+
+    distance, (sel_lat, sel_lon), raws = min(candidates, key=lambda c: (c[0], c[1]))
+    warning = (
+        f"The nearest ERA5-Land grid point ({nearest_lat}, {nearest_lon}) has no value in any "
+        "month (for example because it is masked as sea or inland water). Values are taken "
+        f"from the neighbouring grid point ({sel_lat}, {sel_lon}), {distance:.1f} km from the "
+        "requested point. It may differ in elevation, coastal influence, and climate."
+    )
+    values: list[Era5MonthValue] = []
+    for record, raw in zip(records, raws, strict=True):
+        value, notes = spec.convert(raw, YearMonth(record.year, record.month))
+        notes = [
+            *notes,
+            f"Value taken from neighbouring grid point ({sel_lat}, {sel_lon}), "
+            f"{distance:.1f} km from the requested point.",
+        ]
+        values.append(
+            Era5MonthValue(
+                year=record.year, month=record.month, value=value, status="ok", notes=notes
+            )
+        )
+    return (
+        report(
+            used=True,
+            reason="The nearest grid point is masked; the nearest valid neighbour was used.",
+            selected_grid_point_latitude=sel_lat,
+            selected_grid_point_longitude=sel_lon,
+            distance_km=distance,
+            warning=warning,
+        ),
+        _Replacement(latitude=sel_lat, longitude=sel_lon, values=values),
+    )
+
+
 # ---------------------------------------------------------------- client
 
 
@@ -695,8 +919,14 @@ class Era5LandClient:
         longitude: float,
         start: YearMonth,
         end: YearMonth,
+        *,
+        land_fallback_max_km: float | None = None,
     ) -> Era5PointSeries:
         """Return monthly values for the nearest ERA5-Land grid point.
+
+        By default a masked grid point yields missing months. With ``land_fallback_max_km``
+        the nearest neighbouring grid point with data in every month is used instead and the
+        substitution is reported in ``land_fallback`` and in the limitations.
 
         All validation runs BEFORE any download.
         """
@@ -708,6 +938,7 @@ class Era5LandClient:
         lat, lon = check_point_in_nominal_coverage(
             latitude, longitude, ERA5_LAND_NOMINAL_BBOX, dataset="ERA5-Land"
         )
+        max_km = _validate_fallback_km(land_fallback_max_km)
         months = list(iter_months(start, end))
         for month in months:
             self._store.assert_month_available(month)
@@ -728,6 +959,28 @@ class Era5LandClient:
                     "Grid point differs between months in the series; refusing to combine."
                 )
 
+        values = [
+            Era5MonthValue(
+                year=r.year,
+                month=r.month,
+                value=r.value,
+                status=r.status,
+                notes=list(r.notes),
+            )
+            for r in records
+        ]
+        grid_lat, grid_lon = first.grid_point_latitude, first.grid_point_longitude
+        limitations = list(ERA5_LAND_LIMITATIONS)
+
+        fallback: LandFallback | None = None
+        if max_km is not None:
+            fallback, replacement = _land_fallback(spec, records, lat, lon, max_km)
+            if replacement is not None:
+                values = replacement.values
+                grid_lat, grid_lon = replacement.latitude, replacement.longitude
+                if fallback.warning:
+                    limitations.insert(0, fallback.warning)
+
         provenance: dict[tuple[str, str], Era5Provenance] = {}
         for record in records:
             prov = record.provenance
@@ -741,20 +994,12 @@ class Era5LandClient:
             units=spec.output_units,
             requested_latitude=lat,
             requested_longitude=lon,
-            grid_point_latitude=first.grid_point_latitude,
-            grid_point_longitude=first.grid_point_longitude,
-            values=[
-                Era5MonthValue(
-                    year=r.year,
-                    month=r.month,
-                    value=r.value,
-                    status=r.status,
-                    notes=list(r.notes),
-                )
-                for r in records
-            ],
+            grid_point_latitude=grid_lat,
+            grid_point_longitude=grid_lon,
+            values=values,
             provenance=list(provenance.values()),
-            limitations=list(ERA5_LAND_LIMITATIONS),
+            limitations=limitations,
+            land_fallback=fallback,
         )
 
 
@@ -784,10 +1029,10 @@ def day_weighted_mean_temperature_c(series: Era5PointSeries) -> float:
         raise ValueError(f"Expected a temperature series (degC), got {series.units!r}.")
     entries = _complete_values(series)
     weights = [days_in_month(year, month) for year, month, _ in entries]
-    total = math.fsum(
+    weighted = math.fsum(
         value * weight for (_, _, value), weight in zip(entries, weights, strict=True)
     )
-    return total / sum(weights)
+    return weighted / sum(weights)
 
 
 def build_era5_land_client(

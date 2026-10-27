@@ -1,13 +1,14 @@
 """Run the CHIRPS rainfall-anomaly pipeline from the command line.
 
-Running this once also warms the local cache, so later API calls for the same period are
-served from disk.
+Running this once also warms the local cache, so later API calls for the same point and
+period are served from disk.
 
-    uv run python scripts/chirps_anomaly.py --lat 30.4 --lon -9.6 \
+    uv run python scripts/chirps_anomaly.py --lat 30.43 --lon -9.61 \
         --observed-start 2024-01 --window-months 3 \
         --baseline-start-year 2011 --baseline-end-year 2020
 
-The first run downloads (baseline years x window months) + window months monthly files.
+Use a point that is NOT an exact multiple of 0.05 degrees (such points lie on a CHIRPS cell
+edge or corner and are flagged).
 """
 
 from __future__ import annotations
@@ -37,13 +38,21 @@ def main() -> int:
     parser.add_argument("--min-baseline-years", type=int, default=MIN_BASELINE_YEARS_DEFAULT)
     args = parser.parse_args()
 
+    settings = get_settings()
     n_years = args.baseline_end_year - args.baseline_start_year + 1
+    n_months = (n_years + 1) * args.window_months
+    mode = (
+        "one pixel per month via HTTP range requests"
+        if settings.chirps_access == "remote"
+        else "whole monthly files are downloaded"
+    )
     print(
-        f"Up to {(n_years + 1) * args.window_months} monthly files are needed "
-        "(files already cached are reused)."
+        f"Reading up to {n_months} monthly values (access mode: {settings.chirps_access}: "
+        f"{mode}; values already cached are reused).",
+        file=sys.stderr,
     )
 
-    client = build_chirps_client(get_settings())
+    client = build_chirps_client(settings)
     try:
         result = chirps_rainfall_anomaly(
             client,
