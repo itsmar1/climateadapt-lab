@@ -42,6 +42,7 @@ import xarray as xr
 from pydantic import BaseModel, ConfigDict
 
 from climateadapt.config import Settings
+from climateadapt.data.cds_client import make_cds_client_factory
 from climateadapt.data.coverage import (
     ERA5_LAND_FIRST_MONTH,
     ERA5_LAND_NOMINAL_BBOX,
@@ -1038,10 +1039,18 @@ def day_weighted_mean_temperature_c(series: Era5PointSeries) -> float:
 def build_era5_land_client(
     settings: Settings, *, downloader: CdsDownloader | None = None
 ) -> Era5LandClient:
-    """Construct a client from application settings."""
+    """Construct a client from application settings (bounded CDS retries by default)."""
+    if downloader is None:
+        downloader = CdsApiDownloader(
+            client_factory=make_cds_client_factory(
+                retry_max=settings.cds_retry_max,
+                sleep_max_seconds=settings.cds_sleep_max_seconds,
+                timeout_seconds=settings.cds_timeout_seconds,
+            )
+        )
     store = Era5LandMonthlyStore(
         cache_dir=settings.data_dir / "cache" / "era5_land",
-        downloader=downloader if downloader is not None else CdsApiDownloader(),
+        downloader=downloader,
         allow_downloads=settings.allow_downloads,
     )
     return Era5LandClient(store)

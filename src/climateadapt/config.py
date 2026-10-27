@@ -34,6 +34,10 @@ class Settings(BaseSettings):
     chirps_access: Literal["remote", "download"] = "remote"
     prefetch_workers: int = Field(default=4, ge=1, le=8)
 
+    cds_retry_max: int = Field(default=5, ge=0, le=500)
+    cds_sleep_max_seconds: float = Field(default=60.0, gt=0, le=600)
+    cds_timeout_seconds: float = Field(default=60.0, gt=0)
+
 
 @lru_cache
 def get_settings() -> Settings:
