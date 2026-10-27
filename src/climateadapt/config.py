@@ -13,7 +13,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Application settings loaded from environment variables or a local .env file.
 
-    All variables use the ``CLIMATEADAPT_`` prefix. No secrets are required yet.
+    All variables use the ``CLIMATEADAPT_`` prefix. No secrets are stored here.
     """
 
     model_config = SettingsConfigDict(
@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     http_timeout_seconds: float = Field(default=60.0, gt=0)
     http_user_agent: str = "climateadapt-lab/0.1 (research prototype)"
     chirps_base_url: str = "https://data.chc.ucsb.edu/products/CHIRPS/v3.0"
+    chirps_access: Literal["remote", "download"] = "remote"
+    prefetch_workers: int = Field(default=4, ge=1, le=8)
 
 
 @lru_cache

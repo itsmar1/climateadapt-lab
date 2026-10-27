@@ -36,6 +36,11 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+filterwarnings = [
+    # rasterio.transform.from_origin (used only to build synthetic test rasters) triggers
+    # an internal Affine deprecation notice that is not ours to fix.
+    "ignore::PendingDeprecationWarning:rasterio.transform",
+]
 
 [tool.ruff]
 line-length = 100

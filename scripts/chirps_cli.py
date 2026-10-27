@@ -1,11 +1,11 @@
 """Developer utility to verify CHIRPS v3 access from your own machine.
 
     uv run python scripts/chirps_cli.py probe --year 2024 --month 1
-    uv run python scripts/chirps_cli.py series --lat 30.4 --lon -9.6 --start 2024-01 --end 2024-03
+    uv run python scripts/chirps_cli.py series --lat 30.43 --lon -9.61 --start 2024-01 --end 2024-03
 
-`probe` sends one HEAD request (no file download) and prints status and size.
-`series` downloads the needed monthly files into the cache, then prints values and
-provenance. Run `probe` first so you know the file size before downloading.
+`probe` sends one HEAD request (no download) and prints status and size.
+`series` fetches a monthly point series using the configured access mode
+(CLIMATEADAPT_CHIRPS_ACCESS=remote|download) and prints values and provenance.
 """
 
 from __future__ import annotations
@@ -46,6 +46,7 @@ def cmd_probe(args: argparse.Namespace) -> int:
     print(f"final url:      {response.url}")
     print(f"content-type:   {response.headers.get('content-type')}")
     print(f"content-length: {response.headers.get('content-length')}")
+    print(f"etag:           {response.headers.get('etag')}")
     print(f"last-modified:  {response.headers.get('last-modified')}")
     return 0 if response.status_code == 200 else 1
 
@@ -62,10 +63,12 @@ def cmd_series(args: argparse.Namespace) -> int:
         client.store.close()
 
     print(
-        f"CHIRPS v{series.version} {series.product} | requested "
-        f"({series.requested_latitude}, {series.requested_longitude}) | cell centre "
+        f"CHIRPS v{series.version} {series.product} | access={settings.chirps_access} | "
+        f"requested ({series.requested_latitude}, {series.requested_longitude}) | cell centre "
         f"({series.pixel_center_latitude:.4f}, {series.pixel_center_longitude:.4f})"
     )
+    if series.point_on_cell_boundary:
+        print("WARNING: the point lies on a cell edge or corner; the cell used is arbitrary.")
     for value in series.values:
         shown = "MISSING" if value.precipitation_mm is None else f"{value.precipitation_mm:.2f}"
         print(f"  {value.year:04d}-{value.month:02d}  {shown:>10} {series.units}")
@@ -74,7 +77,8 @@ def cmd_series(args: argparse.Namespace) -> int:
     except MissingDataError as exc:
         print(f"accumulated total: not computed ({exc})")
     for prov in series.provenance:
-        print(f"  {prov.source_url}  {prov.size_bytes} bytes  sha256={prov.sha256[:12]}...")
+        sha = f"sha256={prov.sha256[:12]}..." if prov.sha256 else "sha256=n/a"
+        print(f"  [{prov.access_mode}] {prov.source_url}  size={prov.size_bytes}  {sha}")
     print(f"citation: {series.provenance[0].citation}")
     return 0
 

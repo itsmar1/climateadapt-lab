@@ -23,6 +23,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict
 
 from climateadapt.data.chirps import (
+    BOUNDARY_LIMITATION,
     CHIRPS_V3_LIMITATIONS,
     ChirpsV3Client,
     accumulated_total_mm,
@@ -64,8 +65,11 @@ class SourceFileRecord(BaseModel):
     year: int
     month: int
     source_url: str
-    sha256: str
-    size_bytes: int
+    access_mode: Literal["download", "remote_range_read"]
+    sha256: str | None
+    size_bytes: int | None
+    remote_etag: str | None
+    remote_last_modified: str | None
     retrieved_at_utc: datetime
 
 
@@ -103,6 +107,7 @@ class ChirpsRainfallAnomalyResult(BaseModel):
     requested_longitude: float
     grid_cell_center_latitude: float
     grid_cell_center_longitude: float
+    point_on_cell_boundary: bool
     observed_window_start: str
     observed_window_end: str
     window_months: int
@@ -171,14 +176,21 @@ def chirps_rainfall_anomaly(
         season_window(YearMonth(year, obs_start.month), window_months_count) for year in years
     ]
 
-    # Fail fast: validate every month of every window BEFORE any download.
+    # Fail fast: validate every month of every window BEFORE any network access.
     for start, end in [(obs_start, obs_end), *baseline_windows]:
         for month in iter_months(start, end):
             client.store.assert_month_available(month)
 
+    # Observed window first: a missing observed value stops the run before the baseline work.
+    client.prefetch(lat, lon, list(iter_months(obs_start, obs_end)))
     observed_series = client.monthly_point_series(lat, lon, obs_start, obs_end)
     observed_total = accumulated_total_mm(observed_series)
     all_series = [observed_series]
+
+    baseline_months = sorted(
+        {month for start, end in baseline_windows for month in iter_months(start, end)}
+    )
+    client.prefetch(lat, lon, baseline_months)
 
     used: list[YearTotal] = []
     excluded: list[ExcludedYear] = []
@@ -226,9 +238,7 @@ def chirps_rainfall_anomaly(
             )
 
     if len(used) < min_years:
-        excluded_text = (
-            "; ".join(f"{e.season_year} ({e.reason})" for e in excluded) or "none"
-        )
+        excluded_text = "; ".join(f"{e.season_year} ({e.reason})" for e in excluded) or "none"
         raise InsufficientBaselineError(
             f"Only {len(used)} of {n_years} requested baseline years have complete data "
             f"(minimum required: {min_years}). Excluded years: {excluded_text}."
@@ -248,8 +258,11 @@ def chirps_rainfall_anomaly(
         message = str(exc)
 
     overlaps = any(start <= obs_end and obs_start <= end for start, end in baseline_windows)
+    on_boundary = any(series.point_on_cell_boundary for series in all_series)
 
     limitations = list(PIPELINE_LIMITATIONS)
+    if on_boundary:
+        limitations.insert(0, BOUNDARY_LIMITATION)
     if len(used) < CLIMATOLOGY_REFERENCE_YEARS:
         limitations.append(
             f"The baseline uses only {len(used)} years, shorter than the 30-year length "
@@ -273,8 +286,11 @@ def chirps_rainfall_anomaly(
                 year=prov.year,
                 month=prov.month,
                 source_url=prov.source_url,
+                access_mode=prov.access_mode,
                 sha256=prov.sha256,
                 size_bytes=prov.size_bytes,
+                remote_etag=prov.remote_etag,
+                remote_last_modified=prov.remote_last_modified,
                 retrieved_at_utc=prov.retrieved_at_utc,
             )
 
@@ -292,6 +308,7 @@ def chirps_rainfall_anomaly(
         requested_longitude=lon,
         grid_cell_center_latitude=reference.pixel_center_latitude,
         grid_cell_center_longitude=reference.pixel_center_longitude,
+        point_on_cell_boundary=on_boundary,
         observed_window_start=str(obs_start),
         observed_window_end=str(obs_end),
         window_months=window_months_count,
