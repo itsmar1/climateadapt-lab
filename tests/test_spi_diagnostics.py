@@ -39,13 +39,13 @@ def test_ks_statistic_hand_checkable():
 def test_ks_statistic_matches_scipy_for_a_continuous_fit():
     sample = np.random.default_rng(7).gamma(2.5, 30.0, size=200).tolist()
     fit = fit_gamma_thom(sample)
+    frozen = stats.gamma(a=fit.shape, scale=fit.scale)
 
     def cdf(x):
-        return float(stats.gamma.cdf(x, a=fit.shape, scale=fit.scale))
+        return float(frozen.cdf(x))
 
     assert ks_statistic(sample, cdf) == pytest.approx(
-        stats.kstest(sample, cdf).statistic, 
-        abs=1e-12
+        stats.kstest(sample, frozen.cdf).statistic, abs=1e-12
     )
 
 
