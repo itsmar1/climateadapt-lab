@@ -1,0 +1,1 @@
+"""Scientific retrieval: curated sources, chunking with page provenance, BM25, fusion, citations."""

@@ -1,0 +1,111 @@
+{
+  "eval_version": 1,
+  "description": "Document-level relevance judgements written from verified abstracts, tables of contents and front matter. They were NOT derived from page text and may be wrong; review them and add page-level annotations (relevant_pages) after reading the documents.",
+  "queries": [
+    {
+      "id": "q01-deficit-tolerant-crops",
+      "query": "Which field crops tolerate deficit irrigation without large yield losses?",
+      "language": "en",
+      "relevant_doc_ids": ["fao-wr22-deficit-irrigation-practices"],
+      "relevance_basis": "The report summary names cotton, maize, groundnut, wheat, sunflower and sugar beet as less sensitive to stress."
+    },
+    {
+      "id": "q02-yield-response-factor",
+      "query": "yield response factor ky relating relative yield loss to relative evapotranspiration deficit",
+      "language": "en",
+      "relevant_doc_ids": ["fao-iddp66-crop-yield-response-to-water", "fao-wr22-deficit-irrigation-practices"],
+      "relevance_basis": "IDDP 66 covers the FAO water production function; Water Reports 22 has a chapter on yield response factors."
+    },
+    {
+      "id": "q03-supplemental-irrigation-dry-spells",
+      "query": "How does supplemental irrigation stabilise yields of rainfed crops during dry spells?",
+      "language": "en",
+      "relevant_doc_ids": ["icarda-supplemental-irrigation-climate-smart-2018", "icarda-supplemental-irrigation-efficient-water-use-practice"],
+      "relevance_basis": "Both ICARDA records are about supplemental irrigation for rainfed crops; the 2018 abstract describes alleviating dry-spell moisture stress."
+    },
+    {
+      "id": "q04-critical-growth-stages",
+      "query": "critical crop growth stages for applying limited irrigation water to rainfed wheat",
+      "language": "en",
+      "relevant_doc_ids": ["icarda-supplemental-irrigation-climate-smart-2018"],
+      "relevance_basis": "The 2018 abstract states supplemental irrigation during critical growth stages improves yield and water productivity."
+    },
+    {
+      "id": "q05-proactive-drought-management",
+      "query": "pro-active drought risk management policy instead of crisis response in the Near East and North Africa",
+      "language": "en",
+      "relevant_doc_ids": ["fao-wr45-drought-north-africa-near-east"],
+      "relevance_basis": "The report abstract calls for a paradigm shift to pro-active drought management planning in the region."
+    },
+    {
+      "id": "q06-national-drought-plans",
+      "query": "which North African countries have national drought management plans",
+      "language": "en",
+      "relevant_doc_ids": ["fao-wr45-drought-north-africa-near-east"],
+      "relevance_basis": "The report reviews drought policies country by country, including Morocco."
+    },
+    {
+      "id": "q07-spi-gamma-fit",
+      "query": "how to compute the Standardized Precipitation Index by fitting a gamma distribution",
+      "language": "en",
+      "relevant_doc_ids": ["wmo-1090-standardized-precipitation-index-user-guide"],
+      "relevance_basis": "The WMO SPI User Guide describes the SPI calculation."
+    },
+    {
+      "id": "q08-spi-record-length",
+      "query": "recommended minimum length of the precipitation record for calculating SPI",
+      "language": "en",
+      "relevant_doc_ids": ["wmo-1090-standardized-precipitation-index-user-guide"],
+      "relevance_basis": "The WMO SPI User Guide gives data-length recommendations."
+    },
+    {
+      "id": "q09-era5-land",
+      "query": "land surface reanalysis forced by atmospheric fields at 9 km resolution",
+      "language": "en",
+      "relevant_doc_ids": ["essd-2021-era5-land-reanalysis"],
+      "relevance_basis": "The ERA5-Land article describes the dataset, its forcing and resolution."
+    },
+    {
+      "id": "q10-chirps",
+      "query": "gridded rainfall dataset blending satellite estimates with rain gauge stations since 1981",
+      "language": "en",
+      "relevant_doc_ids": ["scidata-2026-chirps-v3"],
+      "relevance_basis": "The article documents CHIRPS version 3, a station-blended satellite precipitation dataset."
+    },
+    {
+      "id": "q11-aquacrop",
+      "query": "AquaCrop simulation model of crop water productivity",
+      "language": "en",
+      "relevant_doc_ids": ["fao-iddp66-crop-yield-response-to-water"],
+      "relevance_basis": "The IDDP 66 table of contents has a part on the AquaCrop simulation model."
+    },
+    {
+      "id": "q12-rdi-fruit-vines",
+      "query": "regulated deficit irrigation of grapevines and fruit trees",
+      "language": "en",
+      "relevant_doc_ids": ["fao-wr22-deficit-irrigation-practices", "fao-iddp66-crop-yield-response-to-water"],
+      "relevance_basis": "Water Reports 22 has chapters on fruit trees and grapevines; IDDP 66 has guidelines for fruit trees and vines."
+    },
+    {
+      "id": "q13-fr-supplemental-irrigation",
+      "query": "irrigation de compl\u00e9ment pour stabiliser les rendements du bl\u00e9 pluvial",
+      "language": "fr",
+      "relevant_doc_ids": ["icarda-supplemental-irrigation-climate-smart-2018", "icarda-supplemental-irrigation-efficient-water-use-practice"],
+      "relevance_basis": "French paraphrase of q03; the documents are in English, so this tests cross-lingual retrieval."
+    },
+    {
+      "id": "q14-fr-drought-north-africa",
+      "query": "gestion proactive de la s\u00e9cheresse en Afrique du Nord",
+      "language": "fr",
+      "relevant_doc_ids": ["fao-wr45-drought-north-africa-near-east"],
+      "relevance_basis": "French paraphrase of q05; the document is in English."
+    },
+    {
+      "id": "q15-ar-supplemental-irrigation",
+      "query": "\u0627\u0644\u0631\u064a \u0627\u0644\u062a\u0643\u0645\u064a\u0644\u064a \u0644\u0644\u0642\u0645\u062d \u0627\u0644\u0628\u0639\u0644\u064a",
+      "language": "ar",
+      "relevant_doc_ids": ["icarda-supplemental-irrigation-climate-smart-2018", "icarda-supplemental-irrigation-efficient-water-use-practice"],
+      "relevance_basis": "Arabic for 'supplemental irrigation of rainfed wheat'; the documents are in English, so this tests cross-lingual retrieval."
+    }
+  ]
+}
