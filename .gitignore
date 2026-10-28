@@ -27,5 +27,6 @@ htmlcov/
 # Future data and experiment artifacts (not used yet)
 data/raw/
 data/cache/
+data/corpus/
 mlruns/
 *.sqlite3
