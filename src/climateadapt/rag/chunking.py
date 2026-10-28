@@ -34,6 +34,9 @@ class ChunkingParams:
             raise ValueError("min_alpha_ratio must be between 0 and 1.")
 
 
+DEFAULT_CHUNKING_PARAMS = ChunkingParams()
+
+
 @dataclass(frozen=True)
 class ChunkingStats:
     n_pages: int
@@ -58,7 +61,7 @@ def sha256_text(text: str) -> str:
 def chunk_document(
     doc_id: str, 
     pages: Sequence[Page], 
-    params: ChunkingParams = ChunkingParams()
+    params: ChunkingParams = DEFAULT_CHUNKING_PARAMS
 ) -> tuple[list[Chunk], ChunkingStats]:
     all_words: list[str] = []
     word_pages: list[int] = []

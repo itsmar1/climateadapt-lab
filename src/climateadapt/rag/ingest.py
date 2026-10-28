@@ -16,7 +16,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
-from climateadapt.rag.chunking import ChunkingParams, chunk_document
+from climateadapt.rag.chunking import DEFAULT_CHUNKING_PARAMS, ChunkingParams, chunk_document
 from climateadapt.rag.manifest import SourceDocument
 from climateadapt.rag.models import Chunk, Page
 from climateadapt.rag.text import normalize_text
@@ -105,7 +105,7 @@ def ingest_document(
     *,
     raw_dir: Path,
     processed_dir: Path,
-    params: ChunkingParams = ChunkingParams(),
+    params: ChunkingParams = DEFAULT_CHUNKING_PARAMS,
 ) -> IngestReport:
     pdf_path = raw_dir / f"{doc.doc_id}.pdf"
     if not pdf_path.exists():

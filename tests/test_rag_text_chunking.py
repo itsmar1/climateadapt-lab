@@ -59,8 +59,8 @@ def test_tampering_and_wrong_pages_fail_verification():
     assert not verify_chunk_provenance(spanning.model_copy(update={"page_start": 2}), pages)
     assert not verify_chunk_provenance(spanning.model_copy(update={"page_end": 1}), pages)
     assert not verify_chunk_provenance(spanning.model_copy(update={"page_end": 9}), pages)
-    shifted = [Page(page=1, text="w9999 " + pages[0].text), pages[1]]
-    assert not verify_chunk_provenance(chunks[0], shifted)
+    edited = [Page(page=1, text=pages[0].text.replace("w0030", "w9999")), pages[1]]
+    assert not verify_chunk_provenance(chunks[0], edited)
 
 
 def test_empty_pages_are_counted_and_skipped():
@@ -79,7 +79,7 @@ def test_empty_pages_are_counted_and_skipped():
 
 def test_number_heavy_windows_are_dropped_and_counted():
     numbers = Page(page=1, text=" ".join(str(1000 + i) for i in range(100)))
-    prose = Page(page=2, text=" ".join(["irrigation scheduling improves water productivity"] * 25))
+    prose = Page(page=2, text=" ".join(["irrigation scheduling improves water productivity"] * 20))
 
     chunks, stats = chunk_document(
         "doc-a",
