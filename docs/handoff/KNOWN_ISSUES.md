@@ -1,0 +1,178 @@
+# Known Issues
+
+Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered code (no repository access). Severity: **High** = blocks verified baseline, scientific honesty or the demo; **Medium** = degrades quality/credibility; **Low** = polish. "Prompt" refers to `MUSE_CODE_TASK_PROMPTS.md`. Always re-check each issue against the real repository first (P00).
+
+---
+
+## A. Verification baseline
+
+### KI-01 — Four fixes not verified; suite not known green (High)
+- **Evidence:** Last log: 536 collected, 534 passed, 2 failed; ruff reports 2 × B008 (`rag/chunking.py` ~l.61, `rag/ingest.py` ~l.108). Claude proposed four fixes afterwards; no log shows them applied or passing.
+- **Impact:** No verified baseline; any later regression is undetectable.
+- **Depends on:** nothing.
+- **Resolution (P00 → P01):** run suite and ruff; apply only fixes that are still needed: `DEFAULT_CHUNKING_PARAMS = ChunkingParams()` constant used in `chunk_document` and `ingest_document` signatures (and import); in `tests/test_rag_text_chunking.py` change the tamper test to edit a word *inside* the chunk (`pages[0].text.replace("w0030", "w9999")`) and change the prose repeat in the number-heavy test from `* 25` to `* 20`. Report actual final counts.
+
+### KI-02 — Local repository may differ from conversation code (High until audited)
+- **Evidence:** Owner fixed many ruff findings by hand (8, 3, 26 errors in different batches), edited `tests/test_chirps.py` (regex changed to `"not be published yet"`), and applied multi-step insert/replace patches (e.g., `era5_land.py`, `test_era5_land.py`).
+- **Impact:** Handoff docs and prompts may name wrong lines/paths; patches may have been applied differently.
+- **Resolution (P00):** treat the repo as truth; produce a file-by-file reconciliation against `IMPLEMENTATION_STATUS.md` §2.
+
+### KI-03 — Slow test suite (Low/Medium)
+- **Evidence:** 7 min 44 s (464 s); earlier 4–5 min. Dominated by creating synthetic rasters in SPI/pipeline tests.
+- **Impact:** Slows every Muse Code iteration.
+- **Resolution:** reuse a session-scoped synthetic raster set or smaller grids; optionally try `uv run --with pytest-xdist pytest -n auto` (UNVERIFIED on this machine). Do not weaken assertions.
+
+### KI-04 — Starlette/httpx deprecation warning (Low)
+- **Evidence:** `StarletteDeprecationWarning ... install httpx2 instead` on every run.
+- **Resolution:** investigate versions/pins; if no clean fix, leave and document. Do not silence blindly.
+
+---
+
+## B. Environmental data and indicators
+
+### KI-05 — Exact swvl1 `units` string unknown (Medium)
+- **Evidence:** `volumetric_soil_water_layer_1` ran successfully (values 0.0703/0.1104/0.1120 m³/m³) so the unit spelling is one of four accepted strings (`m**3 m**-3`, `m3 m-3`, `m^3 m^-3`, `m3/m3`); `scripts/inspect_nc.py` was never run on `data\cache\era5_land\raw\504d1adaca31d5f7.nc`. For `tp`, `inspect_nc` output showed units `m` (CONFIRMED). `t2m` accepted with units `K` (implied by passing run).
+- **Impact:** If the real string differs from the accepted set for other layers/versions, requests will fail with an integrity error; wrongly broad acceptance could hide mismatches.
+- **Resolution (P02):** run `uv run python scripts/inspect_nc.py "data\cache\era5_land\raw\504d1adaca31d5f7.nc"`, record the exact `units`, tighten/extend `SOIL_WATER_UNITS` and tests to what is observed, verify layers 2 and 3 with one small live request each.
+
+### KI-06 — Soil-moisture anomaly pipeline missing (Medium)
+- **Evidence:** Variables registered and series run; no pipeline analogous to `pipelines/temperature_anomaly.py`. Absolute ERA5-Land soil water has documented bias in at least one region (so anomalies, not absolute values, should be reported). Layer 4 intentionally excluded (documented depth inconsistency).
+- **Dependencies:** KI-05.
+- **Resolution (P04):** shared window-anomaly helper + soil-water pipeline, same safeguards.
+
+### KI-07 — ERA5-based indicators not exposed via API; latency (High for the demo)
+- **Evidence:** ERA5 SPI, temperature anomaly and soil water exist as scripts only. CDS requests took ≈20–60 s each; a dropped connection triggered an automatic 120 s retry (≈5 min total, log "attempt 1 of 500"). CHIRPS cold SPI ≈1 min.
+- **Impact:** A frontend cannot call these synchronously.
+- **Resolution (P05):** job/polling pattern or cache-warming endpoints, explicit timeouts, progress states, and CORS. No endpoint may block indefinitely.
+
+### KI-08 — CDS retry bounds unverified live (Medium)
+- **Evidence:** `data/cds_client.py` passes `retry_max`, `sleep_max`, `timeout` only if the installed `cdsapi.Client.__init__` declares them; no log shows a warning or confirms the options applied. An earlier web search did not confirm Python option names (it returned a Rust port).
+- **Impact:** A failing request could still retry for hours (500 × ≤120 s) on some versions.
+- **Resolution (P02):** print the installed `cdsapi.Client` signature, confirm which options exist, and add a wall-clock deadline wrapper if they do not.
+
+### KI-09 — CDS service notices and terms update (Medium)
+- **Evidence:** Log banners: "Data Stores Service protection measures" and Terms of Use update on 28 Oct 2026 (continued use = acceptance; objections before 27 Oct).
+- **Impact:** Possible throttling; owner action about terms.
+- **Resolution:** owner reads notices; keep requests grouped/cached; no code change unless throttling is observed.
+
+### KI-10 — ERA5-Land masked grid point at the reference location (Medium)
+- **Evidence:** (30.4, −9.6) has no value in any month; fallback used (30.5, −9.6), 7.8 km away. The pattern is consistent with a land–sea mask but this was never confirmed against ERA5-Land documentation.
+- **Impact:** Values come from a neighbouring cell with possibly different elevation/coastal influence; reports must repeat the warning.
+- **Resolution:** keep fallback opt-in and loudly reported; confirm mask explanation from official documentation when convenient.
+
+### KI-11 — CHIRPS remote cache not revalidated against ETag (Medium)
+- **Evidence:** Captured ETags/Last-Modified show per-file revisions (2014-03 revised 2025-04-22; others 2024-11/12). Cached point records are never re-checked.
+- **Impact:** Stale values after upstream revision.
+- **Resolution:** optional `revalidate` path comparing ETag/Last-Modified with a HEAD request; record when values change. Low priority.
+
+### KI-12 — SPI quality and labelling gaps (Medium)
+- **Evidence:** Gamma fit has only descriptive KS D (0.093 CHIRPS, 0.103 ERA5) and no goodness-of-fit test; CHIRPS fitted vs empirical probability differ (0.303 vs 0.367 → SPI −0.517 vs −0.341); no SPI category labels because WMO bands were not verified.
+- **Impact:** Users may over-read SPI; reports may want labels.
+- **Resolution:** keep labels out until WMO bands are verified from the primary source (the WMO SPI User Guide, once obtained); consider a normality check of reference SPI; keep sensitivity (empirical vs gamma) in outputs.
+
+### KI-13 — CHIRPS vs ERA5-Land disagreement unexplained; no ground truth (Medium)
+- **Evidence:** Same season/point: totals 76.87 vs 59.15 mm, opposite monthly shapes; yearly correlation 0.77; SPI-3 −0.52 vs −0.38. Half-period change differences are within ~1 standard error.
+- **Impact:** Any claim of a trend or a validated drought state would be unsupported.
+- **Resolution:** present both products and their disagreement as uncertainty; compare against station/national data only if supplied. No trend claims.
+
+### KI-14 — Everything is single-point; limited geography tested (Medium)
+- **Evidence:** All analyses take one lat/lon; all real runs used one reference point (30.43, −9.61).
+- **Impact:** "Global-first" is architectural only; coverage edge cases (high latitude, ocean, antimeridian, >60°N for CHIRPS) are tested synthetically, not on real data elsewhere.
+- **Resolution (P14):** run the real pipelines at a few contrasting locations (one outside Africa) and report results and failures honestly; do not claim validation.
+
+### KI-15 — Prototype percentage anomaly endpoints can mislead (Low/Medium)
+- **Evidence:** Percentage anomaly was +0.55 % while SPI was −0.52 against a longer reference; response labels state it is not a drought index.
+- **Resolution:** frontend must show SPI first, show the percentage anomaly with its caveat, and always show the reference period.
+
+### KI-16 — Duplicated window logic in `pipelines/spi_era5.py` and `temperature_anomaly.py` (Low)
+- **Resolution (P04):** extract a shared helper when adding soil moisture; keep behavior and tests unchanged.
+
+---
+
+## C. Scientific RAG
+
+### KI-17 — Citations use PDF page indices, not printed page numbers (High for credibility)
+- **Evidence:** `rag_search` returned "p. 114" for the 505-page FAO IDDP66 PDF, which has roman-numeral front matter, so the printed page differs.
+- **Impact:** A reader opening the cited printed page lands in the wrong place.
+- **Resolution (P06):** store PDF page labels where the PDF provides them (verify the pypdf page-label API from its docs), cite "PDF p. N (printed p. X)" or label ambiguity explicitly; extend `verify_citation` and tests.
+
+### KI-18 — Missing documents (High for retrieval evaluation)
+- **Evidence:** 3 manual downloads missing (`fao-wr22-deficit-irrigation-practices`, two ICARDA papers); WMO guide HTTP 503. 7 of 15 evaluation queries skipped.
+- **Resolution:** owner downloads manual PDFs into `data/corpus/raw/<doc_id>.pdf`; retry WMO later; a second WMO mirror was seen in a search (`publicdocs.mnr.gov.on.ca`) but is NOT verified as the genuine WMO file — verify before adding.
+
+### KI-19 — Evaluation set is tiny and unreviewed (High)
+- **Evidence:** Gold labels are document-level, written by Claude from abstracts/front matter; 8 evaluable queries; hit@1 = 1.00 (7 EN, 1 FR); the French hit is unexplained (possible lexical overlap). No page-level annotations.
+- **Impact:** The numbers do not show retrieval quality.
+- **Resolution (P06/P07):** owner reviews all 15 labels; add page-level annotations after reading; add queries for the new documents; report per-language results.
+
+### KI-20 — Bibliography chunks and wide page ranges degrade results (Medium)
+- **Evidence:** In `rag_search`, hit #2 was a reference-list chunk spanning PDF pages 115–119; hits #4–#5 were off-topic (maize leaf area; Iraq project list).
+- **Resolution (P06):** detect and tag/down-weight reference sections, keep page ranges narrow, and re-evaluate. Do not drop content silently.
+
+### KI-21 — No dense/cross-lingual retrieval (High)
+- **Evidence:** BM25 only. French/Arabic queries cannot match English text lexically. `HybridRetriever` has only been tested with stub retrievers.
+- **Resolution (P07):** multilingual E5 (default `intfloat/multilingual-e5-small`, 384-d; `query: `/`passage: ` prefixes) with Qdrant local mode; hybrid via RRF; verify package APIs from docs; torch/model download is large; measure before/after on the same gold set. RRF constant k=60 is a convention from memory and must be tuned/justified, not assumed.
+
+### KI-22 — pypdf font warnings flood ingest output (Low/Medium)
+- **Evidence:** Hundreds of "fontTools is required to fully parse the encoding of a CFF Type1 font" lines; extracted text looked readable in search results.
+- **Impact:** Noisy logs; possibly degraded extraction for some fonts (unmeasured).
+- **Resolution (P06):** test whether installing `fonttools` changes extracted text; do not just suppress logging.
+
+### KI-23 — Licences of several corpus sources UNVERIFIED (Medium)
+- **Evidence:** Manifest marks WMO, ESSD and Sci Data licences as unverified; ICARDA records state CC-BY-NC-ND / CC-BY-SA; FAO items carry FAO notices.
+- **Impact:** Redistribution/packaging risk for submission.
+- **Resolution:** keep `data/corpus/` out of git and out of submission artifacts; verify licences on landing pages before any redistribution; owner decides.
+
+### KI-24 — Manifest authors/year partially unverified (Low)
+- **Evidence:** `unverified_fields` lists authors/year for some entries (e.g., ICARDA 1997 year and co-authors; WMO and journal author lists).
+- **Resolution:** fill from the PDFs once downloaded.
+
+---
+
+## D. Model access, agent, recommendations, frontend
+
+### KI-25 — Baseten model access details unverified; no LLM code exists (High)
+- **Evidence:** Owner states access to `meta-models/muse-spark-open-1026` with credits and rate limits. Endpoint, auth, tool calling, schema-constrained output, context size, and limits are unverified.
+- **Impact:** Agent design depends on tool-calling support; an unsupported feature would change the architecture.
+- **Resolution (P03):** verify from current Baseten documentation; run a tiny gated smoke script; record findings; design the adapter around verified capabilities with a deterministic fallback.
+
+### KI-26 — No recommendation engine or evidence-backed catalog (High)
+- **Evidence:** Not started. Corpus currently covers irrigation-related practices (deficit and supplemental irrigation, crop water response) and indicator/dataset documentation; it contains little on other adaptation options (e.g., varieties, sowing dates, mulching, water harvesting).
+- **Impact:** Catalog entries would be unsupported unless more sources are added.
+- **Resolution (P08):** build the catalog only from documents in the corpus with explicit unknowns; owner supplies/approves additional sources first.
+
+### KI-27 — No frontend; blueprint says Streamlit (High)
+- **Evidence:** No `frontend/`; blueprint and early requirements named Streamlit/Plotly. Requirement is now React + Vite.
+- **Resolution (P11–P13):** React + Vite; remove stale Streamlit mentions in docs.
+
+### KI-28 — API has no CORS, no auth, no rate limiting, synchronous long calls (Medium/High for frontend)
+- **Evidence:** `api/main.py` (as delivered) has no `CORSMiddleware`; endpoints are synchronous; the shared client has no shutdown hook; offline-mode error text includes a local cache path.
+- **Resolution (P05/P11):** CORS for the dev origin, request timeouts/jobs, lifespan shutdown, remove local paths from client-facing messages.
+
+### KI-29 — No scenario persistence (Medium)
+- **Evidence:** No database or history store. Blueprint calls for PostgreSQL/PostGIS.
+- **Resolution (P11):** minimal, justified persistence (SQLite for the demo unless the owner wants PostgreSQL now).
+
+---
+
+## E. MLOps and scope
+
+### KI-30 — Nine of eleven named MLOps tools not started (Medium; depends on rubric)
+- **Evidence:** Only Pytest and FastAPI exist. No Docker, CI, MLflow, Optuna, Airflow, PostgreSQL, Prometheus, Evidently, Grafana.
+- **Resolution (P15):** Docker + CI first; others only as thin, genuinely functioning integrations (e.g., MLflow/Optuna on retrieval evaluation, Prometheus `/metrics`, Evidently on input-data drift). Never claim an integration that does not run.
+
+### KI-31 — Computer-vision milestone undecided (Medium)
+- **Evidence:** Deferred by Claude's proposal (RAG first); the owner has not confirmed. CropHarvest/PyTorch work is heavy and only loosely tied to the adaptation recommendation.
+- **Resolution:** owner decides (P16). If included, never present crop classification as proof of drought damage.
+
+### KI-32 — Judging rubric and deadline unknown (High for planning)
+- **Evidence:** Not in the blueprint or conversation.
+- **Resolution:** owner supplies; revise `IMPLEMENTATION_ROADMAP.md` priorities accordingly.
+
+### KI-33 — README stale (Low/Medium)
+- **Evidence:** No RAG commands, no soil-moisture/CDS-retry notes.
+- **Resolution (P06, P17):** update alongside each change.
+
+### KI-34 — Windows/console quirks (Low)
+- **Evidence:** RAG scripts call `sys.stdout.reconfigure(encoding="utf-8")` for Arabic/French output; earlier scripts do not. Paths in docs use backslashes.
+- **Resolution:** keep commands PowerShell-safe; check encoding handling when scripts print non-ASCII.
