@@ -1,9 +1,14 @@
 # ClimateAdapt Lab
 
 Evidence-grounded AI agent for agricultural drought adaptation (Meta Global Developer AI
-Hackathon project). **Status:** Milestones 0-2 are implemented (tested data connectors and
-precipitation/temperature indicators). The retrieval, recommendation, agent, and UI layers
-are not built yet.
+Hackathon project). **Status (verified 2026-10-30, see `docs/handoff/AUDIT_REPORT.md`):**
+Milestones 0-2 are implemented (tested data connectors and precipitation/temperature
+indicators). Scientific RAG first batch is partially complete (BM25 + RRF retrieval,
+citations, evaluation harness; 4 of 8 corpus documents ingested; dense retrieval and RAG
+API routes missing). Recommendation, agent, and UI layers: not started.
+Verified baseline (2026-10-30): 536 tests passed in 9 min 36 s, `ruff check .` clean;
+details in `docs/handoff/IMPLEMENTATION_STATUS.md`, issues in `docs/handoff/KNOWN_ISSUES.md`.
+Full evidence: `docs/handoff/AUDIT_REPORT.md`.
 
 ## Scientific scope and limitations
 
@@ -37,8 +42,8 @@ uv run pytest
 uv run ruff check .
 ```
 
-The suite takes about 4-5 minutes (it builds many synthetic rasters). Optionally run in
-parallel: `uv run --with pytest-xdist pytest -n auto`.
+The suite takes about 10 minutes (verified 9 min 36 s on 2026-10-30: 536 passed;
+it builds many synthetic rasters). Optionally run in parallel: `uv run --with pytest-xdist pytest -n auto`.
 
 ## Run the API
 
@@ -76,11 +81,19 @@ uv run python scripts/spi_diagnostics.py --source chirps --lat 30.43 --lon -9.61
 
 # Inspect a downloaded ERA5-Land NetCDF (no network)
 uv run python scripts/inspect_nc.py "data\cache\era5_land\raw\<file>.nc"
+
+# Scientific RAG first batch (BM25 retrieval; needs an ingested corpus)
+uv run python scripts/corpus_fetch.py
+uv run python scripts/corpus_ingest.py
+uv run python scripts/rag_search.py "supplemental irrigation rainfed wheat" --top-k 5
+uv run python scripts/rag_eval.py
 ```
 
 ERA5-Land variables: `2m_temperature`, `total_precipitation`,
 `volumetric_soil_water_layer_1/2/3` (0-7, 7-28, 28-100 cm). Layer 4 is excluded because its
-documented depth is contested.
+documented depth is contested. Soil-water *connector* support (series for layers 1-3)
+exists and is tested, but the soil-moisture *anomaly pipeline* and ERA5 API routes are
+still missing (see `docs/handoff/KNOWN_ISSUES.md` KI-06, KI-07).
 
 ## CHIRPS access modes
 
@@ -119,4 +132,13 @@ All errors use `{"detail": [{"loc": [], "msg": "...", "type": "<code>"}]}` with 
 
 Cached CHIRPS remote values are not revalidated against ETag changes (CHC revised at least one
 file after release). The SPI gamma fit is not goodness-of-fit tested and there are no SPI
-category labels. Soil water, retrieval, recommendation, agent, and UI layers are still to do.
+category labels. Still missing: soil-moisture anomaly pipeline (connector exists), dense
+retrieval + RAG routes (BM25 batch exists), recommendation engine, agent, and UI.
+
+## Verified environment and audit limits (2026-10-30)
+
+- Verified with Python 3.11.17 (uv-managed), pytest 9.1.1, ruff 0.17.2, uv 0.13.5.
+- Frontend prerequisite: Node.js 18+ is required for current Vite, but only Node v16.13.1
+  is installed — upgrade Node before any frontend work.
+- P00 audit was offline and read-only: live CDS behavior, Baseten model access, and `.env`
+  contents were deliberately not verified. No new source-code defects were found.

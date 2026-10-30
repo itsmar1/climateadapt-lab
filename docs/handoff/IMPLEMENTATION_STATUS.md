@@ -2,6 +2,10 @@
 
 Handoff date: 2026-10-28.
 
+P00 audit update: 2026-10-30 (see `docs/handoff/AUDIT_REPORT.md`). The audit verified the
+repository against this document on branch `feat/muse-code-handoff` @ `12f3ac6`. Where §1b
+below gives a verified result, it supersedes the pre-audit snapshot in §1.
+
 ## 0. Evidence basis — read this first
 
 The author (Claude, browser chat) **could not inspect the repository**. The only project file directly visible was `technical_blueprint.txt`. Everything below comes from two sources:
@@ -33,14 +37,52 @@ Evidence legend used in tables:
 
 Test counts per module in the 536 run (from the owner's log): analysis_and_schemas 15, api 19, api_chirps 16, api_spi 18, cds_client 8, chirps 29, chirps_boundary 6, chirps_remote 16, era5_land 37, era5_land_fallback 19, era5_soil_moisture 18, geo 6, periods_and_coverage 46, rag_bm25_fusion 15, rag_citations 11, rag_end_to_end 5, rag_ingest_fetch 12, rag_manifest 17, rag_text_chunking 13 (2 failed), rainfall 27, rainfall_pipeline 25, spi 54, spi_diagnostics 8, spi_era5_pipeline 16, spi_pipeline 16, temperature 23, temperature_pipeline 14, units 27.
 
+## 1b. P00 audit verification (CONFIRMED 2026-10-30)
+
+Source: `docs/handoff/AUDIT_REPORT.md` §4–§5 (offline, read-only; branch
+`feat/muse-code-handoff` @ `12f3ac6`). No new source-code defects were identified.
+
+| Item | Result |
+|---|---|
+| Full suite (`python -m pytest -q --tb=short`; canonical re-run: `uv run pytest`) | **536 passed, 1 warning in 576.54s (0:09:36)**, exit 0. The 1 warning is the known `StarletteDeprecationWarning` (KI-04). No skips, no failures. |
+| `ruff check .` | **All checks passed!** (exit 0). Both B008 findings are gone. |
+| KI-01 four fixes | **Already present and verified working** (AUDIT_REPORT §7): `DEFAULT_CHUNKING_PARAMS` in `rag/chunking.py:37,64` and `rag/ingest.py:19,108`; tamper test edits a word inside the chunk (`tests/test_rag_text_chunking.py:62`); number-heavy test uses `* 20` (`tests/test_rag_text_chunking.py:82`). Green suite proves they work. |
+| Per-module test breakdown | Total 536 CONFIRMED (identical collection count, now 536 passed vs 534+2). Per-module numbers above were **not** individually re-verified — treat them as REPORTED-compatible. |
+| File inventory vs §2 | CONFIRMED accurate: all 41 `src`, 31 `tests`, 13 `scripts`, corpus and doc paths present, no renames. Two corrections: tracked `uv.lock` exists but was unmentioned in the handoff (observation, not a problem); `scripts/chirps_layout_probe.py` is **confirmed deleted**. |
+| API routes | 4 app routes + 4 FastAPI docs routes, verified by import (see §2.5). |
+
+### Milestone status (verified 2026-10-30; CONFIRMED)
+
+No milestone definitions exist in the repo (`technical_blueprint.txt` was never committed),
+so this mapping follows the handoff's implied milestones. "Complete" = implemented + tested.
+
+| Milestone | Status | Evidence |
+|---|---|---|
+| M0 (project setup/config) | **Complete** | `pyproject.toml` + `uv.lock`, `.env.example`, `config.py` (`CLIMATEADAPT_` prefix), tests layout, ruff/pytest config; exercised by the green suite. |
+| M1 (CHIRPS connector + precipitation indicators + API) | **Complete** | `data/chirps.py`, `data/chirps_remote.py`, `indicators/rainfall.py`, `indicators/spi.py`, `pipelines/rainfall_anomaly.py`, `pipelines/spi.py`, 3 CHIRPS API routes + `/health`. Real-data behavior is REPORTED (past logs; local cache files corroborate runs happened), not re-executed in the audit. |
+| M2 (ERA5-Land connector + temperature/SPI indicators) | **Complete as CLI** | `data/era5_land.py`, `data/cds_client.py`, `indicators/temperature.py`, `indicators/spi_diagnostics.py`, `indicators/units.py`, `pipelines/spi_era5.py`, `pipelines/temperature_anomaly.py`, CLI scripts. ERA5 API exposure does not exist (expected — P05 scope). |
+| M3 (computer vision) | **Not started** | No CV code, deps, or docs beyond handoff mentions; deferral decision still pending with the owner. |
+| M4 (scientific RAG, first batch) | **Partially complete** | Implemented + tested: manifest, fetch, ingest, page-aware chunking + provenance verification, BM25, RRF, `Bm25Retriever`/`HybridRetriever`, citations, evaluation harness. Missing within M4: dense E5 + Qdrant retriever (no code at all), RAG API routes, 4 of 8 corpus documents, page-level gold annotations, printed page labels. `HybridRetriever` is generic/inert without a second retriever. |
+
+M5 (recommendations) / M6 (agent + LLM), frontend, persistence, and Docker/CI are all
+**not started** — no code, not partial (AUDIT_REPORT §6).
+
+### Environment note (verified 2026-10-30; CONFIRMED)
+
+Node.js v16.13.1 / npm 8.1.2 is installed — Node 16 is end-of-life and **below the Node 18+
+that current Vite requires**. A Node upgrade is a prerequisite before any frontend work
+(P12). Verified environment otherwise: Python 3.11.17 (uv-managed), pytest 9.1.1,
+ruff 0.17.2, uv 0.13.5, Docker engine 29.8.2 present (no Docker files exist yet).
+
 ## 2. Completed components (expected paths)
 
 ### 2.1 Project configuration
 | Path | Contents | Evidence |
 |---|---|---|
 | `pyproject.toml` | setuptools src layout; deps: cdsapi, fastapi, httpx, netcdf4, numpy, pydantic, pydantic-settings, pypdf, rasterio, scipy, uvicorn, xarray; dev: pytest, ruff; pytest `filterwarnings` for rasterio; ruff `E,F,I,B,UP`, line 100 | R (`uv sync` works) |
+| `uv.lock` | Tracked lockfile (P00 audit 2026-10-30: present but unmentioned in the handoff; installed venv matches it) | CONFIRMED present |
 | `.env.example`, `.gitignore` | env template (data dir, downloads flag, CHIRPS mode, prefetch workers, CDS retry bounds); `.gitignore` includes `data/corpus/`, `data/cache/`, `.env` | U (content), R (used) |
-| `README.md` | Setup, API, scripts, CDS credentials, error codes. **Stale:** no RAG commands, no soil-moisture note, no CDS retry bounds detail | stale |
+| `README.md` | Setup, API, scripts, CDS credentials, error codes. **Was stale:** no RAG commands, no soil-moisture note (both added 2026-10-30); CDS retry bounds detail still missing | partially stale |
 | `src/climateadapt/__init__.py`, `config.py` | `Settings` (env prefix `CLIMATEADAPT_`): environment, log_level, data_dir, allow_downloads, http_timeout_seconds, http_user_agent, chirps_base_url, chirps_access (`remote`/`download`), prefetch_workers, cds_retry_max, cds_sleep_max_seconds, cds_timeout_seconds | T, R |
 
 ### 2.2 Data connectors (`src/climateadapt/data/`)
@@ -97,7 +139,7 @@ Files: `api/main.py` (factory, validation-error handler that never echoes input,
 | `evaluation.py` | Document- and page-level metrics, per-language aggregates | T, R |
 
 ### 2.7 Developer scripts (`scripts/`)
-`chirps_anomaly.py`, `chirps_cli.py` (probe, series), `chirps_spi.py`, `compare_chirps_era5.py`, `era5land_cli.py`, `inspect_nc.py`, `spi_compare.py`, `spi_diagnostics.py`, `temperature_anomaly.py`, `corpus_fetch.py`, `corpus_ingest.py`, `rag_search.py`, `rag_eval.py` — all R (each appeared in pasted logs). `scripts/chirps_layout_probe.py` was ordered deleted (U whether it was).
+`chirps_anomaly.py`, `chirps_cli.py` (probe, series), `chirps_spi.py`, `compare_chirps_era5.py`, `era5land_cli.py`, `inspect_nc.py`, `spi_compare.py`, `spi_diagnostics.py`, `temperature_anomaly.py`, `corpus_fetch.py`, `corpus_ingest.py`, `rag_search.py`, `rag_eval.py` — all R (each appeared in pasted logs). `scripts/chirps_layout_probe.py` was ordered deleted — **confirmed deleted** (P00 audit 2026-10-30).
 
 ### 2.8 Versioned corpus assets
 `corpus/manifest.json` (8 documents, metadata only) and `corpus/eval/queries.json` (15 queries: 12 English, 2 French, 1 Arabic; **gold labels written by Claude from abstracts and front matter, not from page text, and never reviewed**).
@@ -109,7 +151,7 @@ Files: `api/main.py` (factory, validation-error handler that never echoes input,
 
 **CHIRPS v3.** HTTPS monthly URL pattern works (`.../monthly/global/tifs/chirps-v3.0.YYYY.MM.tif`); files ≈22 MB, 7200×2400 float32 EPSG:4326, **LZW strips, not tiled, no overviews, no nodata tag** (so the −9999 sentinel logic matters). Remote single-pixel read matched the downloaded value exactly (27.39597511291504). Download mode: 33 files ≈17 min cold; remote mode: same anomaly digits (0.5543783725454325), ≈30 s cold. File ETags/Last-Modified captured; 2014-03 was revised 2025-04-22 while the rest were 2024-11/12.
 
-**ERA5-Land via CDS.** Authentication, licence acceptance and request fields work; NetCDF (not zip) returned, ~25 KB; coordinate `valid_time`; variable `tp` units `m`; grid at multiples of 0.1°; nearest grid point (30.4, −9.6) masked in all months; fallback to (30.5, −9.6) works. Requests took ≈20–60 s; one connection drop cost ≈5 min of automatic retry. `t2m` run succeeded (units must have been `K`). `swvl1` run succeeded with unit spelling inside the accepted set; **exact string not inspected**.
+**ERA5-Land via CDS.** Authentication, licence acceptance and request fields work; NetCDF (not zip) returned, ~25 KB; coordinate `valid_time`; variable `tp` units `m`; grid at multiples of 0.1°; nearest grid point (30.4, −9.6) masked in all months; fallback to (30.5, −9.6) works. Requests took ≈20–60 s; one connection drop cost ≈5 min of automatic retry. `t2m` run succeeded (units must have been `K`). `swvl1` run succeeded with unit spelling inside the accepted set. **P00 audit 2026-10-30: exact string observed as `m**3 m**-3`** (executed `scripts/inspect_nc.py` on `504d1adaca31d5f7.nc`; CONFIRMED). Layers 2–3 units remain UNVERIFIED live.
 
 **RAG.** Fetch: 4 of 5 automatic downloads OK (IDDP66 22.9 MB, WR45 3.3 MB, ESSD 9.4 MB, Sci Data 9.1 MB); WMO guide HTTP 503. Ingest results: see §5. Search and eval ran (BM25 only).
 
@@ -161,8 +203,8 @@ Retrieval evaluation so far: 8 of 15 queries evaluable, 7 skipped (relevant docu
 3. Baseten: endpoint URL, auth header/env var, rate limits and credit budget, whether tool calling/JSON-schema output is supported for the model.
 4. Is Milestone 3 (CropHarvest vision) wanted, and may MLflow/Optuna be demonstrated on retrieval evaluation instead?
 5. Are the three manual PDFs and a WMO mirror available?
-6. Is the repo under git, and are the four proposed fixes applied?
-7. Exact `units` string in `504d1adaca31d5f7.nc` (swvl1 NetCDF).
+6. ~~Is the repo under git, and are the four proposed fixes applied?~~ **Answered 2026-10-30:** yes, git repo on branch `feat/muse-code-handoff`; all four KI-01 fixes present and verified (see §1b).
+7. ~~Exact `units` string in `504d1adaca31d5f7.nc` (swvl1 NetCDF).~~ **Answered 2026-10-30:** `m**3 m**-3` (observed via `scripts/inspect_nc.py`).
 8. Which demo locations beyond the Moroccan reference point should be used to support "global-first" claims?
 
 See `KNOWN_ISSUES.md` for bugs and risks.

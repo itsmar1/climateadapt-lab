@@ -6,24 +6,26 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 
 ## A. Verification baseline
 
-### KI-01 — Four fixes not verified; suite not known green (High)
+### KI-01 — Four fixes not verified; suite not known green (High) — ✅ RESOLVED 2026-10-30
 - **Evidence:** Last log: 536 collected, 534 passed, 2 failed; ruff reports 2 × B008 (`rag/chunking.py` ~l.61, `rag/ingest.py` ~l.108). Claude proposed four fixes afterwards; no log shows them applied or passing.
 - **Impact:** No verified baseline; any later regression is undetectable.
 - **Depends on:** nothing.
 - **Resolution (P00 → P01):** run suite and ruff; apply only fixes that are still needed: `DEFAULT_CHUNKING_PARAMS = ChunkingParams()` constant used in `chunk_document` and `ingest_document` signatures (and import); in `tests/test_rag_text_chunking.py` change the tamper test to edit a word *inside* the chunk (`pages[0].text.replace("w0030", "w9999")`) and change the prose repeat in the number-heavy test from `* 25` to `* 20`. Report actual final counts.
+- **Audit evidence (P00, 2026-10-30; CONFIRMED):** all four fixes were already present — `DEFAULT_CHUNKING_PARAMS` in `src/climateadapt/rag/chunking.py:37,64` and `src/climateadapt/rag/ingest.py:19,108`; in-chunk tamper edit in `tests/test_rag_text_chunking.py:62`; `* 20` in `tests/test_rag_text_chunking.py:82` (AUDIT_REPORT §7). Full suite: **536 passed, 1 warning in 576.54s (0:09:36)**; `ruff check .`: **All checks passed!** No fixes were needed; P01-as-written has nothing to fix.
 
-### KI-02 — Local repository may differ from conversation code (High until audited)
+### KI-02 — Local repository may differ from conversation code (High until audited) — ✅ RETIRED 2026-10-30
 - **Evidence:** Owner fixed many ruff findings by hand (8, 3, 26 errors in different batches), edited `tests/test_chirps.py` (regex changed to `"not be published yet"`), and applied multi-step insert/replace patches (e.g., `era5_land.py`, `test_era5_land.py`).
 - **Impact:** Handoff docs and prompts may name wrong lines/paths; patches may have been applied differently.
 - **Resolution (P00):** treat the repo as truth; produce a file-by-file reconciliation against `IMPLEMENTATION_STATUS.md` §2.
+- **Audit evidence (P00, 2026-10-30; CONFIRMED):** reconciliation done (AUDIT_REPORT §2.3) — all 41 `src`, 31 `tests`, 13 `scripts`, corpus and doc paths present, no renames, no extra source files. The repo matches the conversation code. Retired by the audit; the repository remains authoritative for any future discrepancy.
 
-### KI-03 — Slow test suite (Low/Medium)
-- **Evidence:** 7 min 44 s (464 s); earlier 4–5 min. Dominated by creating synthetic rasters in SPI/pipeline tests.
+### KI-03 — Slow test suite (Low/Medium) — still open
+- **Evidence:** 7 min 44 s (464 s); earlier 4–5 min. Dominated by creating synthetic rasters in SPI/pipeline tests. **P00 audit 2026-10-30 (CONFIRMED): suite now takes 9 min 36 s (576.54 s) and is growing.**
 - **Impact:** Slows every Muse Code iteration.
 - **Resolution:** reuse a session-scoped synthetic raster set or smaller grids; optionally try `uv run --with pytest-xdist pytest -n auto` (UNVERIFIED on this machine). Do not weaken assertions.
 
-### KI-04 — Starlette/httpx deprecation warning (Low)
-- **Evidence:** `StarletteDeprecationWarning ... install httpx2 instead` on every run.
+### KI-04 — Starlette/httpx deprecation warning (Low) — still open
+- **Evidence:** `StarletteDeprecationWarning ... install httpx2 instead` on every run. **P00 audit 2026-10-30 (CONFIRMED): warning observed verbatim in the green 536-passed run (the suite's single warning); cause still uninvestigated, harmless but noisy.**
 - **Resolution:** investigate versions/pins; if no clean fix, leave and document. Do not silence blindly.
 
 ---
