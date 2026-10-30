@@ -182,3 +182,25 @@ def test_bm25_retriever_returns_ranked_chunks_with_scores():
     assert [h.chunk.chunk_id for h in hits][0] == chunks[0].chunk_id
     assert [h.rank for h in hits] == [1, 2]
     assert hits[0].component_scores == {"bm25": hits[0].score}
+
+
+def test_bm25_can_exclude_reference_chunks():
+    body = make_chunk(0, "supplemental irrigation wheat yields")
+    refs = make_chunk(
+        1, "supplemental irrigation Smith 2001 Jones 2005", section_type="references"
+    )
+    default = Bm25Retriever([body, refs]).search("supplemental irrigation", top_k=5)
+    assert [h.chunk.chunk_id for h in default] == [body.chunk_id, refs.chunk_id]
+    filtered = Bm25Retriever([body, refs]).search(
+        "supplemental irrigation", top_k=5, exclude_reference=True
+    )
+    assert [h.chunk.chunk_id for h in filtered] == [body.chunk_id]
+    assert filtered[0].rank == 1
+
+
+def test_hybrid_excludes_reference_chunks_before_the_cut():
+    body = make_chunk(0, "supplemental irrigation wheat yields")
+    refs = make_chunk(1, "supplemental irrigation bibliography", section_type="references")
+    hybrid = HybridRetriever([Bm25Retriever([body, refs])])
+    hits = hybrid.search("supplemental irrigation", top_k=5, exclude_reference=True)
+    assert [h.chunk.chunk_id for h in hits] == [body.chunk_id]

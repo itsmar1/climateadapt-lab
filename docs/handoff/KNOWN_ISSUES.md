@@ -100,32 +100,37 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 
 ## C. Scientific RAG
 
-### KI-17 — Citations use PDF page indices, not printed page numbers (High for credibility)
+### KI-17 — Citations use PDF page indices, not printed page numbers (High for credibility) — RESOLVED 2026-10-30
 - **Evidence:** `rag_search` returned "p. 114" for the 505-page FAO IDDP66 PDF, which has roman-numeral front matter, so the printed page differs.
 - **Impact:** A reader opening the cited printed page lands in the wrong place.
 - **Resolution (P06):** store PDF page labels where the PDF provides them (verify the pypdf page-label API from its docs), cite "PDF p. N (printed p. X)" or label ambiguity explicitly; extend `verify_citation` and tests.
+- **P06 evidence 2026-10-30:** `Page.label` / `Chunk.label_start|end` from pypdf 6.21.3 `reader.page_labels`, presence-checked via `"/PageLabels" in reader.trailer["/Root"]` (`page_labels` synthesizes 1..N when absent, verified by probe). Citations render "PDF p. 114 (printed p. 96)" or "p. 7 (PDF index; no printed label)"; `verify_citation` flags label mismatches. Re-ingest: 830/854 pages carry printed labels. Tests use synthetic PDFs with labels stamped by pypdf's own `PdfWriter.set_page_label`.
 
 ### KI-18 — Missing documents (High for retrieval evaluation)
 - **Evidence:** 3 manual downloads missing (`fao-wr22-deficit-irrigation-practices`, two ICARDA papers); WMO guide HTTP 503. 7 of 15 evaluation queries skipped.
+- **P06 2026-10-30:** WMO retry SUCCEEDED (519,165 bytes, sha256 `eb3c3edf…`, 24 pages; title + WMO-No. 1090 on PDF p. 1). Corpus now 5 of 8 ingested; eval 10/15 with 5 skipped (all missing-manual queries). No mirror was added: the primary URL works, and the `publicdocs.mnr.gov.on.ca` URL stays unverified. Manuals still missing — owner action.
 - **Resolution:** owner downloads manual PDFs into `data/corpus/raw/<doc_id>.pdf`; retry WMO later; a second WMO mirror was seen in a search (`publicdocs.mnr.gov.on.ca`) but is NOT verified as the genuine WMO file — verify before adding.
 
 ### KI-19 — Evaluation set is tiny and unreviewed (High)
 - **Evidence:** Gold labels are document-level, written by Claude from abstracts/front matter; 8 evaluable queries; hit@1 = 1.00 (7 EN, 1 FR); the French hit is unexplained (possible lexical overlap). No page-level annotations.
+- **P06 2026-10-30:** re-ran on 5 docs: 10 evaluable (9 EN, 1 FR), hit@1 = 1.00, 5 skipped with explicit reasons (q01, q03, q04, q13-fr, q15-ar — all need missing manuals). `scripts/rag_eval_review.py` writes git-ignored `data/corpus/eval_review.md` (top-3 + excerpts per query). Labels still owner-unreviewed — stays open.
 - **Impact:** The numbers do not show retrieval quality.
 - **Resolution (P06/P07):** owner reviews all 15 labels; add page-level annotations after reading; add queries for the new documents; report per-language results.
 
-### KI-20 — Bibliography chunks and wide page ranges degrade results (Medium)
+### KI-20 — Bibliography chunks and wide page ranges degrade results (Medium) — tooling delivered 2026-10-30, default behavior unchanged
 - **Evidence:** In `rag_search`, hit #2 was a reference-list chunk spanning PDF pages 115–119; hits #4–#5 were off-topic (maize leaf area; Iraq project list).
 - **Resolution (P06):** detect and tag/down-weight reference sections, keep page ranges narrow, and re-evaluate. Do not drop content silently.
+- **P06 evidence 2026-10-30:** `section_type` tag (year-density heuristic, tested; nothing deleted) + `exclude_reference` filter on both retrievers (default OFF), `rag_search --exclude-reference`, and `corpus_ingest --max-page-span`. Ref counts: IDDP66 188, WR45 275, WMO 2, ESSD 60, SciData 23 (of 1824). Spans default → cap-2: {1:947, 2:776, 3:63, 4:25, 5:11, 6:2} → {1:977, 2:834}, costing 13 short-dropped chunks. Canonical corpus keeps defaults (bare-command reproducibility). Known limitation: WR45's citation-dense historical chronology is over-tagged (visible in the review file); tightening was deferred to avoid hiding real bibliographies.
 
 ### KI-21 — No dense/cross-lingual retrieval (High)
 - **Evidence:** BM25 only. French/Arabic queries cannot match English text lexically. `HybridRetriever` has only been tested with stub retrievers.
 - **Resolution (P07):** multilingual E5 (default `intfloat/multilingual-e5-small`, 384-d; `query: `/`passage: ` prefixes) with Qdrant local mode; hybrid via RRF; verify package APIs from docs; torch/model download is large; measure before/after on the same gold set. RRF constant k=60 is a convention from memory and must be tuned/justified, not assumed.
 
-### KI-22 — pypdf font warnings flood ingest output (Low/Medium)
+### KI-22 — pypdf font warnings flood ingest output (Low/Medium) — measured 2026-10-30, still open (noise only)
 - **Evidence:** Hundreds of "fontTools is required to fully parse the encoding of a CFF Type1 font" lines; extracted text looked readable in search results.
 - **Impact:** Noisy logs; possibly degraded extraction for some fonts (unmeasured).
 - **Resolution (P06):** test whether installing `fonttools` changes extracted text; do not just suppress logging.
+- **P06 evidence 2026-10-30:** sampled 30 pages per FAO PDF (first/middle/last) with pypdf 6.21.3: extracted-text sha256 byte-identical with fonttools 4.68.0 on an ephemeral `PYTHONPATH` (wheel deleted after) and without; only warnings changed (17 → 0 on the sample). pypdf uses fonttools solely for CFF `/FontFile3` parsing (`pypdf/_cmap.py`); IDDP66 has such fonts yet its text is unchanged. Decision: dependency NOT added; warning stays visible (cosmetic for this corpus, still noisy).
 
 ### KI-23 — Licences of several corpus sources UNVERIFIED (Medium)
 - **Evidence:** Manifest marks WMO, ESSD and Sci Data licences as unverified; ICARDA records state CC-BY-NC-ND / CC-BY-SA; FAO items carry FAO notices.

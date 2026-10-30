@@ -15,7 +15,7 @@ from climateadapt.rag.ingest import (
 )
 from climateadapt.rag.manifest import SourceDocument
 from climateadapt.rag.text import words
-from rag_helpers import make_pdf
+from rag_helpers import make_labeled_pdf, make_pdf
 from test_rag_manifest import valid_doc
 
 PARAMS = ChunkingParams(chunk_words=40, overlap_words=10, min_words=10)
@@ -185,3 +185,67 @@ def test_manual_documents_are_not_fetched(tmp_path):
     with pytest.raises(FetchError, match="manual download"):
         fetch_pdf(document(access="manual", pdf_urls=[]), tmp_path, client)
     assert calls == []
+
+
+def test_pages_without_labels_record_none(tmp_path):
+    pdf = tmp_path / "x.pdf"
+    pdf.write_bytes(make_pdf(["Alpha beta.", "Gamma delta."]))
+    pages, _ = extract_pages(pdf)
+    assert [p.label for p in pages] == [None, None]
+
+
+def test_printed_page_labels_are_extracted(tmp_path):
+    pdf = tmp_path / "x.pdf"
+    pdf.write_bytes(
+        make_labeled_pdf(["Alpha beta gamma.", "Delta epsilon zeta."], start=5, prefix="A-")
+    )
+    pages, failed = extract_pages(pdf)
+    assert failed == []
+    assert [p.label for p in pages] == ["A-5", "A-6"]
+    assert words(pages[0].text) == ["Alpha", "beta", "gamma."]
+
+
+def test_ingest_reports_reference_chunks(tmp_path):
+    raw, processed = tmp_path / "raw", tmp_path / "processed"
+    raw.mkdir()
+    refs = " ".join(f"Smith, J. ({2000 + i}). Title {i}. Journal." for i in range(20))
+    (raw / "test-doc-one.pdf").write_bytes(
+        make_pdf([long_page("Supplemental irrigation stabilises rainfed wheat yields."), refs])
+    )
+    report = ingest_document(document(), raw_dir=raw, processed_dir=processed, params=PARAMS)
+    chunks = load_chunks(processed)
+    assert report.n_reference_chunks == sum(
+        1 for c in chunks if c.section_type == "references"
+    )
+    assert report.n_reference_chunks >= 1
+
+
+def test_fetch_retries_once_on_5xx(tmp_path):
+    attempts = []
+
+    def flaky():
+        attempts.append(1)
+        if len(attempts) == 1:
+            return httpx.Response(503)
+        return httpx.Response(
+            200, content=make_pdf(["recovered"]), headers={"content-type": "application/pdf"}
+        )
+
+    client, calls = client_for({"https://example.org/doc.pdf": flaky})
+    result = fetch_pdf(document(), tmp_path, client)
+    assert result.size_bytes > 0 and len(calls) == 2
+
+
+def test_fetch_gives_up_after_two_5xx(tmp_path):
+    client, calls = client_for({"https://example.org/doc.pdf": lambda: httpx.Response(503)})
+    with pytest.raises(FetchError, match="HTTP 503"):
+        fetch_pdf(document(), tmp_path, client)
+    assert len(calls) == 2
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_fetch_does_not_retry_4xx(tmp_path):
+    client, calls = client_for({})
+    with pytest.raises(FetchError, match="HTTP 404"):
+        fetch_pdf(document(), tmp_path, client)
+    assert len(calls) == 1

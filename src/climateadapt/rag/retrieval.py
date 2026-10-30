@@ -22,8 +22,22 @@ class Bm25Retriever:
     def __init__(self, chunks: Sequence[Chunk], *, k1: float = 1.5, b: float = 0.75) -> None:
         self._index = BM25Index(chunks, k1=k1, b=b)
 
-    def search(self, query: str, top_k: int = 10) -> list[RetrievedChunk]:
+    def search(
+        self, query: str, top_k: int = 10, *, exclude_reference: bool = False
+    ) -> list[RetrievedChunk]:
+        """Search BM25; with exclude_reference, drop reference-list chunks first.
+
+        Filtering (not down-ranking): reference chunks never appear, ranks are
+        recomputed on the filtered list, and BM25 idf statistics are unchanged.
+        """
+        depth = len(self._index.chunks) if exclude_reference else top_k
+        hits = self._index.search(query, depth) if depth >= 1 else []
         chunks = self._index.chunks
+        ranked = [
+            (position, score)
+            for position, score in hits
+            if not exclude_reference or chunks[position].section_type != "references"
+        ][:top_k]
         return [
             RetrievedChunk(
                 chunk=chunks[position],
@@ -32,7 +46,7 @@ class Bm25Retriever:
                 component_ranks={self.name: rank},
                 component_scores={self.name: score},
             )
-            for rank, (position, score) in enumerate(self._index.search(query, top_k), start=1)
+            for rank, (position, score) in enumerate(ranked, start=1)
         ]
 
 
@@ -57,7 +71,14 @@ class HybridRetriever:
         self._rrf_k = rrf_k
         self._depth = candidate_depth
 
-    def search(self, query: str, top_k: int = 10) -> list[RetrievedChunk]:
+    def search(
+        self, query: str, top_k: int = 10, *, exclude_reference: bool = False
+    ) -> list[RetrievedChunk]:
+        """Fuse components; with exclude_reference, drop reference-list hits.
+
+        Components are always queried the same way; filtering applies to the
+        fused ranking before the top_k cut, and ranks are recomputed after.
+        """
         rankings: dict[str, list[str]] = {}
         chunks: dict[str, Chunk] = {}
         scores: dict[str, dict[str, float]] = {}
@@ -67,7 +88,12 @@ class HybridRetriever:
             scores[retriever.name] = {hit.chunk.chunk_id: hit.score for hit in hits}
             for hit in hits:
                 chunks[hit.chunk.chunk_id] = hit.chunk
-        fused = reciprocal_rank_fusion(rankings, k=self._rrf_k, top_k=top_k)
+        fused = reciprocal_rank_fusion(
+            rankings, k=self._rrf_k, top_k=None if exclude_reference else top_k
+        )
+        if exclude_reference:
+            fused = [hit for hit in fused if chunks[hit.chunk_id].section_type != "references"]
+            fused = fused[:top_k]
         return [
             RetrievedChunk(
                 chunk=chunks[item.chunk_id],

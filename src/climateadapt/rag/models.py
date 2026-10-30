@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -9,6 +11,7 @@ class Page(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     page: int = Field(ge=1)
+    label: str | None = None
     text: str
 
 
@@ -23,6 +26,9 @@ class Chunk(BaseModel):
     word_count: int = Field(ge=1)
     text: str
     text_sha256: str
+    label_start: str | None = None
+    label_end: str | None = None
+    section_type: Literal["body", "references"] = "body"
 
 
 class RetrievedChunk(BaseModel):

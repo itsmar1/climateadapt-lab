@@ -30,8 +30,18 @@ class Citation(BaseModel):
     formatted: str
 
 
-def format_pages(start: int, end: int) -> str:
-    return f"p. {start}" if start == end else f"pp. {start}-{end}"
+def format_pages(
+    start: int,
+    end: int,
+    label_start: str | None = None,
+    label_end: str | None = None,
+) -> str:
+    index = f"p. {start}" if start == end else f"pp. {start}-{end}"
+    labels = [label for label in (label_start, label_end) if label is not None]
+    if not labels:
+        return f"{index} (PDF index; no printed label)"
+    printed = labels[0] if len(set(labels)) == 1 else f"{labels[0]}-{labels[-1]}"
+    return f"PDF {index} (printed p. {printed})"
 
 
 def _surname(author: str) -> str:
@@ -52,7 +62,7 @@ def author_label(doc: SourceDocument) -> str:
 def build_citation(chunk: Chunk, doc: SourceDocument) -> Citation:
     if chunk.doc_id != doc.doc_id:
         raise ValueError(f"Chunk belongs to {chunk.doc_id!r}, not {doc.doc_id!r}.")
-    pages = format_pages(chunk.page_start, chunk.page_end)
+    pages = format_pages(chunk.page_start, chunk.page_end, chunk.label_start, chunk.label_end)
     year = str(doc.year) if doc.year is not None else "n.d."
     series = f"{doc.series}. " if doc.series else ""
     formatted = f"{author_label(doc)} ({year}). {doc.title}. {series}{doc.publisher}. {pages}."
@@ -94,4 +104,15 @@ def verify_citation(
     elif not verify_chunk_provenance(chunk, pages):
         problems.append(f"{chunk.chunk_id}: text does not re-derive from pages "
                         f"{chunk.page_start}-{chunk.page_end}.")
+    by_number = {page.page: page for page in pages}
+    for number, slot, field in (
+        (chunk.page_start, chunk.label_start, "label_start"),
+        (chunk.page_end, chunk.label_end, "label_end"),
+    ):
+        page = by_number.get(number)
+        if page is not None and slot is not None and page.label != slot:
+            problems.append(
+                f"{chunk.chunk_id}: {field} {slot!r} does not match the stored "
+                f"label {page.label!r} of PDF page {number}."
+            )
     return problems

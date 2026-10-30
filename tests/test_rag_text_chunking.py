@@ -1,6 +1,11 @@
 import pytest
 
-from climateadapt.rag.chunking import ChunkingParams, chunk_document, verify_chunk_provenance
+from climateadapt.rag.chunking import (
+    ChunkingParams,
+    chunk_document,
+    section_type_of,
+    verify_chunk_provenance,
+)
 from climateadapt.rag.models import Page
 from climateadapt.rag.text import normalize_text, words
 
@@ -107,8 +112,47 @@ def test_tiny_documents_are_dropped_and_counted():
         {"min_words": 0},
         {"chunk_words": 50, "min_words": 60},
         {"min_alpha_ratio": 1.5},
+        {"max_page_span": 0},
     ],
 )
 def test_invalid_parameters_are_rejected(kwargs):
     with pytest.raises(ValueError):
         ChunkingParams(**kwargs)
+
+
+def test_section_tagger_marks_bibliographies():
+    refs = " ".join(
+        f"Smith, J. ({2000 + i}). Some title {i}. Journal of Examples." for i in range(6)
+    )
+    assert section_type_of(refs) == "references"
+    assert section_type_of("References " + refs) == "references"
+    headed = "Bibliographie " + "Dupont, P. (2001). Titre. Revue. " * 2
+    assert section_type_of(headed) == "references"
+
+
+def test_section_tagger_keeps_cited_body_text():
+    body = (
+        "Supplemental irrigation stabilises rainfed wheat yields (Smith 2001). "
+        "Deficit irrigation saves water in cotton and maize (Jones 2005)."
+    )
+    assert section_type_of(body) == "body"
+
+
+def test_chunks_carry_labels_and_spans_can_be_capped():
+    pages = [
+        Page(page=n, text=f"Content words for page {n}. " * 30, label=str(n))
+        for n in (1, 2, 3)
+    ]
+    params = ChunkingParams(chunk_words=60, overlap_words=10, min_words=10)
+    chunks, _ = chunk_document("doc-a", pages, params)
+    assert all(c.label_start == str(c.page_start) for c in chunks)
+    assert all(c.label_end == str(c.page_end) for c in chunks)
+    assert max(c.page_end - c.page_start + 1 for c in chunks) >= 2
+    capped, stats = chunk_document(
+        "doc-a",
+        pages,
+        ChunkingParams(chunk_words=60, overlap_words=10, min_words=10, max_page_span=1),
+    )
+    assert all(c.page_end == c.page_start for c in capped)
+    assert all(c.label_start == c.label_end for c in capped)
+    assert stats.n_chunks_cut_for_span >= 1

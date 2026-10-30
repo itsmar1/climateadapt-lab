@@ -134,7 +134,7 @@
       "license_status": "unverified",
       "license_notes": "Check WMO's current terms of use before any redistribution. Keep processed text local.",
       "unverified_fields": ["authors", "license"],
-      "verification_notes": "Title, WMO number and 2012 date confirmed from the file name and search results. The author list and licence terms were not verified, so authors is left empty and the citation falls back to the publisher.",
+      "verification_notes": "Title, WMO number and 2012 date confirmed from the file name and search results. The author list and licence terms were not verified, so authors is left empty and the citation falls back to the publisher. 2026-10-30: retry download succeeded (519,165 bytes, 24 pages); PDF page 1 confirms the title and WMO-No. 1090. Authors and licence remain unverified.",
       "metadata_verified_on": "2026-10-28"
     },
     {

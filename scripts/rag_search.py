@@ -24,6 +24,8 @@ def main() -> int:
     parser.add_argument("query")
     parser.add_argument("--top-k", type=int, default=5)
     parser.add_argument("--snippet-chars", type=int, default=350)
+    parser.add_argument("--exclude-reference", action="store_true",
+                        help="drop reference-list chunks from the results")
     args = parser.parse_args()
 
     processed_dir = get_settings().data_dir / "corpus" / "processed"
@@ -33,9 +35,11 @@ def main() -> int:
         return 2
     manifest = load_manifest(MANIFEST)
 
-    for hit in Bm25Retriever(chunks).search(args.query, args.top_k):
+    for hit in Bm25Retriever(chunks).search(args.query, args.top_k,
+                                              exclude_reference=args.exclude_reference):
         citation = build_citation(hit.chunk, manifest.get(hit.chunk.doc_id))
-        print(f"#{hit.rank}  score={hit.score:.3f}  {hit.chunk.chunk_id}")
+        print(f"#{hit.rank}  score={hit.score:.3f}  [{hit.chunk.section_type}]")
+        print(f"    {hit.chunk.chunk_id}")
         print(f"    {citation.formatted}")
         if citation.unverified_fields:
             print(f"    (unverified metadata: {', '.join(citation.unverified_fields)})")

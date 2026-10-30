@@ -43,6 +43,7 @@ class IngestReport(BaseModel):
     n_chunks: int
     n_dropped_short: int
     n_dropped_low_alpha: int
+    n_reference_chunks: int = 0
     warnings: list[str]
 
 
@@ -66,6 +67,12 @@ def extract_pages(pdf_path: Path) -> tuple[list[Page], list[int]]:
         if reader.is_encrypted and not reader.decrypt(""):
             raise IngestError(f"{pdf_path.name} is encrypted and needs a password.")
         page_objects = list(reader.pages)
+        try:
+            has_labels = "/PageLabels" in reader.trailer["/Root"]
+            raw_labels = list(reader.page_labels) if has_labels else []
+        except Exception:  # a /PageLabels entry pypdf cannot parse
+            raw_labels = []
+        labels = raw_labels if len(raw_labels) == len(page_objects) else []
     except (PyPdfError, OSError, ValueError) as exc:
         raise IngestError(f"{pdf_path.name} is not a readable PDF: {exc}") from exc
 
@@ -82,7 +89,8 @@ def extract_pages(pdf_path: Path) -> tuple[list[Page], list[int]]:
                 exc,
             )
             text, failed = "", [*failed, number]
-        pages.append(Page(page=number, text=text))
+        label = labels[number - 1] if labels else None
+        pages.append(Page(page=number, text=text, label=label))
     return pages, failed
 
 
@@ -117,6 +125,7 @@ def ingest_document(
     pages, failed = extract_pages(pdf_path)
     chunks, stats = chunk_document(doc.doc_id, pages, params)
     empty = [page.page for page in pages if not normalize_text(page.text)]
+    n_reference = sum(1 for chunk in chunks if chunk.section_type == "references")
 
     warnings: list[str] = []
     if pages and len(empty) / len(pages) > EMPTY_PAGE_WARNING_RATIO:
@@ -159,6 +168,7 @@ def ingest_document(
         n_chunks=stats.n_chunks_kept,
         n_dropped_short=stats.n_chunks_dropped_short,
         n_dropped_low_alpha=stats.n_chunks_dropped_low_alpha,
+        n_reference_chunks=n_reference,
         warnings=warnings,
     )
 

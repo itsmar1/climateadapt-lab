@@ -27,8 +27,11 @@ def test_author_labels(authors, expected):
 
 
 def test_page_formatting():
-    assert format_pages(7, 7) == "p. 7"
-    assert format_pages(7, 9) == "pp. 7-9"
+    assert format_pages(7, 7) == "p. 7 (PDF index; no printed label)"
+    assert format_pages(7, 9) == "pp. 7-9 (PDF index; no printed label)"
+    assert format_pages(114, 114, "96", "96") == "PDF p. 114 (printed p. 96)"
+    assert format_pages(3, 5, "1", "3") == "PDF pp. 3-5 (printed p. 1-3)"
+    assert format_pages(3, 5, "1", None) == "PDF pp. 3-5 (printed p. 1)"
 
 
 def test_formatted_citation_uses_only_manifest_fields():
@@ -47,9 +50,9 @@ def test_formatted_citation_uses_only_manifest_fields():
 
     assert citation.formatted == (
         "Steduto et al. (2012). Crop yield response to water. "
-        "FAO Irrigation and Drainage Paper 66. FAO. pp. 12-13."
+        "FAO Irrigation and Drainage Paper 66. FAO. pp. 12-13 (PDF index; no printed label)."
     )
-    assert citation.pages == "pp. 12-13"
+    assert citation.pages == "pp. 12-13 (PDF index; no printed label)"
     assert citation.unverified_fields == ["year"]
     assert citation.license_status == "verified_in_record"
     assert citation.landing_url == "https://example.org/doc"
@@ -60,7 +63,9 @@ def test_missing_year_and_series_are_handled():
         make_chunk(0, "x y z", doc_id="test-doc-one"),
         doc(year=None, series=None),
     )
-    assert citation.formatted.startswith("Author (n.d.). A test document. Test Publisher. p. 1.")
+    assert citation.formatted.startswith(
+        "Author (n.d.). A test document. Test Publisher. p. 1 (PDF index; no printed label)."
+    )
 
 
 def test_citing_a_chunk_with_the_wrong_document_is_an_error():
@@ -100,3 +105,25 @@ def test_citation_problems_are_reported():
     assert "exceeds" in verify_citation(beyond, manifest, pages_by_doc)[0]
     wrong_text = chunks[0].model_copy(update={"text": chunks[0].text + " extra"})
     assert "does not re-derive" in verify_citation(wrong_text, manifest, pages_by_doc)[0]
+
+
+def test_labeled_citations_show_both_page_numbers():
+    citation = build_citation(
+        make_chunk(0, "x y z", doc_id="test-doc-one", pages=(114, 114), labels=("96", "96")),
+        doc(),
+    )
+    assert citation.pages == "PDF p. 114 (printed p. 96)"
+    assert citation.formatted.endswith("PDF p. 114 (printed p. 96).")
+
+
+def test_label_mismatches_are_reported():
+    manifest, pages, chunks = corpus()
+    labeled = [Page(page=1, text=pages[0].text, label="i"),
+               Page(page=2, text=pages[1].text, label="ii")]
+    chunk = chunks[0].model_copy(update={"label_start": "WRONG"})
+    problems = verify_citation(chunk, manifest, {"test-doc-one": labeled})
+    assert any("label_start" in p and "does not match" in p for p in problems)
+    matching = chunks[0].model_copy(
+        update={"label_start": "i", "label_end": labeled[chunks[0].page_end - 1].label}
+    )
+    assert verify_citation(matching, manifest, {"test-doc-one": labeled}) == []

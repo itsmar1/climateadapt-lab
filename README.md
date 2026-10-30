@@ -96,8 +96,11 @@ uv run python scripts/inspect_nc.py "data\cache\era5_land\raw\<file>.nc"
 # Scientific RAG first batch (BM25 retrieval; needs an ingested corpus)
 uv run python scripts/corpus_fetch.py
 uv run python scripts/corpus_ingest.py
+uv run python scripts/corpus_ingest.py --max-page-span 2  # optional: cap chunk page spans
 uv run python scripts/rag_search.py "supplemental irrigation rainfed wheat" --top-k 5
+uv run python scripts/rag_search.py "supplemental irrigation rainfed wheat" --exclude-reference
 uv run python scripts/rag_eval.py
+uv run python scripts/rag_eval_review.py  # writes git-ignored data/corpus/eval_review.md
 ```
 
 ERA5-Land variables: `2m_temperature`, `total_precipitation`,

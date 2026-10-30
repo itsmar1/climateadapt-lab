@@ -47,8 +47,29 @@ def make_pdf(pages: list[str]) -> bytes:
     return bytes(out)
 
 
+def make_labeled_pdf(pages: list[str], *, start: int = 1, prefix: str = "") -> bytes:
+    """Like make_pdf, but stamped with printed page labels via pypdf's own writer."""
+    import io
+
+    from pypdf import PdfReader, PdfWriter
+
+    reader = PdfReader(io.BytesIO(make_pdf(pages)))
+    writer = PdfWriter()
+    for page in reader.pages:
+        writer.add_page(page)
+    writer.set_page_label(0, len(pages) - 1, style="/D", start=start, prefix=prefix or None)
+    out = io.BytesIO()
+    writer.write(out)
+    return out.getvalue()
+
+
 def make_chunk(
-        index: int, text: str, doc_id: str = "doc-a", pages: tuple[int, int] = (1, 1)
+        index: int,
+        text: str,
+        doc_id: str = "doc-a",
+        pages: tuple[int, int] = (1, 1),
+        labels: tuple[str | None, str | None] | None = None,
+        section_type: str = "body",
 ) -> Chunk:
     return Chunk(
         chunk_id=make_chunk_id(doc_id, index),
@@ -59,4 +80,7 @@ def make_chunk(
         word_count=len(text.split()),
         text=text,
         text_sha256=sha256_text(text),
+        label_start=labels[0] if labels else None,
+        label_end=labels[1] if labels else None,
+        section_type=section_type,
     )

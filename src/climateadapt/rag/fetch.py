@@ -22,6 +22,14 @@ class FetchError(Exception):
     """A PDF could not be downloaded or verified."""
 
 
+class _HttpStatusError(FetchError):
+    """A download attempt failed with a non-200 HTTP status (message stays "HTTP {code}")."""
+
+    def __init__(self, status_code: int) -> None:
+        super().__init__(f"HTTP {status_code}")
+        self.status_code = status_code
+
+
 class FetchResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -37,7 +45,7 @@ def raw_pdf_path(raw_dir: Path, doc_id: str) -> Path:
     return raw_dir / f"{doc_id}.pdf"
 
 
-def _download(
+def _download_once(
     doc: SourceDocument,
     url: str,
     target: Path,
@@ -56,7 +64,7 @@ def _download(
             "GET", url, headers={"User-Agent": user_agent}, timeout=timeout
         ) as response:
             if response.status_code != 200:
-                raise FetchError(f"HTTP {response.status_code}")
+                raise _HttpStatusError(response.status_code)
             content_type = response.headers.get("content-type")
             final_url = str(response.url)
             with open(tmp, "wb") as handle:
@@ -100,6 +108,31 @@ def _download(
         encoding="utf-8",
     )
     return result
+
+
+def _download(
+    doc: SourceDocument,
+    url: str,
+    target: Path,
+    client: httpx.Client,
+    *,
+    user_agent: str,
+    timeout: float,
+    max_bytes: int,
+) -> FetchResult:
+    """Download once, retrying a single time when the server answers 5xx."""
+    try:
+        return _download_once(
+            doc, url, target, client,
+            user_agent=user_agent, timeout=timeout, max_bytes=max_bytes,
+        )
+    except _HttpStatusError as exc:
+        if not 500 <= exc.status_code < 600:
+            raise
+        return _download_once(
+            doc, url, target, client,
+            user_agent=user_agent, timeout=timeout, max_bytes=max_bytes,
+        )
 
 
 def fetch_pdf(
