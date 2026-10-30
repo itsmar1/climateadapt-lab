@@ -38,6 +38,15 @@ class Settings(BaseSettings):
     cds_sleep_max_seconds: float = Field(default=60.0, gt=0, le=600)
     cds_timeout_seconds: float = Field(default=60.0, gt=0)
 
+    # FastAPI surface (P05). CORS origins are explicit; the default is the Vite dev
+    # server origin. Jobs bound every new analysis endpoint: queue depth (workers),
+    # per-job wall-clock timeout, result retention (TTL), and store size cap.
+    api_cors_origins: list[str] = Field(default=["http://localhost:5173"])
+    api_job_timeout_seconds: float = Field(default=900.0, gt=0)
+    api_job_ttl_seconds: float = Field(default=3600.0, gt=0)
+    api_job_max_workers: int = Field(default=4, ge=1, le=16)
+    api_job_max_jobs: int = Field(default=1000, ge=1)
+
     # Baseten Model APIs (application inference; see docs/LLM_PROVIDER_NOTES.md).
     # P03 verified the base URL + Bearer auth from docs and the -1026 slug live;
     # official examples show meta-models/muse-spark-open (fallback if -1026 ever 404s).

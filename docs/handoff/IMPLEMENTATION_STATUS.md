@@ -127,8 +127,13 @@ Note: `spi_era5.py` and `temperature_anomaly.py` used to duplicate window-assemb
 | `POST /v1/analysis/rainfall-anomaly` (user-supplied totals; prototype) | T |
 | `POST /v1/analysis/chirps-rainfall-anomaly` | T; **R (live uvicorn call, cached data)** |
 | `POST /v1/analysis/chirps-spi` | T; **R (live uvicorn call, cached data)** |
+| `POST /v1/analysis/era5-spi` → 202 job (P05) | T (offline; live uvicorn check not yet run) |
+| `POST /v1/analysis/era5-temperature-anomaly` → 202 job (P05) | T (offline; live uvicorn check not yet run) |
+| `POST /v1/analysis/era5-soil-moisture-anomaly` → 202 job (P05) | T (offline; live uvicorn check not yet run) |
+| `POST /v1/analysis/environmental-bundle` → 202 job (P05) | T; **R (live uvicorn 2026-10-30: 202 + poll → succeeded, 4/4 ok, ~21 s)** |
+| `GET /v1/jobs/{job_id}` (P05) | T; **R (live poll to terminal)** |
 
-Files: `api/main.py` (factory, validation-error handler that never echoes input, domain-error handlers), `api/dependencies.py` (`get_chirps_client`, `lru_cache`), `schemas.py`, `schemas_chirps.py`, `schemas_spi.py`, `analysis.py`, `geo.py`. **No ERA5 routes, no RAG routes, no CORS, no auth.**
+Files: `api/main.py` (factory, validation-error handler that never echoes input, domain-error handlers, CORS, lifespan), `api/dependencies.py` (`get_chirps_client`, `get_era5_client`, `get_job_store`, shutdown), `api/jobs.py` (in-memory store: bounded workers, per-job timeout, TTL), `api/bundle.py` (per-indicator statuses), `api/errors.py` (shared codes), `schemas.py`, `schemas_chirps.py`, `schemas_spi.py`, `schemas_era5.py`, `analysis.py`, `geo.py`, `docs/openapi.json` (generated contract, matches routes). **No RAG routes, no auth, no rate limiting.**
 
 ### 2.6 Scientific RAG (`src/climateadapt/rag/`, first batch)
 | Path | Purpose | Evidence |
@@ -149,7 +154,7 @@ Files: `api/main.py` (factory, validation-error handler that never echoes input,
 `corpus/manifest.json` (8 documents, metadata only) and `corpus/eval/queries.json` (15 queries: 12 English, 2 French, 1 Arabic; **gold labels written by Claude from abstracts and front matter, not from page text, and never reviewed**).
 
 ### 2.9 Test support
-`tests/conftest.py` (synthetic GeoTIFF factory, MockTransport factory), `tests/era5_helpers.py` (synthetic NetCDF builder, FakeDownloader), `tests/rag_helpers.py` (minimal PDF writer). 28 test modules as listed in §1, plus `test_baseten_config.py` (P03) and `test_soil_moisture.py`, `test_soil_moisture_pipeline.py`, `test_window_anomaly_regression.py` (P04).
+`tests/conftest.py` (synthetic GeoTIFF factory, MockTransport factory), `tests/era5_helpers.py` (synthetic NetCDF builder, FakeDownloader), `tests/rag_helpers.py` (minimal PDF writer). 28 test modules as listed in §1, plus `test_baseten_config.py` (P03), `test_soil_moisture.py`, `test_soil_moisture_pipeline.py`, `test_window_anomaly_regression.py` (P04), and `test_api_jobs.py`, `test_api_era5.py` (P05).
 
 ## 3. Real-data verification log (CONFIRMED from owner's logs)
 
@@ -161,7 +166,7 @@ Files: `api/main.py` (factory, validation-error handler that never echoes input,
 
 ## 4. API behavior notes (from code; UNVERIFIED beyond tests unless stated)
 
-Requests are synchronous. Cold CHIRPS SPI reads ≈93 values (~1 min); cold anomaly ≈33 values (~30 s). Warm-cache calls are instant. Error bodies never echo inputs. `get_chirps_client` shares one httpx/GDAL client for the process lifetime without a shutdown hook.
+CHIRPS requests are synchronous. Cold CHIRPS SPI reads ≈93 values (~1 min); cold anomaly ≈33 values (~30 s). Warm-cache calls are instant. Error bodies never echo inputs. P05: new ERA5/bundle endpoints return 202 + job id (never block); jobs have a 900 s timeout, 1 h TTL, 4 workers, hard cap 1000 (503 `server_busy` when full); CORS allows the Vite dev origin from settings; lifespan closes the shared CHIRPS store and cancels queued jobs. Local paths removed from client-facing error text (result provenance still carries raw-file paths by design).
 
 ## 5. Data and documents currently available
 
@@ -185,17 +190,17 @@ Retrieval evaluation so far: 8 of 15 queries evaluable, 7 skipped (relevant docu
 ## 6. Partial implementations
 
 - RAG: BM25 only. `HybridRetriever` exists but has no second real retriever. Citations show PDF page indices, not printed page numbers.
-- ERA5-Land: temperature/precipitation/soil-water series work; precipitation, temperature, and (P04) soil-moisture layers 1–3 have analysis pipelines; ERA5 indicators are CLI-only.
+- ERA5-Land: temperature/precipitation/soil-water series work; precipitation, temperature, and (P04) soil-moisture layers 1–3 have analysis pipelines; (P05) all three plus a bundle are API-exposed as jobs (bundle + jobs polling verified live 2026-10-30; single-indicator POSTs offline-tested only).
 - SPI: value, probability, fit parameters and descriptive diagnostics only; no category labels.
-- API: three CHIRPS-based analysis routes only.
+- API: CHIRPS routes (sync) + ERA5 routes and bundle (async jobs); no RAG routes, no auth, no rate limiting.
 
 ## 7. Missing components (vs. blueprint and owner goals)
 
 - Dense retrieval (multilingual E5 + Qdrant); RAG API routes.
-- ERA5 indicator API; area/polygon analysis (all analyses are single-point); crop context/calendar; vegetation (Sentinel-2/NDVI); WaPOR.
+- Area/polygon analysis (all analyses are single-point); crop context/calendar; vegetation (Sentinel-2/NDVI); WaPOR.
 - Intervention catalog, constraints, ranking, evidence strength metadata (Milestone 5).
 - LLM provider adapter (Baseten), report schema, agent workflow (Milestone 6). (P03 verified the route + settings only; no adapter/agent code.)
-- Scenario persistence/history, OpenAPI contract for the frontend, CORS.
+- Scenario persistence/history, API auth and rate limiting. (P05 delivered the OpenAPI contract and CORS.)
 - **React + Vite frontend** (no `frontend/` directory expected).
 - Computer-vision baseline (CropHarvest) — deferred.
 - MLOps: Docker/Compose, GitHub Actions CI/CD, MLflow, Optuna, Airflow, PostgreSQL/PostGIS, Prometheus, Evidently, Grafana. Of the owner's eleven named tools only Pytest and FastAPI exist.

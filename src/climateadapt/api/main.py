@@ -1,54 +1,59 @@
-"""FastAPI application: health, prototype anomaly, CHIRPS anomaly, and CHIRPS SPI."""
+"""FastAPI application: health, prototype anomaly, CHIRPS + ERA5 analyses, and jobs.
+
+CHIRPS endpoints answer synchronously (historical behavior, warm cache is fast).
+ERA5-Land endpoints and the environmental bundle run as background jobs: POST returns
+202 + job id immediately, and clients poll GET /v1/jobs/{id}. No new endpoint blocks
+past its own request/response round trip.
+"""
 
 from __future__ import annotations
 
 import logging
-from typing import Annotated
+from contextlib import asynccontextmanager
+from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from climateadapt import __version__
 from climateadapt.analysis import analyze_rainfall
-from climateadapt.api.dependencies import get_chirps_client
+from climateadapt.api.bundle import run_environmental_bundle
+from climateadapt.api.dependencies import (
+    close_shared_clients,
+    get_chirps_client,
+    get_era5_client,
+    get_job_store,
+)
+from climateadapt.api.errors import DOMAIN_ERRORS, JOB_NOT_FOUND
+from climateadapt.api.jobs import JobStatus, JobStore, JobSubmitted
 from climateadapt.config import get_settings
 from climateadapt.data.chirps import ChirpsV3Client
-from climateadapt.data.errors import (
-    DataIntegrityError,
-    DataNotAvailableError,
-    DownloadError,
-    MissingDataError,
-    OutsideCoverageError,
-)
+from climateadapt.data.era5_land import Era5LandClient
 from climateadapt.data.periods import YearMonth
 from climateadapt.indicators.rainfall import InvalidPrecipitationError
-from climateadapt.indicators.spi import InsufficientReferenceError
 from climateadapt.pipelines.rainfall_anomaly import (
     ChirpsRainfallAnomalyResult,
-    InsufficientBaselineError,
     chirps_rainfall_anomaly,
 )
+from climateadapt.pipelines.soil_moisture_anomaly import era5_land_soil_moisture_anomaly
 from climateadapt.pipelines.spi import ChirpsSpiResult, chirps_spi
+from climateadapt.pipelines.spi_era5 import era5_land_spi
+from climateadapt.pipelines.temperature_anomaly import era5_land_temperature_anomaly
 from climateadapt.schemas import (
     HealthResponse,
     RainfallAnalysisRequest,
     RainfallAnalysisResponse,
 )
 from climateadapt.schemas_chirps import ChirpsRainfallAnomalyRequest
+from climateadapt.schemas_era5 import (
+    EnvironmentalBundleRequest,
+    Era5SoilMoistureAnomalyRequest,
+    Era5SpiRequest,
+    Era5TemperatureAnomalyRequest,
+)
 from climateadapt.schemas_spi import ChirpsSpiRequest
-
-# Domain error -> (HTTP status, machine-readable code). All error bodies share one shape:
-# {"detail": [{"loc": [...], "msg": "...", "type": "<code>"}]}
-_DOMAIN_ERRORS: list[tuple[type[Exception], int, str]] = [
-    (OutsideCoverageError, 422, "outside_coverage"),
-    (DataNotAvailableError, 404, "data_not_available"),
-    (MissingDataError, 422, "missing_data"),
-    (InsufficientBaselineError, 422, "insufficient_baseline"),
-    (InsufficientReferenceError, 422, "insufficient_reference"),
-    (DownloadError, 502, "download_error"),
-    (DataIntegrityError, 502, "data_integrity_error"),
-]
 
 
 def _error_response(status_code: int, code: str, message: str) -> JSONResponse:
@@ -77,7 +82,7 @@ async def validation_error_handler(request: Request, exc: RequestValidationError
 
 
 def _register_domain_errors(app: FastAPI) -> None:
-    for exc_type, status_code, code in _DOMAIN_ERRORS:
+    for exc_type, status_code, code in DOMAIN_ERRORS:
 
         async def handler(
             request: Request,
@@ -90,6 +95,17 @@ def _register_domain_errors(app: FastAPI) -> None:
         app.add_exception_handler(exc_type, handler)
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield
+    close_shared_clients()
+
+
+def _submit(label: str, total_steps: int, jobs: JobStore, fn: Any) -> JobSubmitted:
+    job_id = jobs.submit(label, total_steps, fn)
+    return JobSubmitted(job_id=job_id, status="queued", status_url=f"/v1/jobs/{job_id}")
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
     logging.basicConfig(level=settings.log_level)
@@ -99,10 +115,18 @@ def create_app() -> FastAPI:
         version=__version__,
         description=(
             "Evidence-grounded agricultural drought adaptation decision support. "
-            "Indicators are precipitation-only (percentage anomaly, SPI); they describe "
-            "rainfall relative to a reference period and do not measure drought impact or "
-            "classify severity."
+            "Indicators describe rainfall, temperature, and soil moisture relative to "
+            "reference periods; they do not measure drought impact or classify severity."
         ),
+        lifespan=lifespan,
+    )
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.api_cors_origins,
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["Content-Type"],
+        allow_credentials=False,
+        max_age=600,
     )
 
     app.add_exception_handler(RequestValidationError, validation_error_handler)
@@ -177,6 +201,168 @@ def create_app() -> FastAPI:
             reference_end_year=request.reference_end_year,
             min_reference_years=request.min_reference_years,
         )
+
+    @app.post(
+        "/v1/analysis/era5-spi",
+        response_model=JobSubmitted,
+        status_code=202,
+        tags=["analysis"],
+        summary="Standardized Precipitation Index (SPI) from ERA5-Land (background job)",
+        description=(
+            "Queues an ERA5-Land SPI computation and returns 202 + job id immediately; "
+            "poll GET /v1/jobs/{job_id} for the result. Gamma fit per calendar month "
+            "(WMO-No. 1090); no severity labels. Cold CDS requests take minutes."
+        ),
+    )
+    def era5_spi_endpoint(
+        request: Era5SpiRequest,
+        client: Annotated[Era5LandClient, Depends(get_era5_client)],
+        jobs: Annotated[JobStore, Depends(get_job_store)],
+    ) -> JobSubmitted:
+        params = {
+            "latitude": request.latitude,
+            "longitude": request.longitude,
+            "target_end_month": YearMonth.parse(request.target_end_month),
+            "timescale_months": request.timescale_months,
+            "reference_start_year": request.reference_start_year,
+            "reference_end_year": request.reference_end_year,
+            "min_reference_years": request.min_reference_years,
+            "land_fallback_max_km": request.land_fallback_max_km,
+        }
+        return _submit(
+            "era5_spi", 1, jobs,
+            lambda progress: era5_land_spi(client, **params).model_dump(mode="json"),
+        )
+
+    @app.post(
+        "/v1/analysis/era5-temperature-anomaly",
+        response_model=JobSubmitted,
+        status_code=202,
+        tags=["analysis"],
+        summary="Temperature window anomaly from ERA5-Land (background job)",
+        description=(
+            "Queues an ERA5-Land temperature-anomaly computation and returns 202 + job id "
+            "immediately; poll GET /v1/jobs/{job_id} for the result. Day-weighted window "
+            "means in degC with standardized anomaly and percentile rank. Cold CDS "
+            "requests take minutes."
+        ),
+    )
+    def era5_temperature_anomaly_endpoint(
+        request: Era5TemperatureAnomalyRequest,
+        client: Annotated[Era5LandClient, Depends(get_era5_client)],
+        jobs: Annotated[JobStore, Depends(get_job_store)],
+    ) -> JobSubmitted:
+        params = {
+            "latitude": request.latitude,
+            "longitude": request.longitude,
+            "target_end_month": YearMonth.parse(request.target_end_month),
+            "timescale_months": request.timescale_months,
+            "reference_start_year": request.reference_start_year,
+            "reference_end_year": request.reference_end_year,
+            "min_reference_years": request.min_reference_years,
+            "land_fallback_max_km": request.land_fallback_max_km,
+        }
+        return _submit(
+            "era5_temperature_anomaly", 1, jobs,
+            lambda progress: era5_land_temperature_anomaly(
+                client, **params
+            ).model_dump(mode="json"),
+        )
+
+    @app.post(
+        "/v1/analysis/era5-soil-moisture-anomaly",
+        response_model=JobSubmitted,
+        status_code=202,
+        tags=["analysis"],
+        summary="Soil-moisture window anomaly from ERA5-Land (background job)",
+        description=(
+            "Queues an ERA5-Land soil-moisture-anomaly computation (layers 1-3) and "
+            "returns 202 + job id immediately; poll GET /v1/jobs/{job_id} for the result. "
+            "Values in m3/m3 with standardized anomaly; anomalies only, no category "
+            "labels. Cold CDS requests take minutes."
+        ),
+    )
+    def era5_soil_moisture_anomaly_endpoint(
+        request: Era5SoilMoistureAnomalyRequest,
+        client: Annotated[Era5LandClient, Depends(get_era5_client)],
+        jobs: Annotated[JobStore, Depends(get_job_store)],
+    ) -> JobSubmitted:
+        params = {
+            "variable": request.variable,
+            "latitude": request.latitude,
+            "longitude": request.longitude,
+            "target_end_month": YearMonth.parse(request.target_end_month),
+            "timescale_months": request.timescale_months,
+            "reference_start_year": request.reference_start_year,
+            "reference_end_year": request.reference_end_year,
+            "min_reference_years": request.min_reference_years,
+            "land_fallback_max_km": request.land_fallback_max_km,
+        }
+        return _submit(
+            "era5_soil_moisture_anomaly", 1, jobs,
+            lambda progress: era5_land_soil_moisture_anomaly(
+                client, **params
+            ).model_dump(mode="json"),
+        )
+
+    @app.post(
+        "/v1/analysis/environmental-bundle",
+        response_model=JobSubmitted,
+        status_code=202,
+        tags=["analysis"],
+        summary="Per-indicator environmental bundle: CHIRPS SPI + ERA5 trio (job)",
+        description=(
+            "Queues one bundle run over CHIRPS SPI, ERA5-Land SPI, temperature anomaly "
+            "and soil-moisture anomaly (layer 1) and returns 202 + job id immediately; "
+            "poll GET /v1/jobs/{job_id} for the result. Each indicator reports its own "
+            "status (ok / undefined / failed / skipped) with result or error type, "
+            "provenance, limitations, and coordinates. Failures are never hidden, never "
+            "merged into a composite score, and never labelled by severity."
+        ),
+    )
+    def environmental_bundle_endpoint(
+        request: EnvironmentalBundleRequest,
+        chirps_client: Annotated[ChirpsV3Client, Depends(get_chirps_client)],
+        era5_client: Annotated[Era5LandClient, Depends(get_era5_client)],
+        jobs: Annotated[JobStore, Depends(get_job_store)],
+    ) -> JobSubmitted:
+        target_end = YearMonth.parse(request.target_end_month)
+        return _submit(
+            "environmental_bundle", len(request.indicators), jobs,
+            lambda progress: run_environmental_bundle(
+                chirps_client,
+                era5_client,
+                latitude=request.latitude,
+                longitude=request.longitude,
+                target_end_month=target_end,
+                timescale_months=request.timescale_months,
+                reference_start_year=request.reference_start_year,
+                reference_end_year=request.reference_end_year,
+                min_reference_years=request.min_reference_years,
+                land_fallback_max_km=request.land_fallback_max_km,
+                indicators=list(request.indicators),
+                progress=progress,
+            ),
+        )
+
+    @app.get(
+        "/v1/jobs/{job_id}",
+        response_model=JobStatus,
+        tags=["jobs"],
+        summary="Poll a background job for status, progress, result, or error",
+        description=(
+            "Returns the job snapshot: queued / running / succeeded / failed / timed_out, "
+            "step progress, and the result or typed error once terminal. Unknown or "
+            "TTL-expired ids return 404 (job_not_found)."
+        ),
+    )
+    def job_status_endpoint(
+        job_id: str, jobs: Annotated[JobStore, Depends(get_job_store)]
+    ) -> JobStatus | JSONResponse:
+        snapshot = jobs.get(job_id)
+        if snapshot is None:
+            return _error_response(404, JOB_NOT_FOUND, "Unknown or expired job id.")
+        return JobStatus.model_validate(snapshot)
 
     return app
 

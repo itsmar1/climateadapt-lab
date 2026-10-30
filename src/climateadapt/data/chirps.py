@@ -264,7 +264,7 @@ class ChirpsMonthlyStore:
 
         if not self._allow_downloads:
             raise DataNotAvailableError(
-                f"CHIRPS v3 Final {month} is not in the local cache ({path}) and downloads "
+                f"CHIRPS v3 Final {month} is not in the local cache and downloads "
                 "are disabled (CLIMATEADAPT_ALLOW_DOWNLOADS=false)."
             )
         return path, self._download(month, path)

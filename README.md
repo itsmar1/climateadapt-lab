@@ -59,8 +59,18 @@ Docs: http://127.0.0.1:8000/docs
 | `POST /v1/analysis/rainfall-anomaly` | Prototype anomaly from user-supplied totals |
 | `POST /v1/analysis/chirps-rainfall-anomaly` | Percentage anomaly computed from CHIRPS v3 Final |
 | `POST /v1/analysis/chirps-spi` | SPI from CHIRPS v3 Final (default reference 1991-2020) |
+| `POST /v1/analysis/era5-spi` | ERA5-Land SPI as a background job (202 + poll) |
+| `POST /v1/analysis/era5-temperature-anomaly` | ERA5-Land temperature anomaly as a job |
+| `POST /v1/analysis/era5-soil-moisture-anomaly` | ERA5-Land soil-moisture anomaly as a job (layers 1-3) |
+| `POST /v1/analysis/environmental-bundle` | CHIRPS SPI + ERA5 trio as one job; per-indicator statuses |
+| `GET /v1/jobs/{job_id}` | Poll a job: queued / running / succeeded / failed / timed_out |
 
-ERA5-Land indicators are CLI-only for now (CDS request latency is unpredictable).
+ERA5-Land endpoints never block: each POST returns 202 with a `job_id` immediately
+and the client polls `GET /v1/jobs/{job_id}` (per-job timeout 900 s, results kept
+1 hour; see `CLIMATEADAPT_API_*` in `.env.example`). The bundle reports every
+indicator separately (`ok` / `undefined` / `failed` / `skipped`) with its result
+or typed error, provenance, limitations, and grid cells — never a composite score
+or severity label. CHIRPS endpoints stay synchronous. Full contract: `docs/openapi.json`.
 
 ## Scripts
 
@@ -126,7 +136,11 @@ cdsapi exposes those options; otherwise a warning is logged).
 All errors use `{"detail": [{"loc": [], "msg": "...", "type": "<code>"}]}` with codes:
 `outside_coverage` (422), `data_not_available` (404), `missing_data` (422),
 `insufficient_baseline` (422), `insufficient_reference` (422), `download_error` (502),
-`data_integrity_error` (502). Invalid requests are 422. A zero baseline returns 200 with
+`data_integrity_error` (502). Invalid requests are 422. Unknown or expired job ids
+return 404 `job_not_found`. A full job store returns 503 `server_busy` (retry shortly).
+Job and bundle records reuse the domain codes above and
+add `timeout` (job exceeded its budget) and `internal` (unexpected failure, generic
+message, details logged server-side only). A zero baseline returns 200 with
 `status: "undefined"`.
 
 ## Known limitations

@@ -44,10 +44,11 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 - **Resolution (P04):** shared window-anomaly helper + soil-water pipeline, same safeguards.
 - **P04 evidence (2026-10-30; CONFIRMED):** `indicators/window_anomaly.py` + `indicators/soil_moisture.py` + `pipelines/soil_moisture_anomaly.py` (layers 1–3, m3/m3 + standardized anomaly, no labels) with 40 new offline tests green and one live layer-1 run (exit 0, values in [0, 1], reported without interpretation). Layer 4 still excluded by design.
 
-### KI-07 — ERA5-based indicators not exposed via API; latency (High for the demo)
+### KI-07 — ERA5-based indicators not exposed via API; latency (High for the demo) — ✅ RESOLVED 2026-10-30
 - **Evidence:** ERA5 SPI, temperature anomaly and soil water exist as scripts only. CDS requests took ≈20–60 s each; a dropped connection triggered an automatic 120 s retry (≈5 min total, log "attempt 1 of 500"). CHIRPS cold SPI ≈1 min.
 - **Impact:** A frontend cannot call these synchronously.
 - **Resolution (P05):** job/polling pattern or cache-warming endpoints, explicit timeouts, progress states, and CORS. No endpoint may block indefinitely.
+- **P05 evidence (2026-10-30; offline-tested):** ERA5 SPI / temperature / soil-moisture (layers 1–3) and the 4-indicator environmental bundle exposed as 202 + poll jobs (900 s timeout, progress, TTL); 26 new offline tests green; full suite green. Live uvicorn bundle check ran 2026-10-30 (downloads disabled, warm cache): POST → 202 in ~1.5 s, poll → succeeded 4/4 ok in ~21 s (CHIRPS SPI −0.517, ERA5 SPI −0.375, temp anomaly +2.218 °C, soil anomaly −0.0505 m3/m3; 30/30 years; ERA5 fallback used; zero external requests; no severity labels or leaks).
 
 ### KI-08 — CDS retry bounds unverified live (Medium) — signature half RESOLVED 2026-10-30, live behavior still open
 - **Evidence:** `data/cds_client.py` passes `retry_max`, `sleep_max`, `timeout` only if the installed `cdsapi.Client.__init__` declares them; no log shows a warning or confirms the options applied. An earlier web search did not confirm Python option names (it returned a Rust port).
@@ -154,9 +155,10 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 - **Evidence:** No `frontend/`; blueprint and early requirements named Streamlit/Plotly. Requirement is now React + Vite.
 - **Resolution (P11–P13):** React + Vite; remove stale Streamlit mentions in docs.
 
-### KI-28 — API has no CORS, no auth, no rate limiting, synchronous long calls (Medium/High for frontend)
+### KI-28 — API has no CORS, no auth, no rate limiting, synchronous long calls (Medium/High for frontend) — P05 parts DONE 2026-10-30, auth/rate limiting still open
 - **Evidence:** `api/main.py` (as delivered) has no `CORSMiddleware`; endpoints are synchronous; the shared client has no shutdown hook; offline-mode error text includes a local cache path.
 - **Resolution (P05/P11):** CORS for the dev origin, request timeouts/jobs, lifespan shutdown, remove local paths from client-facing messages.
+- **P05 evidence (2026-10-30; offline-tested):** CORS from settings (Vite origin default) with preflight tests; new endpoints are 202 + poll jobs (timeout/TTL/workers); lifespan closes the CHIRPS store and cancels queued jobs; local path removed from the offline error text. Remaining: no auth, no rate limiting (P11 scope). Submission backpressure added (follow-up 2026-10-30): a full store returns 503 `server_busy` instead of growing.
 
 ### KI-29 — No scenario persistence (Medium)
 - **Evidence:** No database or history store. Blueprint calls for PostgreSQL/PostGIS.
