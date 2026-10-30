@@ -96,3 +96,17 @@ def test_default_retry_bounds_are_far_below_cdsapi_defaults():
     settings = Settings()
     assert settings.cds_retry_max < 500
     assert settings.cds_sleep_max_seconds <= 120
+
+
+def test_installed_cdsapi_exposes_all_retry_options():
+    """P02: the real installed cdsapi must expose the bounds the factory passes.
+
+    Together with test_factory_passes_every_supported_option this proves the app's
+    retry bounds reach the real client. If a cdsapi upgrade renames an option, this
+    test fails loudly instead of letting requests silently retry for hours.
+    """
+    cdsapi = pytest.importorskip("cdsapi")
+    _, unsupported = supported_options(
+        cdsapi.Client, {"retry_max": 5, "sleep_max": 60, "timeout": 60.0}
+    )
+    assert unsupported == []

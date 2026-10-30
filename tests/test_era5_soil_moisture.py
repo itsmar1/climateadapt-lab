@@ -18,7 +18,12 @@ from era5_helpers import LAT, LON, Builder, FakeDownloader
 
 JAN, FEB, MAR = YearMonth(2024, 1), YearMonth(2024, 2), YearMonth(2024, 3)
 NAN = float("nan")
-UNIT_SPELLINGS = ["m**3 m**-3", "m3 m-3", "m^3 m^-3", "m3/m3"]
+# P02 (2026-10-30): the only file-unit spelling observed for swvl1/2/3, in one cached
+# NetCDF (converted 2026-10-27) and two live CDS responses (2026-10-30). See
+# docs/DATA_VERIFICATION.md. Unobserved spellings are rejected on purpose: a new
+# spelling must be observed and added deliberately, never accepted silently.
+OBSERVED_UNIT_SPELLING = "m**3 m**-3"
+UNOBSERVED_UNIT_SPELLINGS = ["m3 m-3", "m^3 m^-3", "m3/m3"]
 
 
 def soil_builder(value_fn, units="m**3 m**-3"):
@@ -73,11 +78,17 @@ def test_values_pass_through_without_conversion(make_client):
     assert request["month"] == ["01", "02", "03"]
 
 
-@pytest.mark.parametrize("units", UNIT_SPELLINGS)
-def test_accepted_unit_spellings(make_client, units):
-    client, _ = make_client(soil_builder(wet, units=units))
+def test_observed_unit_spelling_is_accepted(make_client):
+    client, _ = make_client(soil_builder(wet, units=OBSERVED_UNIT_SPELLING))
     series = client.monthly_point_series("volumetric_soil_water_layer_1", LAT, LON, JAN, JAN)
     assert series.values[0].value == pytest.approx(0.26, abs=1e-6)
+
+
+@pytest.mark.parametrize("units", UNOBSERVED_UNIT_SPELLINGS)
+def test_unobserved_unit_spellings_are_rejected(make_client, units):
+    client, _ = make_client(soil_builder(wet, units=units))
+    with pytest.raises(DataIntegrityError, match="units"):
+        client.monthly_point_series("volumetric_soil_water_layer_1", LAT, LON, JAN, JAN)
 
 
 @pytest.mark.parametrize("units", ["kg m-2", "%", "K"])
@@ -134,9 +145,9 @@ def _manual_series(units, entries):
         grid_point_longitude=0.0,
         values=[
             Era5MonthValue(
-                year=y, 
-                month=m, 
-                value=v, 
+                year=y,
+                month=m,
+                value=v,
                 status="ok" if v is not None else "missing_value", notes=[]
             )
             for y, m, v in entries

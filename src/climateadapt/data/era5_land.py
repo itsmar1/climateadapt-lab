@@ -142,7 +142,11 @@ def _convert_precipitation(raw: float, month: YearMonth) -> tuple[float, list[st
     return mean_daily_accumulation_m_to_monthly_mm(value, month.year, month.month), notes
 
 
-SOIL_WATER_UNITS = frozenset({"m**3 m**-3", "m3 m-3", "m^3 m^-3", "m3/m3"})
+# P02 (2026-10-30): the only file-unit spelling observed for volumetric soil water,
+# identical for layers 1-3 across one cached NetCDF and two live CDS responses (see
+# docs/DATA_VERIFICATION.md). Other spellings are rejected deliberately: if a future
+# file spells units differently, extend this set only after observing it.
+SOIL_WATER_UNITS = frozenset({"m**3 m**-3"})
 
 
 def _convert_soil_water(raw: float, month: YearMonth) -> tuple[float, list[str]]:

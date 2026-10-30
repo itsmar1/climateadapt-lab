@@ -32,10 +32,11 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 
 ## B. Environmental data and indicators
 
-### KI-05 — Exact swvl1 `units` string unknown (Medium)
+### KI-05 — Exact swvl1 `units` string unknown (Medium) — ✅ RESOLVED 2026-10-30
 - **Evidence:** `volumetric_soil_water_layer_1` ran successfully (values 0.0703/0.1104/0.1120 m³/m³) so the unit spelling is one of four accepted strings (`m**3 m**-3`, `m3 m-3`, `m^3 m^-3`, `m3/m3`); `scripts/inspect_nc.py` was never run on `data\cache\era5_land\raw\504d1adaca31d5f7.nc`. For `tp`, `inspect_nc` output showed units `m` (CONFIRMED). `t2m` accepted with units `K` (implied by passing run).
 - **Impact:** If the real string differs from the accepted set for other layers/versions, requests will fail with an integrity error; wrongly broad acceptance could hide mismatches.
 - **Resolution (P02):** run `uv run python scripts/inspect_nc.py "data\cache\era5_land\raw\504d1adaca31d5f7.nc"`, record the exact `units`, tighten/extend `SOIL_WATER_UNITS` and tests to what is observed, verify layers 2 and 3 with one small live request each.
+- **P02 evidence (2026-10-30; CONFIRMED, see `docs/DATA_VERIFICATION.md`):** `swvl1`/`swvl2`/`swvl3` all observed as `m**3 m**-3` (one cached file + two live single-month requests, 2 of 4 allowed); `tp` = `m`, `t2m` = `K` both directly observed. `SOIL_WATER_UNITS` tightened to exactly `{"m**3 m**-3"}` with a justification comment; tests accept the observed spelling and reject the three unobserved ones. A future spelling change now fails loudly with the actual string instead of being silently accepted or rejected.
 
 ### KI-06 — Soil-moisture anomaly pipeline missing (Medium)
 - **Evidence:** Variables registered and series run; no pipeline analogous to `pipelines/temperature_anomaly.py`. Absolute ERA5-Land soil water has documented bias in at least one region (so anomalies, not absolute values, should be reported). Layer 4 intentionally excluded (documented depth inconsistency).
@@ -47,20 +48,23 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 - **Impact:** A frontend cannot call these synchronously.
 - **Resolution (P05):** job/polling pattern or cache-warming endpoints, explicit timeouts, progress states, and CORS. No endpoint may block indefinitely.
 
-### KI-08 — CDS retry bounds unverified live (Medium)
+### KI-08 — CDS retry bounds unverified live (Medium) — signature half RESOLVED 2026-10-30, live behavior still open
 - **Evidence:** `data/cds_client.py` passes `retry_max`, `sleep_max`, `timeout` only if the installed `cdsapi.Client.__init__` declares them; no log shows a warning or confirms the options applied. An earlier web search did not confirm Python option names (it returned a Rust port).
 - **Impact:** A failing request could still retry for hours (500 × ≤120 s) on some versions.
 - **Resolution (P02):** print the installed `cdsapi.Client` signature, confirm which options exist, and add a wall-clock deadline wrapper if they do not.
+- **P02 evidence (2026-10-30; CONFIRMED, see `docs/DATA_VERIFICATION.md` §3):** installed cdsapi 0.7.7 declares all three as explicit `__init__` keywords (`timeout=60`, `retry_max=500`, `sleep_max=120`), so the app's bounds (5 / 60 s / 60 s) ARE passed — no deadline wrapper needed. New test `test_installed_cdsapi_exposes_all_retry_options` pins this against future cdsapi upgrades. Live retry behavior under a real failure remains UNVERIFIED (deliberately not attempted; the service carries throttling notices).
 
 ### KI-09 — CDS service notices and terms update (Medium)
 - **Evidence:** Log banners: "Data Stores Service protection measures" and Terms of Use update on 28 Oct 2026 (continued use = acceptance; objections before 27 Oct).
 - **Impact:** Possible throttling; owner action about terms.
 - **Resolution:** owner reads notices; keep requests grouped/cached; no code change unless throttling is observed.
+- **P02 observation (2026-10-30):** both live requests opened with the "Data Stores Service protection measures" banner (2026-10-06 notice); no throttling observed (~15 s and ~35 s queue+download).
 
 ### KI-10 — ERA5-Land masked grid point at the reference location (Medium)
 - **Evidence:** (30.4, −9.6) has no value in any month; fallback used (30.5, −9.6), 7.8 km away. The pattern is consistent with a land–sea mask but this was never confirmed against ERA5-Land documentation.
 - **Impact:** Values come from a neighbouring cell with possibly different elevation/coastal influence; reports must repeat the warning.
 - **Resolution:** keep fallback opt-in and loudly reported; confirm mask explanation from official documentation when convenient.
+- **P02 observation (2026-10-30):** both live swvl2/3 responses show the identical mask pattern ((30.4, -9.6) NaN, fallback to (30.5, -9.6)) — corroborated, still not confirmed against ERA5-Land documentation.
 
 ### KI-11 — CHIRPS remote cache not revalidated against ETag (Medium)
 - **Evidence:** Captured ETags/Last-Modified show per-file revisions (2014-03 revised 2025-04-22; others 2024-11/12). Cached point records are never re-checked.
