@@ -1,5 +1,9 @@
 """Temperature window anomaly: pure, deterministic, tested calculations.
 
+Thin wrapper over :mod:`climateadapt.indicators.window_anomaly` (P04): the statistics
+live in the shared core; this module keeps the temperature public API, field names,
+units, plausibility checks, and results identical.
+
 Definitions
 -----------
 * Window mean: the DAY-WEIGHTED mean of the monthly mean temperatures (degC) of ``timescale``
@@ -18,20 +22,17 @@ reference period (no detrending); monthly means cannot show heat waves, frost, o
 from __future__ import annotations
 
 import math
-import statistics
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from numbers import Real
 
 from climateadapt.data.periods import YearMonth
-from climateadapt.indicators.spi import (
-    DEFAULT_MIN_REFERENCE_YEARS,
-    IncompleteWindowError,
-    InsufficientReferenceError,
-    validate_parameters,
-    window_months,
+from climateadapt.indicators.spi import DEFAULT_MIN_REFERENCE_YEARS
+from climateadapt.indicators.window_anomaly import (
+    compute_window_anomaly,
+    mid_rank_percentile,
+    window_day_weighted_mean,
 )
-from climateadapt.indicators.units import days_in_month
 
 MIN_PLAUSIBLE_C = -100.0
 MAX_PLAUSIBLE_C = 60.0
@@ -71,23 +72,12 @@ def window_mean_c(
     monthly: Mapping[YearMonth, float | None], end: YearMonth, timescale: int
 ) -> float | None:
     """Day-weighted mean of the window ending at ``end``; None if any month is missing."""
-    try:
-        months = window_months(end, timescale)
-    except ValueError:
-        return None
-    values = [monthly.get(m) for m in months]
-    if any(v is None for v in values):
-        return None
-    weights = [days_in_month(m.year, m.month) for m in months]
-    weighted = math.fsum(v * w for v, w in zip(values, weights, strict=True) if v is not None)
-    return weighted / sum(weights)
+    return window_day_weighted_mean(monthly, end, timescale)
 
 
 def percentile_rank(value: float, reference: Sequence[float]) -> float:
     """Empirical mid-rank percentile (0-1) of ``value`` within ``reference``."""
-    below = sum(1 for r in reference if r < value)
-    equal = sum(1 for r in reference if r == value)
-    return (below + 0.5 * equal) / len(reference)
+    return mid_rank_percentile(value, reference)
 
 
 def compute_temperature_anomaly(
@@ -106,66 +96,28 @@ def compute_temperature_anomaly(
         IncompleteWindowError: the target window has a missing month.
         InsufficientReferenceError: too few usable reference years.
     """
-    validate_parameters(timescale, reference_start_year, reference_end_year, min_reference_years)
-    for month, value in monthly.items():
-        if value is not None:
-            _check_temperature(f"temperature for {month}", value)
-
-    target = window_mean_c(monthly, target_end, timescale)
-    if target is None:
-        missing = [str(m) for m in window_months(target_end, timescale) if monthly.get(m) is None]
-        raise IncompleteWindowError(
-            "The target window has no value for: " + ", ".join(missing) + ". The anomaly "
-            "cannot be computed from an incomplete window."
-        )
-
-    samples: list[float] = []
-    used: list[int] = []
-    unavailable: list[int] = []
-    for year in range(reference_start_year, reference_end_year + 1):
-        mean = window_mean_c(monthly, YearMonth(year, target_end.month), timescale)
-        if mean is None:
-            unavailable.append(year)
-        else:
-            samples.append(mean)
-            used.append(year)
-
-    n_years = reference_end_year - reference_start_year + 1
-    if len(samples) < min_reference_years:
-        listed = ", ".join(str(y) for y in unavailable[:10]) + (
-            " ..." if len(unavailable) > 10 else ""
-        )
-        raise InsufficientReferenceError(
-            f"Only {len(samples)} of {n_years} reference years have a complete {timescale}-month "
-            f"window ending in calendar month {target_end.month} (minimum required: "
-            f"{min_reference_years}). Unavailable years: {listed or 'none'}."
-        )
-
-    reference_mean = statistics.fmean(samples)
-    sd = statistics.stdev(samples)
-    anomaly = target - reference_mean
-    if sd > _MIN_SD_C:
-        standardized: float | None = anomaly / sd
-        reason = None
-    else:
-        standardized = None
-        reason = (
-            "The reference window means are (almost) identical, so the standardized anomaly "
-            "is undefined."
-        )
-
+    core = compute_window_anomaly(
+        monthly,
+        target_end,
+        timescale,
+        reference_start_year,
+        reference_end_year,
+        min_reference_years=min_reference_years,
+        check_value=lambda month, value: _check_temperature(f"temperature for {month}", value),
+        sd_floor=_MIN_SD_C,
+    )
     return TemperatureAnomaly(
-        window_mean_c=target,
-        reference_mean_c=reference_mean,
-        anomaly_c=anomaly,
-        reference_sd_c=sd,
-        standardized_anomaly=standardized,
-        percentile_rank=percentile_rank(target, samples),
-        reason=reason,
-        calendar_month=target_end.month,
-        reference_start_year=reference_start_year,
-        reference_end_year=reference_end_year,
-        reference_years_used=used,
-        reference_years_unavailable=unavailable,
-        target_in_reference_period=reference_start_year <= target_end.year <= reference_end_year,
+        window_mean_c=core.window_mean,
+        reference_mean_c=core.reference_mean,
+        anomaly_c=core.anomaly,
+        reference_sd_c=core.reference_sd,
+        standardized_anomaly=core.standardized_anomaly,
+        percentile_rank=core.percentile_rank,
+        reason=core.reason,
+        calendar_month=core.calendar_month,
+        reference_start_year=core.reference_start_year,
+        reference_end_year=core.reference_end_year,
+        reference_years_used=core.reference_years_used,
+        reference_years_unavailable=core.reference_years_unavailable,
+        target_in_reference_period=core.target_in_reference_period,
     )

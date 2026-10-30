@@ -38,10 +38,11 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 - **Resolution (P02):** run `uv run python scripts/inspect_nc.py "data\cache\era5_land\raw\504d1adaca31d5f7.nc"`, record the exact `units`, tighten/extend `SOIL_WATER_UNITS` and tests to what is observed, verify layers 2 and 3 with one small live request each.
 - **P02 evidence (2026-10-30; CONFIRMED, see `docs/DATA_VERIFICATION.md`):** `swvl1`/`swvl2`/`swvl3` all observed as `m**3 m**-3` (one cached file + two live single-month requests, 2 of 4 allowed); `tp` = `m`, `t2m` = `K` both directly observed. `SOIL_WATER_UNITS` tightened to exactly `{"m**3 m**-3"}` with a justification comment; tests accept the observed spelling and reject the three unobserved ones. A future spelling change now fails loudly with the actual string instead of being silently accepted or rejected.
 
-### KI-06 — Soil-moisture anomaly pipeline missing (Medium)
+### KI-06 — Soil-moisture anomaly pipeline missing (Medium) — ✅ RESOLVED 2026-10-30
 - **Evidence:** Variables registered and series run; no pipeline analogous to `pipelines/temperature_anomaly.py`. Absolute ERA5-Land soil water has documented bias in at least one region (so anomalies, not absolute values, should be reported). Layer 4 intentionally excluded (documented depth inconsistency).
 - **Dependencies:** KI-05.
 - **Resolution (P04):** shared window-anomaly helper + soil-water pipeline, same safeguards.
+- **P04 evidence (2026-10-30; CONFIRMED):** `indicators/window_anomaly.py` + `indicators/soil_moisture.py` + `pipelines/soil_moisture_anomaly.py` (layers 1–3, m3/m3 + standardized anomaly, no labels) with 40 new offline tests green and one live layer-1 run (exit 0, values in [0, 1], reported without interpretation). Layer 4 still excluded by design.
 
 ### KI-07 — ERA5-based indicators not exposed via API; latency (High for the demo)
 - **Evidence:** ERA5 SPI, temperature anomaly and soil water exist as scripts only. CDS requests took ≈20–60 s each; a dropped connection triggered an automatic 120 s retry (≈5 min total, log "attempt 1 of 500"). CHIRPS cold SPI ≈1 min.
@@ -90,8 +91,9 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 - **Evidence:** Percentage anomaly was +0.55 % while SPI was −0.52 against a longer reference; response labels state it is not a drought index.
 - **Resolution:** frontend must show SPI first, show the percentage anomaly with its caveat, and always show the reference period.
 
-### KI-16 — Duplicated window logic in `pipelines/spi_era5.py` and `temperature_anomaly.py` (Low)
+### KI-16 — Duplicated window logic in `pipelines/spi_era5.py` and `temperature_anomaly.py` (Low) — ✅ RESOLVED 2026-10-30
 - **Resolution (P04):** extract a shared helper when adding soil moisture; keep behavior and tests unchanged.
+- **P04 evidence (2026-10-30; CONFIRMED):** `pipelines/era5_windows.py` holds the shared planning/fetch/grid-check logic; all three pipelines use it. Pre-existing temperature/SPI tests pass unmodified, plus a hand-computed regression guard pins identical temperature results.
 
 ---
 

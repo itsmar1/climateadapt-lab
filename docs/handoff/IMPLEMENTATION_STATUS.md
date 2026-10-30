@@ -104,7 +104,9 @@ ruff 0.17.2, uv 0.13.5, Docker engine 29.8.2 present (no Docker files exist yet)
 | `units.py` | K→°C, mean-daily-accumulation→mm/month, days in month | T |
 | `spi.py` | Thom gamma fit per calendar month, zero point mass, windows, `compute_spi`, `validate_parameters`; exceptions `InsufficientReferenceError`, `IncompleteWindowError`, `GammaFitError` | T, R |
 | `spi_diagnostics.py` | KS D statistic and empirical-rank SPI beside gamma SPI | T, R |
-| `temperature.py` | Day-weighted window mean, anomaly (°C difference), standardized anomaly, mid-rank percentile | T, R |
+| `temperature.py` | Thin wrapper over `window_anomaly.py` (P04); same API, fields, results | T, R |
+| `window_anomaly.py` | Shared core: day-weighted window mean, exclusion-not-imputation, anomaly, standardized anomaly, mid-rank percentile; caller-supplied validity checks | T |
+| `soil_moisture.py` | Soil-water wrapper ([0, 1] m3/m3 check); anomaly in m3/m3, no category labels | T, R |
 
 ### 2.4 Pipelines (`src/climateadapt/pipelines/`)
 | Path | Purpose | Evidence |
@@ -113,8 +115,10 @@ ruff 0.17.2, uv 0.13.5, Docker engine 29.8.2 present (no Docker files exist yet)
 | `spi.py` | CHIRPS SPI (1–48 month windows) | T, R |
 | `spi_era5.py` | ERA5-Land SPI, grid-point consistency check | T, R |
 | `temperature_anomaly.py` | ERA5-Land temperature anomaly | T, R |
+| `era5_windows.py` | Shared window assembly (P04, KI-16): reference planning, fail-fast validation, target-first + grouped fetch, grid-point check | T |
+| `soil_moisture_anomaly.py` | ERA5-Land soil-moisture anomaly, layers 1-3, same safeguards as temperature | T, R |
 
-Note: `spi_era5.py` and `temperature_anomaly.py` duplicate window-assembly logic by design (planned refactor when soil moisture is added).
+Note: `spi_era5.py` and `temperature_anomaly.py` used to duplicate window-assembly logic; P04 extracted it into `era5_windows.py` (KI-16 resolved) with behavior and tests unchanged.
 
 ### 2.5 API (`src/climateadapt/api/`, `schemas*.py`, `analysis.py`)
 | Route | Status |
@@ -139,19 +143,19 @@ Files: `api/main.py` (factory, validation-error handler that never echoes input,
 | `evaluation.py` | Document- and page-level metrics, per-language aggregates | T, R |
 
 ### 2.7 Developer scripts (`scripts/`)
-`chirps_anomaly.py`, `chirps_cli.py` (probe, series), `chirps_spi.py`, `compare_chirps_era5.py`, `era5land_cli.py`, `inspect_nc.py`, `spi_compare.py`, `spi_diagnostics.py`, `temperature_anomaly.py`, `corpus_fetch.py`, `corpus_ingest.py`, `rag_search.py`, `rag_eval.py` — all R (each appeared in pasted logs). `scripts/chirps_layout_probe.py` was ordered deleted — **confirmed deleted** (P00 audit 2026-10-30). P03 added `scripts/llm_smoke.py` (gated Baseten probe, max 5 calls; ran once 2026-10-30, exit 0).
+`chirps_anomaly.py`, `chirps_cli.py` (probe, series), `chirps_spi.py`, `compare_chirps_era5.py`, `era5land_cli.py`, `inspect_nc.py`, `spi_compare.py`, `spi_diagnostics.py`, `temperature_anomaly.py`, `corpus_fetch.py`, `corpus_ingest.py`, `rag_search.py`, `rag_eval.py` — all R (each appeared in pasted logs). `scripts/chirps_layout_probe.py` was ordered deleted — **confirmed deleted** (P00 audit 2026-10-30). P03 added `scripts/llm_smoke.py` (gated Baseten probe, max 5 calls; ran once 2026-10-30, exit 0). P04 added `scripts/soil_moisture_anomaly.py` (layer 1-3 anomaly CLI; one live layer-1 run 2026-10-30, exit 0).
 
 ### 2.8 Versioned corpus assets
 `corpus/manifest.json` (8 documents, metadata only) and `corpus/eval/queries.json` (15 queries: 12 English, 2 French, 1 Arabic; **gold labels written by Claude from abstracts and front matter, not from page text, and never reviewed**).
 
 ### 2.9 Test support
-`tests/conftest.py` (synthetic GeoTIFF factory, MockTransport factory), `tests/era5_helpers.py` (synthetic NetCDF builder, FakeDownloader), `tests/rag_helpers.py` (minimal PDF writer). 28 test modules as listed in §1.
+`tests/conftest.py` (synthetic GeoTIFF factory, MockTransport factory), `tests/era5_helpers.py` (synthetic NetCDF builder, FakeDownloader), `tests/rag_helpers.py` (minimal PDF writer). 28 test modules as listed in §1, plus `test_baseten_config.py` (P03) and `test_soil_moisture.py`, `test_soil_moisture_pipeline.py`, `test_window_anomaly_regression.py` (P04).
 
 ## 3. Real-data verification log (CONFIRMED from owner's logs)
 
 **CHIRPS v3.** HTTPS monthly URL pattern works (`.../monthly/global/tifs/chirps-v3.0.YYYY.MM.tif`); files ≈22 MB, 7200×2400 float32 EPSG:4326, **LZW strips, not tiled, no overviews, no nodata tag** (so the −9999 sentinel logic matters). Remote single-pixel read matched the downloaded value exactly (27.39597511291504). Download mode: 33 files ≈17 min cold; remote mode: same anomaly digits (0.5543783725454325), ≈30 s cold. File ETags/Last-Modified captured; 2014-03 was revised 2025-04-22 while the rest were 2024-11/12.
 
-**ERA5-Land via CDS.** Authentication, licence acceptance and request fields work; NetCDF (not zip) returned, ~25 KB; coordinate `valid_time`; variable `tp` units `m`; grid at multiples of 0.1°; nearest grid point (30.4, −9.6) masked in all months; fallback to (30.5, −9.6) works. Requests took ≈20–60 s; one connection drop cost ≈5 min of automatic retry. `t2m` run succeeded (units must have been `K`). `swvl1` run succeeded with unit spelling inside the accepted set. **P00 audit 2026-10-30: exact string observed as `m**3 m**-3`** (executed `scripts/inspect_nc.py` on `504d1adaca31d5f7.nc`; CONFIRMED). **P02 2026-10-30: layers 2–3 verified live** (one single-month request each, 2024-01 at the reference point; `swvl2`/`swvl3` both `m**3 m**-3`, values 0.1384/0.1545 m3/m3, same masked-point fallback). `SOIL_WATER_UNITS` tightened to the observed spelling; see `docs/DATA_VERIFICATION.md`.
+**ERA5-Land via CDS.** Authentication, licence acceptance and request fields work; NetCDF (not zip) returned, ~25 KB; coordinate `valid_time`; variable `tp` units `m`; grid at multiples of 0.1°; nearest grid point (30.4, −9.6) masked in all months; fallback to (30.5, −9.6) works. Requests took ≈20–60 s; one connection drop cost ≈5 min of automatic retry. `t2m` run succeeded (units must have been `K`). `swvl1` run succeeded with unit spelling inside the accepted set. **P00 audit 2026-10-30: exact string observed as `m**3 m**-3`** (executed `scripts/inspect_nc.py` on `504d1adaca31d5f7.nc`; CONFIRMED). **P02 2026-10-30: layers 2–3 verified live** (one single-month request each, 2024-01 at the reference point; `swvl2`/`swvl3` both `m**3 m**-3`, values 0.1384/0.1545 m3/m3, same masked-point fallback). `SOIL_WATER_UNITS` tightened to the observed spelling; see `docs/DATA_VERIFICATION.md`. **P04 2026-10-30: soil-moisture anomaly verified live** (layer 1, Jan–Mar 2024, timescale 3, reference 1991–2020, fallback to (30.5, −9.6)): window mean 0.0973, reference mean 0.1478 (sd 0.0605), anomaly −0.0505 m3/m3, standardized −0.834, percentile 0.2; 30/30 reference years used; 1 new CDS request (grouped reference; target served from cache); 2 connection drops recovered by bounded retries. Means lie in [0, 1]; values reported without wet/dry interpretation.
 
 **RAG.** Fetch: 4 of 5 automatic downloads OK (IDDP66 22.9 MB, WR45 3.3 MB, ESSD 9.4 MB, Sci Data 9.1 MB); WMO guide HTTP 503. Ingest results: see §5. Search and eval ran (BM25 only).
 
@@ -181,14 +185,14 @@ Retrieval evaluation so far: 8 of 15 queries evaluable, 7 skipped (relevant docu
 ## 6. Partial implementations
 
 - RAG: BM25 only. `HybridRetriever` exists but has no second real retriever. Citations show PDF page indices, not printed page numbers.
-- ERA5-Land: temperature/precipitation/soil-water series work, but only precipitation and temperature have analysis pipelines; soil water has none; ERA5 indicators are CLI-only.
+- ERA5-Land: temperature/precipitation/soil-water series work; precipitation, temperature, and (P04) soil-moisture layers 1–3 have analysis pipelines; ERA5 indicators are CLI-only.
 - SPI: value, probability, fit parameters and descriptive diagnostics only; no category labels.
 - API: three CHIRPS-based analysis routes only.
 
 ## 7. Missing components (vs. blueprint and owner goals)
 
 - Dense retrieval (multilingual E5 + Qdrant); RAG API routes.
-- Soil-moisture anomaly pipeline; ERA5 indicator API; area/polygon analysis (all analyses are single-point); crop context/calendar; vegetation (Sentinel-2/NDVI); WaPOR.
+- ERA5 indicator API; area/polygon analysis (all analyses are single-point); crop context/calendar; vegetation (Sentinel-2/NDVI); WaPOR.
 - Intervention catalog, constraints, ranking, evidence strength metadata (Milestone 5).
 - LLM provider adapter (Baseten), report schema, agent workflow (Milestone 6). (P03 verified the route + settings only; no adapter/agent code.)
 - Scenario persistence/history, OpenAPI contract for the frontend, CORS.

@@ -3,20 +3,18 @@
 Mirrors ``pipelines/spi.py`` (CHIRPS). Differences: data come from ERA5-Land monthly means
 (0.1 degree reanalysis, 1950 onwards) through the Copernicus CDS, and a masked nearest grid
 point can be handled by the opt-in land fallback. The SAME grid point must serve every window;
-otherwise the run is refused.
+otherwise the run is refused. Window assembly is shared via ``pipelines/era5_windows.py``
+(P04, KI-16).
 """
 
 from __future__ import annotations
 
-import math
 from datetime import datetime
-from itertools import chain
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict
 
 from climateadapt.data.coverage import (
-    ERA5_LAND_FIRST_MONTH,
     ERA5_LAND_NOMINAL_BBOX,
     check_point_in_nominal_coverage,
 )
@@ -31,7 +29,7 @@ from climateadapt.data.era5_land import (
     Era5LandClient,
     LandFallback,
 )
-from climateadapt.data.errors import DataIntegrityError, MissingDataError
+from climateadapt.data.errors import MissingDataError
 from climateadapt.data.periods import YearMonth
 from climateadapt.indicators.spi import (
     DEFAULT_MIN_REFERENCE_YEARS,
@@ -39,7 +37,10 @@ from climateadapt.indicators.spi import (
     IncompleteWindowError,
     compute_spi,
     validate_parameters,
-    window_months,
+)
+from climateadapt.pipelines.era5_windows import (
+    fetch_era5_window_values,
+    plan_era5_reference_windows,
 )
 from climateadapt.pipelines.spi import (
     DEFAULT_REFERENCE_END_YEAR,
@@ -125,73 +126,23 @@ def era5_land_spi(
     k = timescale_months
     spec = VARIABLES[VARIABLE]
 
-    target_months = window_months(target_end_month, k)
-    windows: dict[int, list[YearMonth]] = {}
-    pipeline_reasons: dict[int, str] = {}
-    for year in range(reference_start_year, reference_end_year + 1):
-        months = window_months(YearMonth(year, target_end_month.month), k)
-        if months[0] < ERA5_LAND_FIRST_MONTH:
-            pipeline_reasons[year] = (
-                f"the window starts at {months[0]}, before the ERA5-Land monthly record begins "
-                f"({ERA5_LAND_FIRST_MONTH})"
-            )
-            continue
-        windows[year] = months
-
-    # Fail fast: validate every month BEFORE any request to the CDS.
-    for month in chain(target_months, *windows.values()):
-        client.store.assert_month_available(month)
-
-    target_series = client.monthly_point_series(
-        VARIABLE,
+    target_months, windows, pipeline_reasons = plan_era5_reference_windows(
+        target_end_month, k, reference_start_year, reference_end_year
+    )
+    monthly, all_series = fetch_era5_window_values(
+        client,
+        spec,
         lat,
         lon,
-        target_months[0],
-        target_months[-1],
+        target_months,
+        windows,
         land_fallback_max_km=land_fallback_max_km,
+        incomplete_window_message=(
+            "SPI cannot be computed from an incomplete window. If the nearest ERA5-Land "
+            "grid point is masked (for example sea), retry with land_fallback_max_km."
+        ),
     )
-    missing = [f"{v.year:04d}-{v.month:02d}" for v in target_series.values if v.value is None]
-    if missing:
-        raise MissingDataError(
-            "The target window has no value for: " + ", ".join(missing) + ". SPI cannot be "
-            "computed from an incomplete window. If the nearest ERA5-Land grid point is masked "
-            "(for example sea), retry with land_fallback_max_km."
-        )
-
-    # One grouped CDS request per identical month-set; later per-window reads hit the cache.
-    needed = sorted({month for months in windows.values() for month in months})
-    if needed:
-        client.store.get_records(spec, lat, lon, needed)
-
-    monthly: dict[YearMonth, float | None] = {}
-    all_series = [target_series]
-    for v in target_series.values:
-        monthly[YearMonth(v.year, v.month)] = v.value
-    for months in windows.values():
-        series = client.monthly_point_series(
-            VARIABLE,
-            lat,
-            lon,
-            months[0],
-            months[-1],
-            land_fallback_max_km=land_fallback_max_km,
-        )
-        all_series.append(series)
-        for v in series.values:
-            monthly[YearMonth(v.year, v.month)] = v.value
-
     reference = all_series[0]
-    for series in all_series[1:]:
-        if not (
-            math.isclose(series.grid_point_latitude, reference.grid_point_latitude, abs_tol=1e-6)
-            and math.isclose(
-                series.grid_point_longitude, reference.grid_point_longitude, abs_tol=1e-6
-            )
-        ):
-            raise DataIntegrityError(
-                "Grid point differs between windows (a different neighbouring grid point would "
-                "have been chosen for some reference years); refusing to combine them."
-            )
 
     try:
         computation = compute_spi(
@@ -215,7 +166,7 @@ def era5_land_spi(
         for year in computation.reference_years_unavailable
     ]
     n_used = len(computation.reference_years_used)
-    fallback = target_series.land_fallback
+    fallback = all_series[0].land_fallback
 
     limitations = list(SPI_LIMITATIONS)
     if fallback is not None and fallback.used and fallback.warning:
