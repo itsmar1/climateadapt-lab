@@ -1,0 +1,201 @@
+# LLM Provider Notes — Baseten Model APIs + Muse Spark Open (P03)
+
+Access date for all documentation below: 2026-10-30. Method: read current official
+Baseten documentation pages (exact URLs cited per fact). Nothing here is guessed; items
+not found in the docs are marked UNVERIFIED. No live Baseten calls were made while
+writing the docs section; see §3 for the smoke-test outcome.
+
+## 1. Verified facts (with evidence)
+
+### Base URL — VERIFIED
+
+- Model APIs (hosted models, no deployment needed) use the shared OpenAI-compatible
+  base URL **`https://inference.baseten.co/v1`**.
+- Sources: [Inference overview](https://docs.baseten.co/inference/overview) ("Model APIs
+  use the shared base URL `https://inference.baseten.co/v1`"), [Chat Completions
+  reference](https://docs.baseten.co/reference/inference-api/chat-completions.md) (Python,
+  JS, and cURL examples all use it), [Muse Spark Open library
+  page](https://www.baseten.co/library/muse-spark-open/) (sample code uses it).
+- This confirms the base URL already noted in `.env.example` (commit `cf037d3`).
+
+### Authentication — VERIFIED
+
+- Header: **`Authorization: Bearer $BASETEN_API_KEY`** with a Baseten API key created in
+  the Baseten account; every official example reads the key from the **`BASETEN_API_KEY`**
+  environment variable.
+- Sources: [Chat Completions
+  reference](https://docs.baseten.co/reference/inference-api/chat-completions.md) (cURL:
+  `-H "Authorization: Bearer $BASETEN_API_KEY"`; OpenAPI `security: BearerAuth`),
+  [API keys](https://docs.baseten.co/organization/api-keys.md) (key management).
+- App mapping: the app accepts `CLIMATEADAPT_BASETEN_API_KEY` (repo convention) and
+  `BASETEN_API_KEY` (Baseten docs convention, already in `.env.example`); see `config.py`.
+
+### Request/response shape — VERIFIED
+
+- Route: **`POST {base_url}/chat/completions`** with the OpenAI Chat Completions format
+  (`model`, `messages`, plus standard parameters). A success returns OpenAI-shaped
+  `chat.completion` with `choices[].message`, `finish_reason`, and `usage`
+  (`prompt_tokens`, `completion_tokens`, `total_tokens`,
+  `prompt_tokens_details.cached_tokens`).
+- Sources: [Chat Completions
+  reference](https://docs.baseten.co/reference/inference-api/chat-completions.md)
+  ("fully compatible with the OpenAI Chat Completions API"), [Pricing and
+  limits](https://docs.baseten.co/inference/model-apis/pricing-and-limits) (annotated
+  response example), OpenAPI spec at
+  `https://docs.baseten.co/reference/inference-api/llm-openapi-spec.json`.
+- Alternative protocols exist (OpenAI Responses, Anthropic Messages beta) but are OUT OF
+  SCOPE for this spike; the app targets Chat Completions only.
+
+### Model identifier string — PARTIALLY VERIFIED
+
+- The official [Muse Spark Open library
+  page](https://www.baseten.co/library/muse-spark-open/) and the "Try model API" link
+  (`app.baseten.co/model-apis/meta-models/muse-spark-open`) use slug
+  **`meta-models/muse-spark-open`**.
+- The owner-stated slug **`meta-models/muse-spark-open-1026`** (app default) was NOT found
+  in official Baseten documentation; it appears only in a third-party hackathon repo
+  using Baseten. **It was verified live on 2026-10-30: all smoke calls with this slug
+  returned HTTP 200 (see §3).** If it ever 404s, fall back to the documented
+  `meta-models/muse-spark-open`. The model id stays a setting, not a constant. Do NOT
+  assume any other model ID or provider exists (AGENTS.md §8).
+
+### Tool / function calling — VERIFIED (docs)
+
+- Supported: "The language models in this table support [tool
+  calling](https://docs.baseten.co/inference/function-calling.md)" ([Model APIs
+  overview](https://docs.baseten.co/inference/model-apis/overview.md#feature-support)),
+  and the [library page](https://www.baseten.co/library/muse-spark-open/) describes
+  "reliable tool use".
+- Wire format is OpenAI-compatible: `tools: [{type: "function", function: {name,
+  description, parameters (JSON Schema), strict}}]`, `tool_choice` (`"required"` forces
+  a call), results returned as `role: "tool"` messages with `tool_call_id`, terminal
+  `finish_reason` of `"stop"` or `"tool_calls"`, and a `refusal` field to check.
+- Source: [Function calling](https://docs.baseten.co/inference/function-calling.md).
+- Live behavior verified 2026-10-30 (see §3): one tool-call round trip succeeded — the model returned the correct function and arguments, and the follow-up with the tool result was answered correctly.
+
+### Structured output / JSON mode — VERIFIED UNSUPPORTED for this model (docs)
+
+- "Model APIs support structured outputs **except for Muse Spark Open, which accepts
+  `json_schema` but doesn't enforce the schema**" ([Structured
+  outputs](https://docs.baseten.co/inference/structured-outputs.md)). Likewise, "All
+  except Muse Spark Open support structured outputs and JSON mode" ([Model APIs
+  overview](https://docs.baseten.co/inference/model-apis/overview.md#feature-support)).
+- Consequence for P09/P10: **do not rely on server-side schema enforcement.** The P09
+  validator must parse and validate the report client-side (Pydantic) and treat any
+  non-conforming output as a validation failure with deterministic fallback. Prompt the
+  model to emit JSON, then verify — never trust. The model *happened* to emit valid
+  JSON on the single live attempt (see §3) — one anecdote, not a guarantee; schema
+  compliance is still unenforced server-side and must be validated client-side every time.
+
+### Streaming — VERIFIED (docs, page level)
+
+- "Streaming returns output incrementally. OpenAI- and Anthropic-compatible APIs use
+  server-sent events" ([Inference
+  overview](https://docs.baseten.co/inference/overview)); details on the [Streaming
+  page](https://docs.baseten.co/inference/streaming.md) (not read in depth — out of scope
+  for the smoke test). Live streaming behavior UNVERIFIED.
+
+### Pricing / credits — VERIFIED (docs)
+
+- [Muse Spark Open library page](https://www.baseten.co/library/muse-spark-open/): **$1.25
+  / 1M input tokens, $0.15 / 1M cached input tokens, $4.25 / 1M output tokens.** Model APIs
+  bill per token; rates vary by model ([Pricing and
+  limits](https://docs.baseten.co/inference/model-apis/pricing-and-limits)). Workspace
+  budgets, per-key/user/model cost attribution, and usage inspection are supported
+  (same page).
+- The owner's actual credit balance and budget are UNVERIFIED — must be obtained from the
+  owner before any live calls beyond the tiny smoke test.
+
+### Rate limits — VERIFIED (docs, mechanics only)
+
+- Per-model requests-per-minute plus token metering (some models split input/output);
+  `429 Too Many Requests` on exhaustion; limits replenish continuously; retry with
+  exponential backoff; `529` means Baseten shed load ([Pricing and
+  limits](https://docs.baseten.co/inference/model-apis/pricing-and-limits)).
+- Numeric RPM/TPM limits for Muse Spark Open are UNVERIFIED (per-model table values were
+  not retrievable as text). Session-affinity guidance (≤ ~60 RPM per session) is
+  documented on the same page.
+
+### Error codes — VERIFIED (docs)
+
+- [Inference errors](https://docs.baseten.co/inference/errors): `400/401/403/404` =
+  malformed request / bad key / wrong model slug / wrong endpoint; `402` = billing;
+  `413` = body too large; `429` = rate limit or no capacity; `499` = client disconnect;
+  `500/502/503/504` = internal/gateway/transient; `529` = shed load. Error-body shape
+  varies (`{"error": "<message>"}` or structured object) — inspect message/code, never
+  infer from shape alone. On persistent failures, save model slug, timestamp, status,
+  error body, and the `x-baseten-request-id` header.
+
+### Muse Spark Open quirks — VERIFIED (docs)
+
+- Accepts `logprobs`/`top_logprobs` but ignores them (returns none); `n > 1` returns
+  HTTP 400; neither `seed` nor `temperature: 0` guarantees reproducibility; audio input
+  supported ([Model APIs
+  overview](https://docs.baseten.co/inference/model-apis/overview.md#defaults-and-limitations)).
+  The app must therefore never request `n > 1` or depend on seed reproducibility.
+
+## 2. UNVERIFIED items (not found in docs or needs a live call)
+
+- Numeric RPM/TPM rate limits and max context/output tokens for this model (per-model
+  table not retrievable as text; third-party pages REPORT a 1M-token context — REPORTED
+  only, not verified).
+- Live behavior beyond the §3 smoke run: streaming, larger generations, error shapes
+  other than the malformed-body 400, retry/backoff behavior, credit balance/budget.
+- `x-session-affinity` usefulness, Anthropic/Responses protocols, web search tools.
+- (Resolved by §3: the `-1026` slug, basic completion shape, tool-call round trip,
+  unenforced-`json_schema` behavior on one attempt, malformed-body error shape,
+  latency ballpark, `usage` accounting.)
+
+## 3. Live smoke — RAN 2026-10-30 (5 calls, owner-approved)
+
+Command (flag set for that one process only; key present via environment, never printed):
+
+```powershell
+$env:CLIMATEADAPT_RUN_LIVE_LLM = "1"; uv run python scripts/llm_smoke.py
+```
+
+Result: exit 0, 5/5 calls made, total usage prompt=1206 / completion=191 tokens
+(≈$0.002 at list rates). Verbatim outcome lines:
+
+```text
+base_url: https://inference.baseten.co/v1
+model: meta-models/muse-spark-open-1026
+[a/trivial] HTTP 200 in 6125 ms
+[a/trivial] finish_reason=length
+[a/trivial] content: None
+[b/json-schema] HTTP 200 in 797 ms
+[b/json-schema] client-side parse valid=True
+[b/json-schema] content: {"answer": "pong"}
+[c/tool-call] HTTP 200 in 781 ms
+[c/tool-call] finish_reason=length
+[c/tool-call] tool_calls=1
+[c/tool-call] add({"a": 3.14, "b": 3.14})
+[c/tool-result] HTTP 200 in 719 ms
+[c/tool-result] content: 3.14 + 3.14 = 6.28
+[d/malformed] HTTP 400 in 188 ms
+[d/malformed] error body: {"error": "Invalid request body"}
+```
+
+Verified live:
+
+- The `-1026` slug works (HTTP 200 on all well-formed calls).
+- Tool calling works end to end: correct function and arguments
+  (`add({"a": 3.14, "b": 3.14})`), follow-up with the tool result answered correctly.
+- `response_format: json_schema` is accepted and the model complied on this attempt
+  (client-side parse valid) — but per §1 it is NOT enforced server-side, so P09 must
+  still validate client-side and fall back on any mismatch.
+- Malformed request (`{}`) → HTTP 400 with body `{"error": "Invalid request body"}`.
+- `usage` accounting is returned, including `prompt_tokens_details.cached_tokens`
+  (128 cached tokens observed on each call) and `completion_tokens_details` with
+  `reasoning_tokens`.
+
+Warnings for P09/P10 (observed):
+
+- This is a reasoning model: `reasoning_tokens` consume `max_tokens`. With tiny budgets
+  the visible content can be cut (`finish_reason=length`, content `None` in probe (a)).
+  P09 must set generous completion budgets and treat `length` as "budget too small",
+  not as a model failure.
+- First call took 6.1 s (cold), later calls ~0.7–0.8 s. P09/P10 timeouts must allow
+  multi-second latency plus queueing.
+- Probe (e), a rate-limit probe, was deliberately skipped: hammering limits is unsafe.
+  No rate-limit or credit-balance information was returned or requested.

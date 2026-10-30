@@ -6,7 +6,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field
+from pydantic import AliasChoices, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -37,6 +37,19 @@ class Settings(BaseSettings):
     cds_retry_max: int = Field(default=5, ge=0, le=500)
     cds_sleep_max_seconds: float = Field(default=60.0, gt=0, le=600)
     cds_timeout_seconds: float = Field(default=60.0, gt=0)
+
+    # Baseten Model APIs (application inference; see docs/LLM_PROVIDER_NOTES.md).
+    # P03 verified the base URL + Bearer auth from docs and the -1026 slug live;
+    # official examples show meta-models/muse-spark-open (fallback if -1026 ever 404s).
+    baseten_base_url: str = "https://inference.baseten.co/v1"
+    baseten_model_id: str = "meta-models/muse-spark-open-1026"
+    # SecretStr never prints the value (repr shows '**********'). Two names are
+    # accepted: the repo-prefixed one and BASETEN_API_KEY from Baseten's own docs
+    # (already in .env.example). Never log get_secret_value().
+    baseten_api_key: SecretStr | None = Field(
+        default=None,
+        validation_alias=AliasChoices("CLIMATEADAPT_BASETEN_API_KEY", "BASETEN_API_KEY"),
+    )
 
 
 @lru_cache

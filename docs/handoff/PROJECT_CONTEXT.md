@@ -35,7 +35,8 @@ Provisional proxies used by the roadmap (assumptions, to be replaced by the real
 ## 4. Model access and constraints
 
 - Application inference: Baseten model **`meta-models/muse-spark-open-1026`**, with credits and rate-limit restrictions (stated by owner; REPORTED).
-- **UNVERIFIED:** Baseten endpoint URL, authentication scheme, request/response format, whether tool/function calling and schema-constrained structured output work for this model on this route, context length, per-minute/day limits, credit cost. No LLM integration code exists in the repo. Do not assume another model ID or provider is available.
+- **P03 verified 2026-10-30 (see `docs/LLM_PROVIDER_NOTES.md`):** endpoint `https://inference.baseten.co/v1/chat/completions` (OpenAI-compatible), `Authorization: Bearer` auth, `-1026` slug, and tool-call round trip all work live; structured output is *not enforced* for this model (docs) so P09 must validate client-side. No LLM integration code exists in the repo yet (settings + gated smoke script only). Do not assume another model ID or provider is available.
+- **Still UNVERIFIED:** numeric rate/context/output limits for this model, credit balance/budget; live behavior beyond the 5-call smoke run.
 - The blueprint's "Meta Model API" wording is superseded by the Baseten route above. The blueprint's risk table already requires isolating model calls behind a provider adapter; keep that.
 - Credentials: Muse Code's own login/auth and the application's Baseten key are different things. The app key lives in environment configuration only.
 - Design for graceful degradation: if the model is unavailable or rate-limited, deterministic outputs (indicators, retrieval, ranking) must still be viewable, clearly marked as having no AI narrative.

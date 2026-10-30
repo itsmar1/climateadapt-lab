@@ -137,10 +137,11 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 
 ## D. Model access, agent, recommendations, frontend
 
-### KI-25 — Baseten model access details unverified; no LLM code exists (High)
+### KI-25 — Baseten model access details unverified; no LLM code exists (High) — route VERIFIED 2026-10-30, adapter still not built
 - **Evidence:** Owner states access to `meta-models/muse-spark-open-1026` with credits and rate limits. Endpoint, auth, tool calling, schema-constrained output, context size, and limits are unverified.
 - **Impact:** Agent design depends on tool-calling support; an unsupported feature would change the architecture.
 - **Resolution (P03):** verify from current Baseten documentation; run a tiny gated smoke script; record findings; design the adapter around verified capabilities with a deterministic fallback.
+- **P03 evidence (2026-10-30; CONFIRMED, see `docs/LLM_PROVIDER_NOTES.md`):** base URL `https://inference.baseten.co/v1` + Bearer auth verified from official docs; `-1026` slug, tool-call round trip, and malformed-body error shape verified by one gated live run (5 calls, ≈$0.002); structured output verified *unsupported* for this model (docs: accepted but not enforced → P09 must validate client-side). Still open: numeric rate/context limits, credit budget, and all of P09/P10 (no adapter/agent code exists).
 
 ### KI-26 — No recommendation engine or evidence-backed catalog (High)
 - **Evidence:** Not started. Corpus currently covers irrigation-related practices (deficit and supplemental irrigation, crop water response) and indicator/dataset documentation; it contains little on other adaptation options (e.g., varieties, sowing dates, mulching, water harvesting).

@@ -83,7 +83,7 @@ ruff 0.17.2, uv 0.13.5, Docker engine 29.8.2 present (no Docker files exist yet)
 | `uv.lock` | Tracked lockfile (P00 audit 2026-10-30: present but unmentioned in the handoff; installed venv matches it) | CONFIRMED present |
 | `.env.example`, `.gitignore` | env template (data dir, downloads flag, CHIRPS mode, prefetch workers, CDS retry bounds); `.gitignore` includes `data/corpus/`, `data/cache/`, `.env` | U (content), R (used) |
 | `README.md` | Setup, API, scripts, CDS credentials, error codes. **Was stale:** no RAG commands, no soil-moisture note (both added 2026-10-30); CDS retry bounds detail still missing | partially stale |
-| `src/climateadapt/__init__.py`, `config.py` | `Settings` (env prefix `CLIMATEADAPT_`): environment, log_level, data_dir, allow_downloads, http_timeout_seconds, http_user_agent, chirps_base_url, chirps_access (`remote`/`download`), prefetch_workers, cds_retry_max, cds_sleep_max_seconds, cds_timeout_seconds | T, R |
+| `src/climateadapt/__init__.py`, `config.py` | `Settings` (env prefix `CLIMATEADAPT_`): environment, log_level, data_dir, allow_downloads, http_timeout_seconds, http_user_agent, chirps_base_url, chirps_access (`remote`/`download`), prefetch_workers, cds_retry_max, cds_sleep_max_seconds, cds_timeout_seconds, baseten_base_url, baseten_model_id, baseten_api_key (SecretStr; P03 2026-10-30) | T, R |
 
 ### 2.2 Data connectors (`src/climateadapt/data/`)
 | Path | Purpose | Evidence |
@@ -139,7 +139,7 @@ Files: `api/main.py` (factory, validation-error handler that never echoes input,
 | `evaluation.py` | Document- and page-level metrics, per-language aggregates | T, R |
 
 ### 2.7 Developer scripts (`scripts/`)
-`chirps_anomaly.py`, `chirps_cli.py` (probe, series), `chirps_spi.py`, `compare_chirps_era5.py`, `era5land_cli.py`, `inspect_nc.py`, `spi_compare.py`, `spi_diagnostics.py`, `temperature_anomaly.py`, `corpus_fetch.py`, `corpus_ingest.py`, `rag_search.py`, `rag_eval.py` — all R (each appeared in pasted logs). `scripts/chirps_layout_probe.py` was ordered deleted — **confirmed deleted** (P00 audit 2026-10-30).
+`chirps_anomaly.py`, `chirps_cli.py` (probe, series), `chirps_spi.py`, `compare_chirps_era5.py`, `era5land_cli.py`, `inspect_nc.py`, `spi_compare.py`, `spi_diagnostics.py`, `temperature_anomaly.py`, `corpus_fetch.py`, `corpus_ingest.py`, `rag_search.py`, `rag_eval.py` — all R (each appeared in pasted logs). `scripts/chirps_layout_probe.py` was ordered deleted — **confirmed deleted** (P00 audit 2026-10-30). P03 added `scripts/llm_smoke.py` (gated Baseten probe, max 5 calls; ran once 2026-10-30, exit 0).
 
 ### 2.8 Versioned corpus assets
 `corpus/manifest.json` (8 documents, metadata only) and `corpus/eval/queries.json` (15 queries: 12 English, 2 French, 1 Arabic; **gold labels written by Claude from abstracts and front matter, not from page text, and never reviewed**).
@@ -190,7 +190,7 @@ Retrieval evaluation so far: 8 of 15 queries evaluable, 7 skipped (relevant docu
 - Dense retrieval (multilingual E5 + Qdrant); RAG API routes.
 - Soil-moisture anomaly pipeline; ERA5 indicator API; area/polygon analysis (all analyses are single-point); crop context/calendar; vegetation (Sentinel-2/NDVI); WaPOR.
 - Intervention catalog, constraints, ranking, evidence strength metadata (Milestone 5).
-- LLM provider adapter (Baseten), report schema, agent workflow (Milestone 6).
+- LLM provider adapter (Baseten), report schema, agent workflow (Milestone 6). (P03 verified the route + settings only; no adapter/agent code.)
 - Scenario persistence/history, OpenAPI contract for the frontend, CORS.
 - **React + Vite frontend** (no `frontend/` directory expected).
 - Computer-vision baseline (CropHarvest) — deferred.
