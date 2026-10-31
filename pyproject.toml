@@ -32,6 +32,32 @@ dev = [
     "ruff>=0.4",
 ]
 
+dense = [
+    "qdrant-client>=1.20",
+    "sentence-transformers>=6.2",
+]
+
+# CPU-only PyTorch for the dense extra: +cpu builds live on the PyTorch CPU
+# index, not PyPI (uv "Using uv with PyTorch" guide). explicit = true keeps
+# every other package on PyPI; only torch is sourced from this index. macOS
+# is carved out (PyPI fallback): the CPU index ships plain 2.15.0 there, and
+# PyTorch publishes no CUDA builds for macOS, so PyPI torch is CPU-only too.
+[tool.uv]
+constraint-dependencies = [
+    "torch==2.15.0+cpu; sys_platform != 'darwin'",
+    "torch==2.15.0; sys_platform == 'darwin'",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", marker = "sys_platform != 'darwin'" },
+]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 

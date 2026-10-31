@@ -28,5 +28,6 @@ htmlcov/
 data/raw/
 data/cache/
 data/corpus/
+data/qdrant/
 mlruns/
 *.sqlite3

@@ -101,6 +101,15 @@ uv run python scripts/rag_search.py "supplemental irrigation rainfed wheat" --to
 uv run python scripts/rag_search.py "supplemental irrigation rainfed wheat" --exclude-reference
 uv run python scripts/rag_eval.py
 uv run python scripts/rag_eval_review.py  # writes git-ignored data/corpus/eval_review.md
+
+# Dense retrieval (needs the dense extra + a built index).
+# pyproject.toml pins torch to CPU-only builds (pytorch-cpu index, with a PyPI
+# fallback on macOS where torch is CPU-only), so a fresh sync stays small and
+# never pulls CUDA-enabled PyTorch unexpectedly.
+uv sync --extra dev --extra dense
+uv run python scripts/rag_index.py
+uv run python scripts/rag_eval.py --compare
+uv run python scripts/rag_eval.py --k-sweep
 ```
 
 ERA5-Land variables: `2m_temperature`, `total_precipitation`,

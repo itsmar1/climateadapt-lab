@@ -143,18 +143,19 @@ Files: `api/main.py` (factory, validation-error handler that never echoes input,
 | `chunking.py` | Page-aware sliding windows, drop/count of short and number-heavy windows, `verify_chunk_provenance`, printed-label carry, `section_type` tag, `max_page_span` | T (11/13 module tests; 2 failing tests are test bugs), R |
 | `ingest.py` | pypdf extraction, outputs `data/corpus/processed/<doc_id>/{pages,chunks}.jsonl` + `meta.json`, /PageLabels capture, reference counts | T, R |
 | `fetch.py` | Verified PDF download with candidate URLs, `%PDF-` check, size cap, one 5xx retry | T, R |
-| `bm25.py`, `fusion.py`, `retrieval.py` | BM25, RRF, `Bm25Retriever`, `HybridRetriever` (hybrid has only been tested with stubs; no dense retriever exists) + `exclude_reference` filter on both | T; BM25 R |
+| `bm25.py`, `fusion.py`, `retrieval.py` | BM25, RRF, `Bm25Retriever`, `HybridRetriever` (P07: fuses real BM25 + dense; RRF untouched) + `exclude_reference` filter on both | T; BM25 R |
 | `citations.py` | Citations built from manifest + chunk page range + printed labels; `verify_citation` incl. label check | T |
+| `embeddings.py`, `dense.py` (P07) | E5-small-only wrapper (prefixes, L2 norm, lazy torch); Qdrant-local `DenseRetriever` with fingerprints + idempotent indexing | T, R |
 | `evaluation.py` | Document- and page-level metrics, per-language aggregates | T, R |
 
 ### 2.7 Developer scripts (`scripts/`)
-`chirps_anomaly.py`, `chirps_cli.py` (probe, series), `chirps_spi.py`, `compare_chirps_era5.py`, `era5land_cli.py`, `inspect_nc.py`, `spi_compare.py`, `spi_diagnostics.py`, `temperature_anomaly.py`, `corpus_fetch.py`, `corpus_ingest.py`, `rag_search.py`, `rag_eval.py`, `rag_eval_review.py` (P06) — all R (each appeared in pasted logs). `scripts/chirps_layout_probe.py` was ordered deleted — **confirmed deleted** (P00 audit 2026-10-30). P03 added `scripts/llm_smoke.py` (gated Baseten probe, max 5 calls; ran once 2026-10-30, exit 0). P04 added `scripts/soil_moisture_anomaly.py` (layer 1-3 anomaly CLI; one live layer-1 run 2026-10-30, exit 0). P06 added `scripts/rag_eval_review.py` (top-3 review file for the owner); `corpus_ingest.py` gained `--max-page-span`, `rag_search.py` gained `--exclude-reference` + section display.
+`chirps_anomaly.py`, `chirps_cli.py` (probe, series), `chirps_spi.py`, `compare_chirps_era5.py`, `era5land_cli.py`, `inspect_nc.py`, `spi_compare.py`, `spi_diagnostics.py`, `temperature_anomaly.py`, `corpus_fetch.py`, `corpus_ingest.py`, `rag_search.py`, `rag_eval.py`, `rag_eval_review.py` (P06), `rag_index.py` (P07) — all R (each appeared in pasted logs). `scripts/chirps_layout_probe.py` was ordered deleted — **confirmed deleted** (P00 audit 2026-10-30). P03 added `scripts/llm_smoke.py` (gated Baseten probe, max 5 calls; ran once 2026-10-30, exit 0). P04 added `scripts/soil_moisture_anomaly.py` (layer 1-3 anomaly CLI; one live layer-1 run 2026-10-30, exit 0). P06 added `scripts/rag_eval_review.py` (top-3 review file for the owner); `corpus_ingest.py` gained `--max-page-span`, `rag_search.py` gained `--exclude-reference` + section display. P07 added `scripts/rag_index.py` (fingerprinted dense build); `rag_eval.py` gained `--retriever/--compare/--k-sweep`.
 
 ### 2.8 Versioned corpus assets
 `corpus/manifest.json` (8 documents, metadata only) and `corpus/eval/queries.json` (15 queries: 12 English, 2 French, 1 Arabic; **gold labels written by Claude from abstracts and front matter, not from page text, and never reviewed**). P06 generated git-ignored `data/corpus/eval_review.md` for that review; labels still owner-unreviewed.
 
 ### 2.9 Test support
-`tests/conftest.py` (synthetic GeoTIFF factory, MockTransport factory), `tests/era5_helpers.py` (synthetic NetCDF builder, FakeDownloader), `tests/rag_helpers.py` (minimal PDF writer). 28 test modules as listed in §1, plus `test_baseten_config.py` (P03), `test_soil_moisture.py`, `test_soil_moisture_pipeline.py`, `test_window_anomaly_regression.py` (P04), and `test_api_jobs.py`, `test_api_era5.py` (P05).
+`tests/conftest.py` (synthetic GeoTIFF factory, MockTransport factory), `tests/era5_helpers.py` (synthetic NetCDF builder, FakeDownloader), `tests/rag_helpers.py` (minimal PDF writer). 28 test modules as listed in §1, plus `test_baseten_config.py` (P03), `test_soil_moisture.py`, `test_soil_moisture_pipeline.py`, `test_window_anomaly_regression.py` (P04), and `test_api_jobs.py`, `test_api_era5.py` (P05), and `test_rag_dense.py` (P07).
 
 ## 3. Real-data verification log (CONFIRMED from owner's logs)
 
@@ -185,11 +186,11 @@ Corpus (8 intended, 5 ingested):
 | `icarda-supplemental-irrigation-efficient-water-use-practice` | **no** — manual | | | | |
 | `wmo-1090-standardized-precipitation-index-user-guide` | yes (P06 retry) | 24 | 4 | 7,359 | 38 (0/3) |
 
-Retrieval evaluation so far: 10 of 15 queries evaluable, 5 skipped (q01, q03, q04, q13-fr, q15-ar — relevant manuals missing); BM25 hit@1 = 1.00 on those 10 (9 English, 1 French). **Too small to mean anything**; the one French hit is unexplained.
+Retrieval evaluation so far: 10 of 15 queries evaluable, 5 skipped (q01, q03, q04, q13-fr, q15-ar — relevant manuals missing); BM25 hit@1 = 1.00 on those 10 (9 English, 1 French). **Too small to mean anything**; the one French hit is unexplained. P07: dense + hybrid also 1.00 everywhere (ceiling-flat, exploratory); see `docs/RAG_EVALUATION.md`.
 
 ## 6. Partial implementations
 
-- RAG: BM25 only. `HybridRetriever` exists but has no second real retriever. Citations show PDF index + printed label where present (KI-17 resolved 2026-10-30); reference-section filter and span cap are delivered opt-in (KI-20 tooling; default retrieval unchanged).
+- RAG: BM25 default + E5-small dense (Qdrant local, fingerprinted) + RRF hybrid (P07); comparison exploratory, no proven gain. Citations show PDF index + printed label where present (KI-17 resolved 2026-10-30); reference-section filter and span cap are delivered opt-in (KI-20 tooling; default retrieval unchanged).
 - ERA5-Land: temperature/precipitation/soil-water series work; precipitation, temperature, and (P04) soil-moisture layers 1–3 have analysis pipelines; (P05) all three plus a bundle are API-exposed as jobs (bundle + jobs polling verified live 2026-10-30; single-indicator POSTs offline-tested only).
 - SPI: value, probability, fit parameters and descriptive diagnostics only; no category labels.
 - API: CHIRPS routes (sync) + ERA5 routes and bundle (async jobs); no RAG routes, no auth, no rate limiting.

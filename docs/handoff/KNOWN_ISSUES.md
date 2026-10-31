@@ -116,15 +116,17 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 - **P06 2026-10-30:** re-ran on 5 docs: 10 evaluable (9 EN, 1 FR), hit@1 = 1.00, 5 skipped with explicit reasons (q01, q03, q04, q13-fr, q15-ar — all need missing manuals). `scripts/rag_eval_review.py` writes git-ignored `data/corpus/eval_review.md` (top-3 + excerpts per query). Labels still owner-unreviewed — stays open.
 - **Impact:** The numbers do not show retrieval quality.
 - **Resolution (P06/P07):** owner reviews all 15 labels; add page-level annotations after reading; add queries for the new documents; report per-language results.
+- **P07 2026-10-31:** labels still show no review traces in repo (no `relevant_pages`, no markers) — stays open. Three-way comparison is ceiling-flat (all arms 1.00); results classified exploratory in `docs/RAG_EVALUATION.md`, no improvement claimed.
 
 ### KI-20 — Bibliography chunks and wide page ranges degrade results (Medium) — tooling delivered 2026-10-30, default behavior unchanged
 - **Evidence:** In `rag_search`, hit #2 was a reference-list chunk spanning PDF pages 115–119; hits #4–#5 were off-topic (maize leaf area; Iraq project list).
 - **Resolution (P06):** detect and tag/down-weight reference sections, keep page ranges narrow, and re-evaluate. Do not drop content silently.
 - **P06 evidence 2026-10-30:** `section_type` tag (year-density heuristic, tested; nothing deleted) + `exclude_reference` filter on both retrievers (default OFF), `rag_search --exclude-reference`, and `corpus_ingest --max-page-span`. Ref counts: IDDP66 188, WR45 275, WMO 2, ESSD 60, SciData 23 (of 1824). Spans default → cap-2: {1:947, 2:776, 3:63, 4:25, 5:11, 6:2} → {1:977, 2:834}, costing 13 short-dropped chunks. Canonical corpus keeps defaults (bare-command reproducibility). Known limitation: WR45's citation-dense historical chronology is over-tagged (visible in the review file); tightening was deferred to avoid hiding real bibliographies.
 
-### KI-21 — No dense/cross-lingual retrieval (High)
+### KI-21 — No dense/cross-lingual retrieval (High) — dense mechanism delivered 2026-10-31, still open (no proven gain)
 - **Evidence:** BM25 only. French/Arabic queries cannot match English text lexically. `HybridRetriever` has only been tested with stub retrievers.
 - **Resolution (P07):** multilingual E5 (default `intfloat/multilingual-e5-small`, 384-d; `query: `/`passage: ` prefixes) with Qdrant local mode; hybrid via RRF; verify package APIs from docs; torch/model download is large; measure before/after on the same gold set. RRF constant k=60 is a convention from memory and must be tuned/justified, not assumed.
+- **P07 evidence 2026-10-31:** E5-small-only `embeddings.py` + Qdrant-local `dense.py` (fingerprinted, idempotent `rag_index.py`) + `HybridRetriever` fusion, all tested with a fake embedder and `:memory:` Qdrant. CPU-only torch 2.15.0+cpu; model rev `614241f6…` (~470 MB); index 1824 points (~97 min build). BM25/dense/hybrid all 1.00 on 10 evaluable queries; k-sweep {10,30,60,100} flat — k=60 kept for lack of evidence. Cross-lingual benefit unproven (fr n=1, ar skipped). Stays open pending harder eval.
 
 ### KI-22 — pypdf font warnings flood ingest output (Low/Medium) — measured 2026-10-30, still open (noise only)
 - **Evidence:** Hundreds of "fontTools is required to fully parse the encoding of a CFF Type1 font" lines; extracted text looked readable in search results.
