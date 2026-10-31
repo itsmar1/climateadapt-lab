@@ -69,8 +69,11 @@ M5 (recommendations) / M6 (agent + LLM), frontend, persistence, and Docker/CI ar
 M5 engine is **implemented + tested** (`src/climateadapt/recommend/`, 3-entry v1 catalog,
 `scripts/validate_catalog.py`, 80 offline tests; see §2.10). **P09 update 2026-10-31:**
 M6 adapter half is **implemented + tested** (`src/climateadapt/llm/`, 51 offline tests,
-one gated live call with fallback served; see §2.11). The M6 agent workflow (P10),
-frontend, persistence and Docker/CI remain not started.
+one gated live call with fallback served; see §2.11). **P10 update 2026-10-31:**
+M6 agent workflow is **implemented + tested** as a fixed pipeline
+(`src/climateadapt/agent/`, 22 offline tests, one gated live run with
+validator-rejected draft → fallback; see §2.12 and `docs/AGENT_WORKFLOW.md`).
+Frontend, persistence and Docker/CI remain not started.
 
 ### Environment note (verified 2026-10-30; CONFIRMED)
 
@@ -186,6 +189,17 @@ Catalog v1: `deficit-irrigation` + `irrigation-scheduling` supported by IDDP66 p
 
 Tests: `tests/test_llm_provider.py`, `tests/test_report_schema.py`, `tests/test_report_validator.py` + `tests/report_helpers.py` (51 offline tests, all synthetic; injection, tampered chunks, altered numbers, timeout/rate-limit, and fallback paths covered). No agent graph/tool loop (P10 scope).
 
+### 2.12 Fixed agent pipeline (`src/climateadapt/agent/`, P10 2026-10-31)
+| Path | Purpose | Evidence |
+|---|---|---|
+| `schemas.py` | `AgentScenario` (validated run request), `AgentConfig` (hard limits), `AgentDeps` (injected data, no globals) | T |
+| `tools.py` | 4 thin typed tools: `get_environmental_bundle`, `retrieve_evidence` (BM25 / hybrid), `rank_adaptation_options`, `validate_report` | T |
+| `workflow.py` | `run_agent`: fixed 7-stage pipeline (validate → bundle → retrieval → ranking → draft → validate → finalize); `complete`/`partial`/`failed` outcomes; step/tool/LLM/token/timeout limits + loop detection | T |
+| `trace.py` | `RunTrace` (stages, tool calls, verdicts, usage; no secrets, no passage text) | T |
+| `scripts/run_agent.py` | Gated live end-to-end run (warm caches + offline BM25 + ≤1 call) | T (gate), R (1 call 2026-10-31: full draft produced, 44 validator problems → fallback served; 97 s, 26965/15087 tokens ≈$0.098; fallback re-validated clean, retrieval reproducible) |
+
+Fixed pipeline by recorded decision (LangGraph 1.2.19 checked via PyPI 2026-10-31, not adopted — see `docs/AGENT_WORKFLOW.md`). Tests: `tests/test_agent_tools.py` + `tests/test_agent_workflow.py` (22 offline tests: happy path, limit enforcement, failure injection, validator rejection, trace completeness). No model draft accepted yet (KI-35).
+
 ## 3. Real-data verification log (CONFIRMED from owner's logs)
 
 **CHIRPS v3.** HTTPS monthly URL pattern works (`.../monthly/global/tifs/chirps-v3.0.YYYY.MM.tif`); files ≈22 MB, 7200×2400 float32 EPSG:4326, **LZW strips, not tiled, no overviews, no nodata tag** (so the −9999 sentinel logic matters). Remote single-pixel read matched the downloaded value exactly (27.39597511291504). Download mode: 33 files ≈17 min cold; remote mode: same anomaly digits (0.5543783725454325), ≈30 s cold. File ETags/Last-Modified captured; 2014-03 was revised 2025-04-22 while the rest were 2024-11/12.
@@ -230,7 +244,7 @@ Retrieval evaluation so far: 10 of 15 queries evaluable, 5 skipped (q01, q03, q0
 - Dense retrieval (multilingual E5 + Qdrant); RAG API routes.
 - Area/polygon analysis (all analyses are single-point); crop context/calendar; vegetation (Sentinel-2/NDVI); WaPOR.
 - ~~Intervention catalog, constraints, ranking, evidence strength metadata (Milestone 5).~~ **Delivered 2026-10-31 (P08):** engine + 3-entry v1 catalog; catalog *growth* still needs owner-approved sources.
-- ~~LLM provider adapter (Baseten), report schema, agent workflow (Milestone 6).~~ **Adapter + schema + validator delivered 2026-10-31 (P09):** `src/climateadapt/llm/` with 51 offline tests and one gated live call (fallback served, see §2.11). Agent workflow (P10) still missing.
+- ~~LLM provider adapter (Baseten), report schema, agent workflow (Milestone 6).~~ **Adapter + schema + validator delivered 2026-10-31 (P09):** `src/climateadapt/llm/` with 51 offline tests and one gated live call (fallback served, see §2.11). **Agent workflow delivered 2026-10-31 (P10):** fixed pipeline in `src/climateadapt/agent/` with 22 offline tests and one gated live run (see §2.12).
 - Scenario persistence/history, API auth and rate limiting. (P05 delivered the OpenAPI contract and CORS.)
 - **React + Vite frontend** (no `frontend/` directory expected).
 - Computer-vision baseline (CropHarvest) — deferred.

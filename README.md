@@ -120,6 +120,10 @@ uv run python scripts/validate_catalog.py
 # plus a configured key, warm caches, and an ingested corpus; falls back
 # deterministically when the draft is invalid -- see docs/LLM_PROVIDER_NOTES.md)
 $env:CLIMATEADAPT_RUN_LIVE_LLM = "1"; uv run python scripts/llm_report.py
+
+# Full agent run (same gate; warm caches + offline BM25 + at most one Baseten
+# call; saves trace + report under git-ignored data/agent_runs/)
+$env:CLIMATEADAPT_RUN_LIVE_LLM = "1"; uv run python scripts/run_agent.py
 ```
 
 ERA5-Land variables: `2m_temperature`, `total_precipitation`,
