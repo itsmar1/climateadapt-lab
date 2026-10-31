@@ -5,7 +5,9 @@ Hackathon project). **Status (verified 2026-10-30, see `docs/handoff/AUDIT_REPOR
 Milestones 0-2 are implemented (tested data connectors and precipitation/temperature
 indicators). Scientific RAG first batch is partially complete (BM25 + RRF retrieval,
 citations, evaluation harness; 4 of 8 corpus documents ingested; dense retrieval and RAG
-API routes missing). Recommendation, agent, and UI layers: not started.
+API routes missing). Recommendation engine delivered 2026-10-31 (P08: versioned
+catalog, deterministic constraints/ranking, `scripts/validate_catalog.py`; see
+`docs/RECOMMENDATION_ENGINE.md`). Agent and UI layers: not started.
 Verified baseline (2026-10-30): 536 tests passed in 9 min 36 s, `ruff check .` clean;
 details in `docs/handoff/IMPLEMENTATION_STATUS.md`, issues in `docs/handoff/KNOWN_ISSUES.md`.
 Full evidence: `docs/handoff/AUDIT_REPORT.md`.
@@ -110,6 +112,9 @@ uv sync --extra dev --extra dense
 uv run python scripts/rag_index.py
 uv run python scripts/rag_eval.py --compare
 uv run python scripts/rag_eval.py --k-sweep
+
+# Recommendation catalog (offline; checks manifest + ingested corpus)
+uv run python scripts/validate_catalog.py
 ```
 
 ERA5-Land variables: `2m_temperature`, `total_precipitation`,
@@ -160,7 +165,8 @@ message, details logged server-side only). A zero baseline returns 200 with
 Cached CHIRPS remote values are not revalidated against ETag changes (CHC revised at least one
 file after release). The SPI gamma fit is not goodness-of-fit tested and there are no SPI
 category labels. Still missing: soil-moisture anomaly pipeline (connector exists), dense
-retrieval + RAG routes (BM25 batch exists), recommendation engine, agent, and UI.
+retrieval + RAG routes (BM25 batch exists), agent, and UI. The recommendation catalog
+covers irrigation options only (v1, 3 entries; other options unranked by design).
 
 ## Verified environment and audit limits (2026-10-30)
 

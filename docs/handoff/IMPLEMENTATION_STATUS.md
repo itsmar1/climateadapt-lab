@@ -65,7 +65,10 @@ so this mapping follows the handoff's implied milestones. "Complete" = implement
 | M4 (scientific RAG, first batch) | **Partially complete** | Implemented + tested: manifest, fetch, ingest, page-aware chunking + provenance verification, BM25, RRF, `Bm25Retriever`/`HybridRetriever`, citations, evaluation harness. Missing within M4: dense E5 + Qdrant retriever (no code at all), RAG API routes, 4 of 8 corpus documents, page-level gold annotations, printed page labels. `HybridRetriever` is generic/inert without a second retriever. |
 
 M5 (recommendations) / M6 (agent + LLM), frontend, persistence, and Docker/CI are all
-**not started** — no code, not partial (AUDIT_REPORT §6).
+**not started** — no code, not partial (AUDIT_REPORT §6). **P08 update 2026-10-31:**
+M5 engine is **implemented + tested** (`src/climateadapt/recommend/`, 3-entry v1 catalog,
+`scripts/validate_catalog.py`, 80 offline tests; see §2.10). M6, frontend, persistence
+and Docker/CI remain not started.
 
 ### Environment note (verified 2026-10-30; CONFIRMED)
 
@@ -149,13 +152,24 @@ Files: `api/main.py` (factory, validation-error handler that never echoes input,
 | `evaluation.py` | Document- and page-level metrics, per-language aggregates | T, R |
 
 ### 2.7 Developer scripts (`scripts/`)
-`chirps_anomaly.py`, `chirps_cli.py` (probe, series), `chirps_spi.py`, `compare_chirps_era5.py`, `era5land_cli.py`, `inspect_nc.py`, `spi_compare.py`, `spi_diagnostics.py`, `temperature_anomaly.py`, `corpus_fetch.py`, `corpus_ingest.py`, `rag_search.py`, `rag_eval.py`, `rag_eval_review.py` (P06), `rag_index.py` (P07) — all R (each appeared in pasted logs). `scripts/chirps_layout_probe.py` was ordered deleted — **confirmed deleted** (P00 audit 2026-10-30). P03 added `scripts/llm_smoke.py` (gated Baseten probe, max 5 calls; ran once 2026-10-30, exit 0). P04 added `scripts/soil_moisture_anomaly.py` (layer 1-3 anomaly CLI; one live layer-1 run 2026-10-30, exit 0). P06 added `scripts/rag_eval_review.py` (top-3 review file for the owner); `corpus_ingest.py` gained `--max-page-span`, `rag_search.py` gained `--exclude-reference` + section display. P07 added `scripts/rag_index.py` (fingerprinted dense build); `rag_eval.py` gained `--retriever/--compare/--k-sweep`.
+`chirps_anomaly.py`, `chirps_cli.py` (probe, series), `chirps_spi.py`, `compare_chirps_era5.py`, `era5land_cli.py`, `inspect_nc.py`, `spi_compare.py`, `spi_diagnostics.py`, `temperature_anomaly.py`, `corpus_fetch.py`, `corpus_ingest.py`, `rag_search.py`, `rag_eval.py`, `rag_eval_review.py` (P06), `rag_index.py` (P07) — all R (each appeared in pasted logs). `scripts/chirps_layout_probe.py` was ordered deleted — **confirmed deleted** (P00 audit 2026-10-30). P03 added `scripts/llm_smoke.py` (gated Baseten probe, max 5 calls; ran once 2026-10-30, exit 0). P04 added `scripts/soil_moisture_anomaly.py` (layer 1-3 anomaly CLI; one live layer-1 run 2026-10-30, exit 0). P06 added `scripts/rag_eval_review.py` (top-3 review file for the owner); `corpus_ingest.py` gained `--max-page-span`, `rag_search.py` gained `--exclude-reference` + section display. P07 added `scripts/rag_index.py` (fingerprinted dense build); `rag_eval.py` gained `--retriever/--compare/--k-sweep`. P08 added `scripts/validate_catalog.py` (catalog vs manifest + ingested corpus; exit 0 on no errors).
 
 ### 2.8 Versioned corpus assets
 `corpus/manifest.json` (8 documents, metadata only) and `corpus/eval/queries.json` (15 queries: 12 English, 2 French, 1 Arabic; **gold labels written by Claude from abstracts and front matter, not from page text, and never reviewed**). P06 generated git-ignored `data/corpus/eval_review.md` for that review; labels still owner-unreviewed.
 
 ### 2.9 Test support
-`tests/conftest.py` (synthetic GeoTIFF factory, MockTransport factory), `tests/era5_helpers.py` (synthetic NetCDF builder, FakeDownloader), `tests/rag_helpers.py` (minimal PDF writer). 28 test modules as listed in §1, plus `test_baseten_config.py` (P03), `test_soil_moisture.py`, `test_soil_moisture_pipeline.py`, `test_window_anomaly_regression.py` (P04), and `test_api_jobs.py`, `test_api_era5.py` (P05), and `test_rag_dense.py` (P07).
+`tests/conftest.py` (synthetic GeoTIFF factory, MockTransport factory), `tests/era5_helpers.py` (synthetic NetCDF builder, FakeDownloader), `tests/rag_helpers.py` (minimal PDF writer). 28 test modules as listed in §1, plus `test_baseten_config.py` (P03), `test_soil_moisture.py`, `test_soil_moisture_pipeline.py`, `test_window_anomaly_regression.py` (P04), and `test_api_jobs.py`, `test_api_era5.py` (P05), and `test_rag_dense.py` (P07), plus `tests/recommend_helpers.py` and `test_recommend_{schema,constraints,ranking,service,validate}.py` (P08, 80 tests, all offline/synthetic).
+
+### 2.10 Recommendation engine (`src/climateadapt/recommend/`, P08 2026-10-31)
+| Path | Purpose | Evidence |
+|---|---|---|
+| `schema.py`, `catalog.json` | Versioned catalog (v1, 3 entries); every applicability attribute nullable; benefit/cost/risk `"unknown"` unless cited; `loader.py` loads the packaged file offline | T |
+| `evidence.py` | Evidence-strength rubric (0 needs_evidence / 1 single-source / 2 multi-source) + manifest-grounded citation formatting | T |
+| `constraints.py` | 5 hard constraints (`needs_evidence`, `no_water_source`, `no_irrigation_equipment`, `production_system_mismatch`, `crop_not_applicable`); unknowns recorded, never excluding | T |
+| `ranking.py` | Weighted score (0.5 evidence + 0.3 indicator-availability + 0.2 fit); full breakdown per option; ties by id | T |
+| `service.py`, `validate.py` | `recommend()` entry point (ranked/excluded/unknowns/evidence/warnings/limitations); offline catalog validation | T |
+
+Catalog v1: `deficit-irrigation` + `irrigation-scheduling` supported by IDDP66 pp. 22/70 and 25/66; `supplemental-irrigation` is `needs_evidence` (ICARDA docs not ingested). No LLM, no invented figures. Details: `docs/RECOMMENDATION_ENGINE.md`.
 
 ## 3. Real-data verification log (CONFIRMED from owner's logs)
 
@@ -194,12 +208,13 @@ Retrieval evaluation so far: 10 of 15 queries evaluable, 5 skipped (q01, q03, q0
 - ERA5-Land: temperature/precipitation/soil-water series work; precipitation, temperature, and (P04) soil-moisture layers 1–3 have analysis pipelines; (P05) all three plus a bundle are API-exposed as jobs (bundle + jobs polling verified live 2026-10-30; single-indicator POSTs offline-tested only).
 - SPI: value, probability, fit parameters and descriptive diagnostics only; no category labels.
 - API: CHIRPS routes (sync) + ERA5 routes and bundle (async jobs); no RAG routes, no auth, no rate limiting.
+- Recommendations (P08 2026-10-31): engine complete and tested, but the catalog is intentionally tiny (2 supported irrigation entries); growth needs owner-supplied sources (KI-18 manuals, KI-26).
 
 ## 7. Missing components (vs. blueprint and owner goals)
 
 - Dense retrieval (multilingual E5 + Qdrant); RAG API routes.
 - Area/polygon analysis (all analyses are single-point); crop context/calendar; vegetation (Sentinel-2/NDVI); WaPOR.
-- Intervention catalog, constraints, ranking, evidence strength metadata (Milestone 5).
+- ~~Intervention catalog, constraints, ranking, evidence strength metadata (Milestone 5).~~ **Delivered 2026-10-31 (P08):** engine + 3-entry v1 catalog; catalog *growth* still needs owner-approved sources.
 - LLM provider adapter (Baseten), report schema, agent workflow (Milestone 6). (P03 verified the route + settings only; no adapter/agent code.)
 - Scenario persistence/history, API auth and rate limiting. (P05 delivered the OpenAPI contract and CORS.)
 - **React + Vite frontend** (no `frontend/` directory expected).

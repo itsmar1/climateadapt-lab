@@ -1,0 +1,106 @@
+{
+  "catalog_version": 1,
+  "description": "ClimateAdapt Lab intervention catalog v1: irrigation options with ingested corpus evidence only. Benefit, cost and risk stay 'unknown' unless a cited source states them. Entries without ingested evidence are marked needs_evidence and excluded from ranking.",
+  "interventions": [
+    {
+      "intervention_id": "deficit-irrigation",
+      "name": "Deficit irrigation",
+      "category": "irrigation",
+      "description": "Applying less irrigation water than full crop water requirements at selected growth stages, guided by crop-specific sensitivity to water deficit.",
+      "applicability": {
+        "crop_types": null,
+        "requires_water_source": true,
+        "production_systems": ["irrigated"],
+        "soil_types": null,
+        "climate_regimes": null,
+        "farm_scales": null
+      },
+      "benefit": "unknown",
+      "benefit_evidence": [],
+      "cost": "unknown",
+      "cost_evidence": [],
+      "risk": "unknown",
+      "risk_evidence": [],
+      "evidence_status": "supported",
+      "evidence_links": [
+        {
+          "doc_id": "fao-iddp66-crop-yield-response-to-water",
+          "pdf_page": 22,
+          "reference": "Yield-response factors (Ky) and deficit-irrigation studies"
+        },
+        {
+          "doc_id": "fao-iddp66-crop-yield-response-to-water",
+          "pdf_page": 70,
+          "reference": "Deficit-irrigation programme design example"
+        }
+      ],
+      "expected_sources": [],
+      "needs_evidence_note": null,
+      "relevant_indicators": ["chirps_spi", "era5_spi", "era5_soil_moisture_anomaly"]
+    },
+    {
+      "intervention_id": "irrigation-scheduling",
+      "name": "Irrigation scheduling",
+      "category": "irrigation",
+      "description": "Deciding when and how much to irrigate during the season from crop water requirements and soil-water information, for example with a water-balance calculation tool.",
+      "applicability": {
+        "crop_types": null,
+        "requires_water_source": true,
+        "production_systems": ["irrigated"],
+        "soil_types": null,
+        "climate_regimes": null,
+        "farm_scales": null
+      },
+      "benefit": "unknown",
+      "benefit_evidence": [],
+      "cost": "unknown",
+      "cost_evidence": [],
+      "risk": "unknown",
+      "risk_evidence": [],
+      "evidence_status": "supported",
+      "evidence_links": [
+        {
+          "doc_id": "fao-iddp66-crop-yield-response-to-water",
+          "pdf_page": 25,
+          "reference": "CROPWAT as a practical tool for irrigation scheduling"
+        },
+        {
+          "doc_id": "fao-iddp66-crop-yield-response-to-water",
+          "pdf_page": 66,
+          "reference": "Seasonal irrigation scheduling programme (tactical decisions)"
+        }
+      ],
+      "expected_sources": [],
+      "needs_evidence_note": null,
+      "relevant_indicators": ["chirps_spi", "era5_spi", "era5_soil_moisture_anomaly"]
+    },
+    {
+      "intervention_id": "supplemental-irrigation",
+      "name": "Supplemental irrigation of rainfed crops",
+      "category": "irrigation",
+      "description": "Adding limited irrigation to otherwise rainfed crops during dry spells or critical growth stages.",
+      "applicability": {
+        "crop_types": null,
+        "requires_water_source": true,
+        "production_systems": ["rainfed"],
+        "soil_types": null,
+        "climate_regimes": null,
+        "farm_scales": null
+      },
+      "benefit": "unknown",
+      "benefit_evidence": [],
+      "cost": "unknown",
+      "cost_evidence": [],
+      "risk": "unknown",
+      "risk_evidence": [],
+      "evidence_status": "needs_evidence",
+      "evidence_links": [],
+      "expected_sources": [
+        "icarda-supplemental-irrigation-climate-smart-2018",
+        "icarda-supplemental-irrigation-efficient-water-use-practice"
+      ],
+      "needs_evidence_note": "Candidate ICARDA documents are in the manifest but not ingested, so no page-level evidence link can be written yet.",
+      "relevant_indicators": ["chirps_spi", "era5_spi", "era5_soil_moisture_anomaly"]
+    }
+  ]
+}

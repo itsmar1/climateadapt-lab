@@ -153,10 +153,11 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 - **Resolution (P03):** verify from current Baseten documentation; run a tiny gated smoke script; record findings; design the adapter around verified capabilities with a deterministic fallback.
 - **P03 evidence (2026-10-30; CONFIRMED, see `docs/LLM_PROVIDER_NOTES.md`):** base URL `https://inference.baseten.co/v1` + Bearer auth verified from official docs; `-1026` slug, tool-call round trip, and malformed-body error shape verified by one gated live run (5 calls, ≈$0.002); structured output verified *unsupported* for this model (docs: accepted but not enforced → P09 must validate client-side). Still open: numeric rate/context limits, credit budget, and all of P09/P10 (no adapter/agent code exists).
 
-### KI-26 — No recommendation engine or evidence-backed catalog (High)
+### KI-26 — No recommendation engine or evidence-backed catalog (High) — ✅ RESOLVED 2026-10-31 (engine done; catalog small by design)
 - **Evidence:** Not started. Corpus currently covers irrigation-related practices (deficit and supplemental irrigation, crop water response) and indicator/dataset documentation; it contains little on other adaptation options (e.g., varieties, sowing dates, mulching, water harvesting).
 - **Impact:** Catalog entries would be unsupported unless more sources are added.
 - **Resolution (P08):** build the catalog only from documents in the corpus with explicit unknowns; owner supplies/approves additional sources first.
+- **P08 evidence (2026-10-31; CONFIRMED):** `src/climateadapt/recommend/` delivers the versioned catalog (v1: 2 supported irrigation entries + 1 `needs_evidence`), deterministic hard constraints with machine-readable reasons, transparent ranking (weights 0.5/0.3/0.2, full breakdowns, id-ordered ties), and `scripts/validate_catalog.py` (0 errors, 0 warnings against the ingested corpus). 80 new offline tests green; no efficacy/cost/benefit figure anywhere (all `unknown`). Catalog growth still needs owner-supplied sources (see KI-18 manuals); non-irrigation options remain unranked by design. Details: `docs/RECOMMENDATION_ENGINE.md`.
 
 ### KI-27 — No frontend; blueprint says Streamlit (High)
 - **Evidence:** No `frontend/`; blueprint and early requirements named Streamlit/Plotly. Requirement is now React + Vite.
