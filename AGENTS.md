@@ -30,7 +30,7 @@ Never upgrade a status without running something and quoting the result. Never w
 ## 4. Stack and layout
 
 - Backend: Python 3.11, `uv`, FastAPI + Pydantic v2, `src/climateadapt/` (src layout). Tests in `tests/`. Windows/PowerShell is the owner's environment — avoid bash-only commands in docs.
-- Frontend: **React + Vite** in `frontend/` (not yet created). **Do not introduce Streamlit** (the original blueprint mentioned it; it is superseded).
+- Frontend: **React + Vite** in `frontend/` (input/analysis screens delivered in P12). **Do not introduce Streamlit** (the original blueprint mentioned it; it is superseded).
 - Retrieval: BM25 + Reciprocal Rank Fusion implemented; dense retrieval (multilingual E5 + Qdrant) planned.
 - Packages: `data/` connectors, `indicators/` pure calculations, `pipelines/` connector+indicator workflows, `rag/` corpus/retrieval, `api/` FastAPI, `scripts/` developer CLIs. Layers import downward only (indicators must not import FastAPI or network code).
 

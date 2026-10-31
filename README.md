@@ -7,7 +7,10 @@ indicators). Scientific RAG first batch is partially complete (BM25 + RRF retrie
 citations, evaluation harness; 4 of 8 corpus documents ingested; dense retrieval and RAG
 API routes missing). Recommendation engine delivered 2026-10-31 (P08: versioned
 catalog, deterministic constraints/ranking, `scripts/validate_catalog.py`; see
-`docs/RECOMMENDATION_ENGINE.md`). Agent and UI layers: not started.
+`docs/RECOMMENDATION_ENGINE.md`). Agent pipeline delivered 2026-10-31 (P10: fixed
+workflow, `docs/AGENT_WORKFLOW.md`; scenario API + SQLite persistence in P11).
+React input/analysis UI delivered 2026-10-31 (P12: `frontend/`, 42 Vitest tests
+green; recommendations/report UI is P13).
 Verified baseline (2026-10-30): 536 tests passed in 9 min 36 s, `ruff check .` clean;
 details in `docs/handoff/IMPLEMENTATION_STATUS.md`, issues in `docs/handoff/KNOWN_ISSUES.md`.
 Full evidence: `docs/handoff/AUDIT_REPORT.md`.
@@ -119,6 +122,34 @@ Invoke-RestMethod "http://127.0.0.1:8000/v1/scenarios?limit=20&offset=0"
 Invoke-RestMethod http://127.0.0.1:8000/v1/scenarios/$($created.scenario_id) -Method Delete
 ```
 
+## Run the frontend
+
+Prereqs: Node 20.19+ (Vite 8; the system Node here is v16.13.1, so P12 was
+built and verified with a portable Node v26.13.0 + npm 11.20.0 — see
+`docs/handoff/IMPLEMENTATION_STATUS.md` §2.14). Start the API first (above),
+then:
+
+```powershell
+cd frontend
+copy .env.example .env   # VITE_API_BASE_URL only (public value, no secrets)
+npm install
+npm run dev              # strict port 5173, matching the API CORS default
+```
+
+`npm run lint`, `npm run test` (Vitest, 42 tests), `npm run build` (`tsc` +
+`vite build`). After any backend route change, regenerate the typed client
+with `npm run gen:api` (openapi-typescript from `docs/openapi.json`); a
+contract test fails on drift.
+
+What the app does (P12): a validated scenario form (lat/lon with coverage
+hints, window, reference period, crop, water flags, ERA5 land-fallback toggle),
+job progress with polling/timeout/keep-waiting, and one results card per
+indicator (value, units, reference period, source + coverage, status,
+limitations, provenance, fallback/cell-edge warnings) with a reference-summary
+chart. No composite scores or severity labels are rendered anywhere; every API
+error `type` code maps to one specific message. Recommendations/report UI is
+P13 scope.
+
 ## Scripts
 
 ```powershell
@@ -175,7 +206,7 @@ ERA5-Land variables: `2m_temperature`, `total_precipitation`,
 `volumetric_soil_water_layer_1/2/3` (0-7, 7-28, 28-100 cm). Layer 4 is excluded because its
 documented depth is contested. Soil-water *connector* support (series for layers 1-3)
 exists and is tested, but the soil-moisture *anomaly pipeline* and ERA5 API routes are
-still missing (see `docs/handoff/KNOWN_ISSUES.md` KI-06, KI-07).
+delivered in P04 (pipeline) and P05 (API routes); KI-06 and KI-07 are resolved.
 
 ## CHIRPS access modes
 
@@ -218,14 +249,14 @@ message, details logged server-side only). A zero baseline returns 200 with
 
 Cached CHIRPS remote values are not revalidated against ETag changes (CHC revised at least one
 file after release). The SPI gamma fit is not goodness-of-fit tested and there are no SPI
-category labels. Still missing: soil-moisture anomaly pipeline (connector exists), dense
-retrieval + RAG routes (BM25 batch exists), agent, and UI. The recommendation catalog
+category labels. Still missing: dense
+retrieval + RAG routes (BM25 batch exists). The soil-moisture pipeline, agent workflow, scenario persistence, and input/analysis UI are delivered (P04, P08–P12). The recommendation catalog
 covers irrigation options only (v1, 3 entries; other options unranked by design).
 
 ## Verified environment and audit limits (2026-10-30)
 
 - Verified with Python 3.11.17 (uv-managed), pytest 9.1.1, ruff 0.17.2, uv 0.13.5.
-- Frontend prerequisite: Node.js 18+ is required for current Vite, but only Node v16.13.1
-  is installed — upgrade Node before any frontend work.
+- Frontend prerequisite: Node 20.19+ is required (Vite 8), but only Node v16.13.1 is installed system-wide; P12 was built and verified with a portable Node v26.13.0 + npm 11.20.0 (untracked `node-tmp/`).
+  Upgrade the system Node or keep the portable toolchain for further frontend work.
 - P00 audit was offline and read-only: live CDS behavior, Baseten model access, and `.env`
   contents were deliberately not verified. No new source-code defects were found.

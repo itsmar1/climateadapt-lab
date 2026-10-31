@@ -7,6 +7,10 @@ dist/
 .venv/
 venv/
 
+# Frontend (P12): dependencies and the local portable-Node workaround
+node_modules/
+node-tmp/
+
 # Tooling caches
 .pytest_cache/
 .ruff_cache/

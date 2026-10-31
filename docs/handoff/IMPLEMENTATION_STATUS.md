@@ -73,7 +73,7 @@ one gated live call with fallback served; see §2.11). **P10 update 2026-10-31:*
 M6 agent workflow is **implemented + tested** as a fixed pipeline
 (`src/climateadapt/agent/`, 22 offline tests, one gated live run with
 validator-rejected draft → fallback; see §2.12 and `docs/AGENT_WORKFLOW.md`).
-Frontend, persistence and Docker/CI remain not started.
+**P11 update 2026-10-31:** scenario persistence is **implemented + tested** (SQLite store + CRUD API, direct-call probe green; TestClient suite written but sandbox-unrunnable; see §2.13). **P12 update 2026-10-31:** React input/analysis UI is **implemented + tested** (`frontend/`, 42 Vitest tests green, tsc/eslint/build clean, verified against real backend outputs; see §2.14). Docker/CI remain not started.
 
 ### Environment note (verified 2026-10-30; CONFIRMED)
 
@@ -158,6 +158,19 @@ Files: `api/main.py` (factory, validation-error handler that never echoes input,
 | `scripts/export_openapi.py` | Deterministic `docs/openapi.json` regeneration (11 paths) | R (ran 2026-10-31) |
 
 Tests: `tests/test_api_scenarios.py` (14 TestClient tests: lifecycle, restart on a temp DB, failed runs, validation shape, pagination, delete, 503 rollback, no-key partial, CORS preflight, 413, openapi routes) — written but never run green in this sandbox (socket block, KI-34 note); a throwaway direct-call probe verified the same behaviors and passed. Standalone `POST /v1/evidence/search` deliberately NOT added: the report already carries cited evidence, and an extra endpoint would widen unauthenticated corpus-text exposure. No auth, no rate limiting (documented limitation).
+
+### 2.14 React input/analysis UI (`frontend/`, P12 2026-10-31)
+| Path | Purpose | Evidence |
+|---|---|---|
+| `src/api/schema.d.ts` | Types generated from `docs/openapi.json` (`npm run gen:api`, openapi-typescript 7.13.0) | T (contract test guards drift) |
+| `src/api/client.ts`, `errors.ts` | openapi-fetch client (contract-version gate, 30 s timeout); every backend `type` code → one specific message | T |
+| `src/api/presenters.ts` | Pure bundle-entry → card view models; defensive narrowing; no severity language (test-enforced) | T |
+| `src/components/` | `ScenarioForm` (validated inputs, coverage hints, fallback toggle), `JobProgress` (2 s poll, timeout + keep-waiting), `ResultsView` + `IndicatorCard` + `ReferenceChart` (summary band, never per-year points), `StatusBadge`; `App` hash routing | T |
+| `src/test/fixtures.ts` | Synthetic fixtures + fresh-Response `mockFetch` | T |
+
+Gates (CONFIRMED 2026-10-31, portable Node v26.13.0 + npm 11.20.0 — system Node is v16.13.1): `tsc` exit 0, `eslint .` exit 0, **42/42 Vitest tests green** (8 files), `vite build` → `dist/` in 8.4 s. Each tool's current docs were verified before use (Vite 8, Vitest 5, RTL, ESLint flat + typescript-eslint, openapi-typescript 7.x).
+Real-backend verification (CONFIRMED, $0 spent): this sandbox blocks `listen()`/`socketpair()` (WinError 10013), so no TCP server or browser run was possible here; instead the exact `run_scenario_job` callable ran in-process on the reference scenario (form-default body validates; downloads off; production no-key `UnavailableProvider`): `partial` in 24.1 s, 4/4 indicators ok (CHIRPS SPI −0.517, ERA5 SPI −0.375, temp +2.22 °C, soil −0.0505 m³/m³), labelled `deterministic-fallback` with `[provider-auth]`. That real 122 KB `ScenarioDetail` rendered through the real `ResultsView` in a throwaway test (4 cards, exact values, fallback banner, no severity text) — passed, then deleted with all other probes. In-browser check and `vite dev` serving remain UNVERIFIED here; the owner runs `uv run uvicorn climateadapt.api.main:app --reload` plus `cd frontend; npm run dev` (strict port 5173 = API CORS default).
+Out of scope (P13): recommendations/report UI, auth, mobile polish.
 
 ### 2.6 Scientific RAG (`src/climateadapt/rag/`, first batch)
 | Path | Purpose | Evidence |
@@ -262,7 +275,7 @@ Retrieval evaluation so far: 10 of 15 queries evaluable, 5 skipped (q01, q03, q0
 - ~~Intervention catalog, constraints, ranking, evidence strength metadata (Milestone 5).~~ **Delivered 2026-10-31 (P08):** engine + 3-entry v1 catalog; catalog *growth* still needs owner-approved sources.
 - ~~LLM provider adapter (Baseten), report schema, agent workflow (Milestone 6).~~ **Adapter + schema + validator delivered 2026-10-31 (P09):** `src/climateadapt/llm/` with 51 offline tests and one gated live call (fallback served, see §2.11). **Agent workflow delivered 2026-10-31 (P10):** fixed pipeline in `src/climateadapt/agent/` with 22 offline tests and one gated live run (see §2.12).
 - ~~Scenario persistence/history, API auth and rate limiting.~~ **Persistence delivered 2026-10-31 (P11):** scenario CRUD + SQLite history (see §2.13). API auth and rate limiting still missing (documented limitation, KI-28).
-- **React + Vite frontend** (no `frontend/` directory expected).
+- ~~**React + Vite frontend** (no `frontend/` directory expected).~~ **Input/analysis screens delivered 2026-10-31 (P12):** form, polling, indicator cards + chart (see §2.14). Recommendations/report UI is P13.
 - Computer-vision baseline (CropHarvest) — deferred.
 - MLOps: Docker/Compose, GitHub Actions CI/CD, MLflow, Optuna, Airflow, PostgreSQL/PostGIS, Prometheus, Evidently, Grafana. Of the owner's eleven named tools only Pytest and FastAPI exist.
 

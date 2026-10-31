@@ -161,9 +161,10 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 - **Resolution (P08):** build the catalog only from documents in the corpus with explicit unknowns; owner supplies/approves additional sources first.
 - **P08 evidence (2026-10-31; CONFIRMED):** `src/climateadapt/recommend/` delivers the versioned catalog (v1: 2 supported irrigation entries + 1 `needs_evidence`), deterministic hard constraints with machine-readable reasons, transparent ranking (weights 0.5/0.3/0.2, full breakdowns, id-ordered ties), and `scripts/validate_catalog.py` (0 errors, 0 warnings against the ingested corpus). 80 new offline tests green; no efficacy/cost/benefit figure anywhere (all `unknown`). Catalog growth still needs owner-supplied sources (see KI-18 manuals); non-irrigation options remain unranked by design. Details: `docs/RECOMMENDATION_ENGINE.md`.
 
-### KI-27 — No frontend; blueprint says Streamlit (High)
+### KI-27 — No frontend; blueprint says Streamlit (High) — ✅ RESOLVED 2026-10-31 (input/analysis UI; P13 extends it)
 - **Evidence:** No `frontend/`; blueprint and early requirements named Streamlit/Plotly. Requirement is now React + Vite.
 - **Resolution (P11–P13):** React + Vite; remove stale Streamlit mentions in docs.
+- **P12 evidence (2026-10-31; CONFIRMED):** `frontend/` delivers the React + Vite input/analysis screens (typed client from `docs/openapi.json`, scenario form, polling, indicator cards + reference chart, error-code mapping; 42/42 Vitest green, tsc/eslint/build clean, verified against real backend outputs — see IMPLEMENTATION_STATUS §2.14). No Streamlit anywhere in code; remaining "Streamlit" hits are historical records (audit report, task prompts, decision log) plus the standing AGENTS.md rule. P13 adds the recommendations/report UI.
 
 ### KI-28 — API has no CORS, no auth, no rate limiting, synchronous long calls (Medium/High for frontend) — P05 parts DONE 2026-10-30, auth/rate limiting still open
 - **Evidence:** `api/main.py` (as delivered) has no `CORSMiddleware`; endpoints are synchronous; the shared client has no shutdown hook; offline-mode error text includes a local cache path.

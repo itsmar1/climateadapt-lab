@@ -47,7 +47,7 @@ Provisional proxies used by the roadmap (assumptions, to be replaced by the real
 |---|---|---|
 | Language/tooling | Python 3.11, `uv`, pytest, ruff | Implemented, CONFIRMED running on owner's Windows machine (Python 3.11.17, pytest 9.1.1) |
 | Backend | FastAPI + Pydantic v2 | Implemented (4 routes) |
-| Frontend | **React + Vite** (supersedes blueprint's Streamlit/Plotly) | Not started |
+| Frontend | **React + Vite** (supersedes blueprint's Streamlit/Plotly) | Input/analysis screens delivered (P12 2026-10-31; 42 tests green); recommendations/report UI is P13 |
 | Rainfall data | CHIRPS v3 Final monthly, 0.05°, 60°S–60°N, 1981→ | Implemented, real-data CONFIRMED |
 | Climate data | ERA5-Land monthly means via Copernicus CDS, 0.1° grid, 1950→ | Implemented, real-data CONFIRMED (tp, t2m, swvl1) |
 | Indicators | Percentage anomaly (prototype), SPI (gamma, Thom fit), temperature window anomaly, SPI fit diagnostics | Implemented, real-data CONFIRMED |
