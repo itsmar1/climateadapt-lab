@@ -46,6 +46,13 @@ class Settings(BaseSettings):
     api_job_ttl_seconds: float = Field(default=3600.0, gt=0)
     api_job_max_workers: int = Field(default=4, ge=1, le=16)
     api_job_max_jobs: int = Field(default=1000, ge=1)
+    api_db_path: Path | None = Field(
+        default=None,
+        description="Scenario SQLite file; defaults to <data_dir>/scenarios.sqlite3.",
+    )
+    api_max_body_bytes: int = Field(
+        default=1048576, ge=1024, description="Largest accepted request body."
+    )
 
     # Baseten Model APIs (application inference; see docs/LLM_PROVIDER_NOTES.md).
     # P03 verified the base URL + Bearer auth from docs and the -1026 slug live;

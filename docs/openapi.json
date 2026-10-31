@@ -1,2001 +1,3649 @@
 {
-  "components": {
-    "schemas": {
-      "AnalysisScenario": {
-        "additionalProperties": false,
-        "description": "Optional descriptive context for an analysis. Informational only in Milestone 0.",
-        "properties": {
-          "baseline_description": {
-            "anyOf": [
-              {
-                "maxLength": 300,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Free-text description of the baseline, e.g. '1991-2020 mean, Mar-May, source: <dataset>'. Not validated.",
-            "title": "Baseline Description"
-          },
-          "crop": {
-            "anyOf": [
-              {
-                "maxLength": 100,
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Crop"
-          },
-          "location": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Location"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "name": {
-            "anyOf": [
-              {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "observation_period": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ObservationPeriod"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "title": "AnalysisScenario",
-        "type": "object"
+ "components": {
+  "schemas": {
+   "AgentScenario": {
+    "additionalProperties": false,
+    "description": "One end-to-end run request: where/when, what to retrieve, whose options.",
+    "properties": {
+     "crop": {
+      "anyOf": [
+       {
+        "maxLength": 80,
+        "minLength": 1,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Crop"
+     },
+     "exclude_reference": {
+      "default": true,
+      "title": "Exclude Reference",
+      "type": "boolean"
+     },
+     "has_irrigation_equipment": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Has Irrigation Equipment"
+     },
+     "has_water_source": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Has Water Source"
+     },
+     "indicators": {
+      "default": [
+       "chirps_spi",
+       "era5_spi",
+       "era5_temperature_anomaly",
+       "era5_soil_moisture_anomaly"
+      ],
+      "items": {
+       "enum": [
+        "chirps_spi",
+        "era5_spi",
+        "era5_temperature_anomaly",
+        "era5_soil_moisture_anomaly"
+       ],
+       "type": "string"
       },
-      "ChirpsRainfallAnomalyRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "baseline_end_year": {
-            "maximum": 9999.0,
-            "minimum": 1.0,
-            "title": "Baseline End Year",
-            "type": "integer"
-          },
-          "baseline_start_year": {
-            "maximum": 9999.0,
-            "minimum": 1.0,
-            "title": "Baseline Start Year",
-            "type": "integer"
-          },
-          "latitude": {
-            "maximum": 90.0,
-            "minimum": -90.0,
-            "title": "Latitude",
-            "type": "number"
-          },
-          "longitude": {
-            "maximum": 180.0,
-            "minimum": -180.0,
-            "title": "Longitude",
-            "type": "number"
-          },
-          "observed_start_month": {
-            "description": "First month of the observation window, formatted YYYY-MM.",
-            "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
-            "title": "Observed Start Month",
-            "type": "string"
-          },
-          "window_months": {
-            "description": "Number of whole calendar months in the window (may cross a year end).",
-            "maximum": 12.0,
-            "minimum": 1.0,
-            "title": "Window Months",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "latitude",
-          "longitude",
-          "observed_start_month",
-          "window_months",
-          "baseline_start_year",
-          "baseline_end_year"
-        ],
-        "title": "ChirpsRainfallAnomalyRequest",
-        "type": "object"
-      },
-      "ChirpsRainfallAnomalyResult": {
-        "additionalProperties": false,
-        "properties": {
-          "absolute_difference_mm": {
-            "title": "Absolute Difference Mm",
-            "type": "number"
-          },
-          "baseline_end_year": {
-            "title": "Baseline End Year",
-            "type": "integer"
-          },
-          "baseline_excluded": {
-            "items": {
-              "$ref": "#/components/schemas/ExcludedYear"
-            },
-            "title": "Baseline Excluded",
-            "type": "array"
-          },
-          "baseline_includes_observed_period": {
-            "title": "Baseline Includes Observed Period",
-            "type": "boolean"
-          },
-          "baseline_mean_mm": {
-            "title": "Baseline Mean Mm",
-            "type": "number"
-          },
-          "baseline_start_year": {
-            "title": "Baseline Start Year",
-            "type": "integer"
-          },
-          "baseline_totals": {
-            "items": {
-              "$ref": "#/components/schemas/YearTotal"
-            },
-            "title": "Baseline Totals",
-            "type": "array"
-          },
-          "baseline_years_used": {
-            "title": "Baseline Years Used",
-            "type": "integer"
-          },
-          "citation": {
-            "title": "Citation",
-            "type": "string"
-          },
-          "data_source": {
-            "title": "Data Source",
-            "type": "string"
-          },
-          "direction": {
-            "enum": [
-              "below_baseline",
-              "above_baseline",
-              "equal_to_baseline"
-            ],
-            "title": "Direction",
-            "type": "string"
-          },
-          "doi": {
-            "title": "Doi",
-            "type": "string"
-          },
-          "formula": {
-            "title": "Formula",
-            "type": "string"
-          },
-          "grid_cell_center_latitude": {
-            "title": "Grid Cell Center Latitude",
-            "type": "number"
-          },
-          "grid_cell_center_longitude": {
-            "title": "Grid Cell Center Longitude",
-            "type": "number"
-          },
-          "indicator": {
-            "const": "precipitation_percentage_anomaly",
-            "default": "precipitation_percentage_anomaly",
-            "title": "Indicator",
-            "type": "string"
-          },
-          "license_note": {
-            "title": "License Note",
-            "type": "string"
-          },
-          "limitations": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Limitations",
-            "type": "array"
-          },
-          "message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Message"
-          },
-          "min_baseline_years": {
-            "title": "Min Baseline Years",
-            "type": "integer"
-          },
-          "observed_total_mm": {
-            "title": "Observed Total Mm",
-            "type": "number"
-          },
-          "observed_window_end": {
-            "title": "Observed Window End",
-            "type": "string"
-          },
-          "observed_window_start": {
-            "title": "Observed Window Start",
-            "type": "string"
-          },
-          "percentage_anomaly": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Percentage Anomaly"
-          },
-          "point_on_cell_boundary": {
-            "title": "Point On Cell Boundary",
-            "type": "boolean"
-          },
-          "requested_latitude": {
-            "title": "Requested Latitude",
-            "type": "number"
-          },
-          "requested_longitude": {
-            "title": "Requested Longitude",
-            "type": "number"
-          },
-          "source_files": {
-            "items": {
-              "$ref": "#/components/schemas/SourceFileRecord"
-            },
-            "title": "Source Files",
-            "type": "array"
-          },
-          "status": {
-            "enum": [
-              "ok",
-              "undefined"
-            ],
-            "title": "Status",
-            "type": "string"
-          },
-          "window_months": {
-            "title": "Window Months",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "status",
-          "data_source",
-          "percentage_anomaly",
-          "absolute_difference_mm",
-          "direction",
-          "observed_total_mm",
-          "baseline_mean_mm",
-          "formula",
-          "requested_latitude",
-          "requested_longitude",
-          "grid_cell_center_latitude",
-          "grid_cell_center_longitude",
-          "point_on_cell_boundary",
-          "observed_window_start",
-          "observed_window_end",
-          "window_months",
-          "baseline_start_year",
-          "baseline_end_year",
-          "min_baseline_years",
-          "baseline_years_used",
-          "baseline_totals",
-          "baseline_excluded",
-          "baseline_includes_observed_period",
-          "source_files",
-          "citation",
-          "doi",
-          "license_note",
-          "limitations"
-        ],
-        "title": "ChirpsRainfallAnomalyResult",
-        "type": "object"
-      },
-      "ChirpsSpiRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "latitude": {
-            "maximum": 90.0,
-            "minimum": -90.0,
-            "title": "Latitude",
-            "type": "number"
-          },
-          "longitude": {
-            "maximum": 180.0,
-            "minimum": -180.0,
-            "title": "Longitude",
-            "type": "number"
-          },
-          "min_reference_years": {
-            "default": 30,
-            "description": "Minimum usable reference years (WMO recommends at least 30).",
-            "maximum": 100.0,
-            "minimum": 10.0,
-            "title": "Min Reference Years",
-            "type": "integer"
-          },
-          "reference_end_year": {
-            "default": 2020,
-            "maximum": 9999.0,
-            "minimum": 1.0,
-            "title": "Reference End Year",
-            "type": "integer"
-          },
-          "reference_start_year": {
-            "default": 1991,
-            "maximum": 9999.0,
-            "minimum": 1.0,
-            "title": "Reference Start Year",
-            "type": "integer"
-          },
-          "target_end_month": {
-            "description": "Last month of the SPI window, formatted YYYY-MM.",
-            "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
-            "title": "Target End Month",
-            "type": "string"
-          },
-          "timescale_months": {
-            "description": "Accumulation period in months (1-48).",
-            "maximum": 48.0,
-            "minimum": 1.0,
-            "title": "Timescale Months",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "latitude",
-          "longitude",
-          "target_end_month",
-          "timescale_months"
-        ],
-        "title": "ChirpsSpiRequest",
-        "type": "object"
-      },
-      "ChirpsSpiResult": {
-        "additionalProperties": false,
-        "properties": {
-          "citation": {
-            "title": "Citation",
-            "type": "string"
-          },
-          "cumulative_probability": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cumulative Probability"
-          },
-          "data_source": {
-            "title": "Data Source",
-            "type": "string"
-          },
-          "doi": {
-            "title": "Doi",
-            "type": "string"
-          },
-          "gamma_scale_mm": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gamma Scale Mm"
-          },
-          "gamma_shape": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gamma Shape"
-          },
-          "grid_cell_center_latitude": {
-            "title": "Grid Cell Center Latitude",
-            "type": "number"
-          },
-          "grid_cell_center_longitude": {
-            "title": "Grid Cell Center Longitude",
-            "type": "number"
-          },
-          "indicator": {
-            "const": "standardized_precipitation_index",
-            "default": "standardized_precipitation_index",
-            "title": "Indicator",
-            "type": "string"
-          },
-          "license_note": {
-            "title": "License Note",
-            "type": "string"
-          },
-          "limitations": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Limitations",
-            "type": "array"
-          },
-          "message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Message"
-          },
-          "method": {
-            "title": "Method",
-            "type": "string"
-          },
-          "min_reference_years": {
-            "title": "Min Reference Years",
-            "type": "integer"
-          },
-          "point_on_cell_boundary": {
-            "title": "Point On Cell Boundary",
-            "type": "boolean"
-          },
-          "reference_end_year": {
-            "title": "Reference End Year",
-            "type": "integer"
-          },
-          "reference_nonzero_count": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reference Nonzero Count"
-          },
-          "reference_spi_mean": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reference Spi Mean"
-          },
-          "reference_spi_std": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reference Spi Std"
-          },
-          "reference_start_year": {
-            "title": "Reference Start Year",
-            "type": "integer"
-          },
-          "reference_years_excluded": {
-            "items": {
-              "$ref": "#/components/schemas/ExcludedReferenceYear"
-            },
-            "title": "Reference Years Excluded",
-            "type": "array"
-          },
-          "reference_years_included": {
-            "items": {
-              "type": "integer"
-            },
-            "title": "Reference Years Included",
-            "type": "array"
-          },
-          "reference_years_used": {
-            "title": "Reference Years Used",
-            "type": "integer"
-          },
-          "reference_zero_count": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reference Zero Count"
-          },
-          "requested_latitude": {
-            "title": "Requested Latitude",
-            "type": "number"
-          },
-          "requested_longitude": {
-            "title": "Requested Longitude",
-            "type": "number"
-          },
-          "source_files": {
-            "items": {
-              "$ref": "#/components/schemas/SourceFileRecord"
-            },
-            "title": "Source Files",
-            "type": "array"
-          },
-          "spi": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Spi"
-          },
-          "status": {
-            "enum": [
-              "ok",
-              "undefined"
-            ],
-            "title": "Status",
-            "type": "string"
-          },
-          "target_in_reference_period": {
-            "title": "Target In Reference Period",
-            "type": "boolean"
-          },
-          "target_window_end": {
-            "title": "Target Window End",
-            "type": "string"
-          },
-          "target_window_start": {
-            "title": "Target Window Start",
-            "type": "string"
-          },
-          "timescale_months": {
-            "title": "Timescale Months",
-            "type": "integer"
-          },
-          "window_total_mm": {
-            "title": "Window Total Mm",
-            "type": "number"
-          },
-          "zero_probability": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Zero Probability"
-          }
-        },
-        "required": [
-          "status",
-          "data_source",
-          "method",
-          "timescale_months",
-          "target_window_start",
-          "target_window_end",
-          "window_total_mm",
-          "spi",
-          "cumulative_probability",
-          "message",
-          "requested_latitude",
-          "requested_longitude",
-          "grid_cell_center_latitude",
-          "grid_cell_center_longitude",
-          "point_on_cell_boundary",
-          "reference_start_year",
-          "reference_end_year",
-          "min_reference_years",
-          "reference_years_used",
-          "reference_years_included",
-          "reference_years_excluded",
-          "target_in_reference_period",
-          "gamma_shape",
-          "gamma_scale_mm",
-          "zero_probability",
-          "reference_zero_count",
-          "reference_nonzero_count",
-          "reference_spi_mean",
-          "reference_spi_std",
-          "source_files",
-          "citation",
-          "doi",
-          "license_note",
-          "limitations"
-        ],
-        "title": "ChirpsSpiResult",
-        "type": "object"
-      },
-      "EnvironmentalBundleRequest": {
-        "additionalProperties": false,
-        "description": "Request schema for the environmental-bundle endpoint.\n\nThe bundle always uses soil layer 1; layers 2-3 are available on the single\nsoil-moisture endpoint.",
-        "example": {
-          "indicators": [
-            "chirps_spi",
-            "era5_spi",
-            "era5_temperature_anomaly",
-            "era5_soil_moisture_anomaly"
-          ],
-          "land_fallback_max_km": 15.0,
-          "latitude": 30.43,
-          "longitude": -9.61,
-          "min_reference_years": 30,
-          "reference_end_year": 2020,
-          "reference_start_year": 1991,
-          "target_end_month": "2024-03",
-          "timescale_months": 3
-        },
-        "properties": {
-          "indicators": {
-            "default": [
-              "chirps_spi",
-              "era5_spi",
-              "era5_temperature_anomaly",
-              "era5_soil_moisture_anomaly"
-            ],
-            "description": "Subset to compute; unlisted indicators return status 'skipped'.",
-            "items": {
-              "enum": [
-                "chirps_spi",
-                "era5_spi",
-                "era5_temperature_anomaly",
-                "era5_soil_moisture_anomaly"
-              ],
-              "type": "string"
-            },
-            "title": "Indicators",
-            "type": "array"
-          },
-          "land_fallback_max_km": {
-            "anyOf": [
-              {
-                "exclusiveMinimum": 0.0,
-                "maximum": 25.0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Opt in: use the nearest valid neighbouring ERA5-Land grid point within this distance (0-25 km) when the nearest point is masked. Always reported.",
-            "title": "Land Fallback Max Km"
-          },
-          "latitude": {
-            "maximum": 90.0,
-            "minimum": -90.0,
-            "title": "Latitude",
-            "type": "number"
-          },
-          "longitude": {
-            "maximum": 180.0,
-            "minimum": -180.0,
-            "title": "Longitude",
-            "type": "number"
-          },
-          "min_reference_years": {
-            "default": 30,
-            "description": "Minimum usable reference years (WMO recommends at least 30).",
-            "maximum": 100.0,
-            "minimum": 10.0,
-            "title": "Min Reference Years",
-            "type": "integer"
-          },
-          "reference_end_year": {
-            "default": 2020,
-            "maximum": 9999.0,
-            "minimum": 1.0,
-            "title": "Reference End Year",
-            "type": "integer"
-          },
-          "reference_start_year": {
-            "default": 1991,
-            "maximum": 9999.0,
-            "minimum": 1.0,
-            "title": "Reference Start Year",
-            "type": "integer"
-          },
-          "target_end_month": {
-            "description": "Last month of the analysis window, formatted YYYY-MM.",
-            "examples": [
-              "2024-03"
-            ],
-            "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
-            "title": "Target End Month",
-            "type": "string"
-          },
-          "timescale_months": {
-            "description": "Accumulation period in months (1-48).",
-            "maximum": 48.0,
-            "minimum": 1.0,
-            "title": "Timescale Months",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "latitude",
-          "longitude",
-          "target_end_month",
-          "timescale_months"
-        ],
-        "title": "EnvironmentalBundleRequest",
-        "type": "object"
-      },
-      "Era5SoilMoistureAnomalyRequest": {
-        "additionalProperties": false,
-        "description": "Request schema for the ERA5-Land soil-moisture-anomaly endpoint.",
-        "example": {
-          "land_fallback_max_km": 15.0,
-          "latitude": 30.43,
-          "longitude": -9.61,
-          "min_reference_years": 30,
-          "reference_end_year": 2020,
-          "reference_start_year": 1991,
-          "target_end_month": "2024-03",
-          "timescale_months": 3,
-          "variable": "volumetric_soil_water_layer_1"
-        },
-        "properties": {
-          "land_fallback_max_km": {
-            "anyOf": [
-              {
-                "exclusiveMinimum": 0.0,
-                "maximum": 25.0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Opt in: use the nearest valid neighbouring ERA5-Land grid point within this distance (0-25 km) when the nearest point is masked. Always reported.",
-            "title": "Land Fallback Max Km"
-          },
-          "latitude": {
-            "maximum": 90.0,
-            "minimum": -90.0,
-            "title": "Latitude",
-            "type": "number"
-          },
-          "longitude": {
-            "maximum": 180.0,
-            "minimum": -180.0,
-            "title": "Longitude",
-            "type": "number"
-          },
-          "min_reference_years": {
-            "default": 30,
-            "description": "Minimum usable reference years (WMO recommends at least 30).",
-            "maximum": 100.0,
-            "minimum": 10.0,
-            "title": "Min Reference Years",
-            "type": "integer"
-          },
-          "reference_end_year": {
-            "default": 2020,
-            "maximum": 9999.0,
-            "minimum": 1.0,
-            "title": "Reference End Year",
-            "type": "integer"
-          },
-          "reference_start_year": {
-            "default": 1991,
-            "maximum": 9999.0,
-            "minimum": 1.0,
-            "title": "Reference Start Year",
-            "type": "integer"
-          },
-          "target_end_month": {
-            "description": "Last month of the analysis window, formatted YYYY-MM.",
-            "examples": [
-              "2024-03"
-            ],
-            "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
-            "title": "Target End Month",
-            "type": "string"
-          },
-          "timescale_months": {
-            "description": "Accumulation period in months (1-48).",
-            "maximum": 48.0,
-            "minimum": 1.0,
-            "title": "Timescale Months",
-            "type": "integer"
-          },
-          "variable": {
-            "default": "volumetric_soil_water_layer_1",
-            "description": "Soil layer (0-7, 7-28, 28-100 cm). Layer 4 is excluded: its documented depth is contested.",
-            "enum": [
-              "volumetric_soil_water_layer_1",
-              "volumetric_soil_water_layer_2",
-              "volumetric_soil_water_layer_3"
-            ],
-            "title": "Variable",
-            "type": "string"
-          }
-        },
-        "required": [
-          "latitude",
-          "longitude",
-          "target_end_month",
-          "timescale_months"
-        ],
-        "title": "Era5SoilMoistureAnomalyRequest",
-        "type": "object"
-      },
-      "Era5SpiRequest": {
-        "additionalProperties": false,
-        "description": "Request schema for the ERA5-Land SPI endpoint.",
-        "example": {
-          "land_fallback_max_km": 15.0,
-          "latitude": 30.43,
-          "longitude": -9.61,
-          "min_reference_years": 30,
-          "reference_end_year": 2020,
-          "reference_start_year": 1991,
-          "target_end_month": "2024-03",
-          "timescale_months": 3
-        },
-        "properties": {
-          "land_fallback_max_km": {
-            "anyOf": [
-              {
-                "exclusiveMinimum": 0.0,
-                "maximum": 25.0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Opt in: use the nearest valid neighbouring ERA5-Land grid point within this distance (0-25 km) when the nearest point is masked. Always reported.",
-            "title": "Land Fallback Max Km"
-          },
-          "latitude": {
-            "maximum": 90.0,
-            "minimum": -90.0,
-            "title": "Latitude",
-            "type": "number"
-          },
-          "longitude": {
-            "maximum": 180.0,
-            "minimum": -180.0,
-            "title": "Longitude",
-            "type": "number"
-          },
-          "min_reference_years": {
-            "default": 30,
-            "description": "Minimum usable reference years (WMO recommends at least 30).",
-            "maximum": 100.0,
-            "minimum": 10.0,
-            "title": "Min Reference Years",
-            "type": "integer"
-          },
-          "reference_end_year": {
-            "default": 2020,
-            "maximum": 9999.0,
-            "minimum": 1.0,
-            "title": "Reference End Year",
-            "type": "integer"
-          },
-          "reference_start_year": {
-            "default": 1991,
-            "maximum": 9999.0,
-            "minimum": 1.0,
-            "title": "Reference Start Year",
-            "type": "integer"
-          },
-          "target_end_month": {
-            "description": "Last month of the analysis window, formatted YYYY-MM.",
-            "examples": [
-              "2024-03"
-            ],
-            "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
-            "title": "Target End Month",
-            "type": "string"
-          },
-          "timescale_months": {
-            "description": "Accumulation period in months (1-48).",
-            "maximum": 48.0,
-            "minimum": 1.0,
-            "title": "Timescale Months",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "latitude",
-          "longitude",
-          "target_end_month",
-          "timescale_months"
-        ],
-        "title": "Era5SpiRequest",
-        "type": "object"
-      },
-      "Era5TemperatureAnomalyRequest": {
-        "additionalProperties": false,
-        "description": "Request schema for the ERA5-Land temperature-anomaly endpoint.",
-        "example": {
-          "land_fallback_max_km": 15.0,
-          "latitude": 30.43,
-          "longitude": -9.61,
-          "min_reference_years": 30,
-          "reference_end_year": 2020,
-          "reference_start_year": 1991,
-          "target_end_month": "2024-03",
-          "timescale_months": 3
-        },
-        "properties": {
-          "land_fallback_max_km": {
-            "anyOf": [
-              {
-                "exclusiveMinimum": 0.0,
-                "maximum": 25.0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Opt in: use the nearest valid neighbouring ERA5-Land grid point within this distance (0-25 km) when the nearest point is masked. Always reported.",
-            "title": "Land Fallback Max Km"
-          },
-          "latitude": {
-            "maximum": 90.0,
-            "minimum": -90.0,
-            "title": "Latitude",
-            "type": "number"
-          },
-          "longitude": {
-            "maximum": 180.0,
-            "minimum": -180.0,
-            "title": "Longitude",
-            "type": "number"
-          },
-          "min_reference_years": {
-            "default": 30,
-            "description": "Minimum usable reference years (WMO recommends at least 30).",
-            "maximum": 100.0,
-            "minimum": 10.0,
-            "title": "Min Reference Years",
-            "type": "integer"
-          },
-          "reference_end_year": {
-            "default": 2020,
-            "maximum": 9999.0,
-            "minimum": 1.0,
-            "title": "Reference End Year",
-            "type": "integer"
-          },
-          "reference_start_year": {
-            "default": 1991,
-            "maximum": 9999.0,
-            "minimum": 1.0,
-            "title": "Reference Start Year",
-            "type": "integer"
-          },
-          "target_end_month": {
-            "description": "Last month of the analysis window, formatted YYYY-MM.",
-            "examples": [
-              "2024-03"
-            ],
-            "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
-            "title": "Target End Month",
-            "type": "string"
-          },
-          "timescale_months": {
-            "description": "Accumulation period in months (1-48).",
-            "maximum": 48.0,
-            "minimum": 1.0,
-            "title": "Timescale Months",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "latitude",
-          "longitude",
-          "target_end_month",
-          "timescale_months"
-        ],
-        "title": "Era5TemperatureAnomalyRequest",
-        "type": "object"
-      },
-      "ExcludedReferenceYear": {
-        "additionalProperties": false,
-        "properties": {
-          "reason": {
-            "title": "Reason",
-            "type": "string"
-          },
-          "year": {
-            "title": "Year",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "year",
-          "reason"
-        ],
-        "title": "ExcludedReferenceYear",
-        "type": "object"
-      },
-      "ExcludedYear": {
-        "additionalProperties": false,
-        "properties": {
-          "reason": {
-            "title": "Reason",
-            "type": "string"
-          },
-          "season_year": {
-            "title": "Season Year",
-            "type": "integer"
-          },
-          "window_end": {
-            "title": "Window End",
-            "type": "string"
-          },
-          "window_start": {
-            "title": "Window Start",
-            "type": "string"
-          }
-        },
-        "required": [
-          "season_year",
-          "window_start",
-          "window_end",
-          "reason"
-        ],
-        "title": "ExcludedYear",
-        "type": "object"
-      },
-      "HTTPValidationError": {
-        "properties": {
-          "detail": {
-            "items": {
-              "$ref": "#/components/schemas/ValidationError"
-            },
-            "title": "Detail",
-            "type": "array"
-          }
-        },
-        "title": "HTTPValidationError",
-        "type": "object"
-      },
-      "HealthResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "environment": {
-            "title": "Environment",
-            "type": "string"
-          },
-          "status": {
-            "const": "ok",
-            "title": "Status",
-            "type": "string"
-          },
-          "version": {
-            "title": "Version",
-            "type": "string"
-          }
-        },
-        "required": [
-          "status",
-          "version",
-          "environment"
-        ],
-        "title": "HealthResponse",
-        "type": "object"
-      },
-      "JobError": {
-        "additionalProperties": false,
-        "properties": {
-          "message": {
-            "title": "Message",
-            "type": "string"
-          },
-          "type": {
-            "title": "Type",
-            "type": "string"
-          }
-        },
-        "required": [
-          "type",
-          "message"
-        ],
-        "title": "JobError",
-        "type": "object"
-      },
-      "JobProgress": {
-        "additionalProperties": false,
-        "properties": {
-          "completed_steps": {
-            "title": "Completed Steps",
-            "type": "integer"
-          },
-          "total_steps": {
-            "title": "Total Steps",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "completed_steps",
-          "total_steps"
-        ],
-        "title": "JobProgress",
-        "type": "object"
-      },
-      "JobStatus": {
-        "additionalProperties": false,
-        "properties": {
-          "error": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/JobError"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "finished_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Finished At"
-          },
-          "job_id": {
-            "title": "Job Id",
-            "type": "string"
-          },
-          "label": {
-            "title": "Label",
-            "type": "string"
-          },
-          "progress": {
-            "$ref": "#/components/schemas/JobProgress"
-          },
-          "result": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Result"
-          },
-          "started_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Started At"
-          },
-          "status": {
-            "enum": [
-              "queued",
-              "running",
-              "succeeded",
-              "failed",
-              "timed_out"
-            ],
-            "title": "Status",
-            "type": "string"
-          },
-          "submitted_at": {
-            "format": "date-time",
-            "title": "Submitted At",
-            "type": "string"
-          }
-        },
-        "required": [
-          "job_id",
-          "label",
-          "status",
-          "submitted_at",
-          "started_at",
-          "finished_at",
-          "progress",
-          "result",
-          "error"
-        ],
-        "title": "JobStatus",
-        "type": "object"
-      },
-      "JobSubmitted": {
-        "additionalProperties": false,
-        "properties": {
-          "job_id": {
-            "title": "Job Id",
-            "type": "string"
-          },
-          "status": {
-            "enum": [
-              "queued",
-              "running",
-              "succeeded",
-              "failed",
-              "timed_out"
-            ],
-            "title": "Status",
-            "type": "string"
-          },
-          "status_url": {
-            "title": "Status Url",
-            "type": "string"
-          }
-        },
-        "required": [
-          "job_id",
-          "status",
-          "status_url"
-        ],
-        "title": "JobSubmitted",
-        "type": "object"
-      },
-      "Location": {
-        "additionalProperties": false,
-        "description": "A point location in WGS84 decimal degrees.",
-        "properties": {
-          "latitude": {
-            "maximum": 90.0,
-            "minimum": -90.0,
-            "title": "Latitude",
-            "type": "number"
-          },
-          "longitude": {
-            "maximum": 180.0,
-            "minimum": -180.0,
-            "title": "Longitude",
-            "type": "number"
-          }
-        },
-        "required": [
-          "latitude",
-          "longitude"
-        ],
-        "title": "Location",
-        "type": "object"
-      },
-      "ObservationPeriod": {
-        "additionalProperties": false,
-        "description": "Inclusive date range of the observed precipitation total.",
-        "properties": {
-          "end_date": {
-            "format": "date",
-            "title": "End Date",
-            "type": "string"
-          },
-          "start_date": {
-            "format": "date",
-            "title": "Start Date",
-            "type": "string"
-          }
-        },
-        "required": [
-          "start_date",
-          "end_date"
-        ],
-        "title": "ObservationPeriod",
-        "type": "object"
-      },
-      "RainfallAnalysisRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "baseline_mean_mm": {
-            "description": "Historical baseline mean for the same window, in millimetres.",
-            "minimum": 0.0,
-            "title": "Baseline Mean Mm",
-            "type": "number"
-          },
-          "data_origin": {
-            "default": "user_supplied",
-            "description": "Declares whether the numbers are a synthetic example or user-supplied.",
-            "enum": [
-              "synthetic_example",
-              "user_supplied"
-            ],
-            "title": "Data Origin",
-            "type": "string"
-          },
-          "observed_total_mm": {
-            "description": "Observed-period precipitation total in millimetres.",
-            "minimum": 0.0,
-            "title": "Observed Total Mm",
-            "type": "number"
-          },
-          "scenario": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AnalysisScenario"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "required": [
-          "observed_total_mm",
-          "baseline_mean_mm"
-        ],
-        "title": "RainfallAnalysisRequest",
-        "type": "object"
-      },
-      "RainfallAnalysisResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "absolute_difference_mm": {
-            "title": "Absolute Difference Mm",
-            "type": "number"
-          },
-          "baseline_mean_mm": {
-            "title": "Baseline Mean Mm",
-            "type": "number"
-          },
-          "data_origin": {
-            "enum": [
-              "synthetic_example",
-              "user_supplied"
-            ],
-            "title": "Data Origin",
-            "type": "string"
-          },
-          "direction": {
-            "enum": [
-              "below_baseline",
-              "above_baseline",
-              "equal_to_baseline"
-            ],
-            "title": "Direction",
-            "type": "string"
-          },
-          "formula": {
-            "title": "Formula",
-            "type": "string"
-          },
-          "indicator": {
-            "const": "precipitation_percentage_anomaly",
-            "default": "precipitation_percentage_anomaly",
-            "title": "Indicator",
-            "type": "string"
-          },
-          "limitations": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Limitations",
-            "type": "array"
-          },
-          "message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Message"
-          },
-          "observed_total_mm": {
-            "title": "Observed Total Mm",
-            "type": "number"
-          },
-          "percentage_anomaly": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Anomaly in percent, or null when undefined. Never a placeholder number.",
-            "title": "Percentage Anomaly"
-          },
-          "scenario": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AnalysisScenario"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "status": {
-            "enum": [
-              "ok",
-              "undefined"
-            ],
-            "title": "Status",
-            "type": "string"
-          }
-        },
-        "required": [
-          "status",
-          "percentage_anomaly",
-          "absolute_difference_mm",
-          "direction",
-          "observed_total_mm",
-          "baseline_mean_mm",
-          "formula",
-          "data_origin",
-          "limitations"
-        ],
-        "title": "RainfallAnalysisResponse",
-        "type": "object"
-      },
-      "SourceFileRecord": {
-        "additionalProperties": false,
-        "properties": {
-          "access_mode": {
-            "enum": [
-              "download",
-              "remote_range_read"
-            ],
-            "title": "Access Mode",
-            "type": "string"
-          },
-          "month": {
-            "title": "Month",
-            "type": "integer"
-          },
-          "remote_etag": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Remote Etag"
-          },
-          "remote_last_modified": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Remote Last Modified"
-          },
-          "retrieved_at_utc": {
-            "format": "date-time",
-            "title": "Retrieved At Utc",
-            "type": "string"
-          },
-          "sha256": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sha256"
-          },
-          "size_bytes": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Size Bytes"
-          },
-          "source_url": {
-            "title": "Source Url",
-            "type": "string"
-          },
-          "year": {
-            "title": "Year",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "year",
-          "month",
-          "source_url",
-          "access_mode",
-          "sha256",
-          "size_bytes",
-          "remote_etag",
-          "remote_last_modified",
-          "retrieved_at_utc"
-        ],
-        "title": "SourceFileRecord",
-        "type": "object"
-      },
-      "ValidationError": {
-        "properties": {
-          "ctx": {
-            "title": "Context",
-            "type": "object"
-          },
-          "input": {
-            "title": "Input"
-          },
-          "loc": {
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
-            },
-            "title": "Location",
-            "type": "array"
-          },
-          "msg": {
-            "title": "Message",
-            "type": "string"
-          },
-          "type": {
-            "title": "Error Type",
-            "type": "string"
-          }
-        },
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
-        "title": "ValidationError",
-        "type": "object"
-      },
-      "YearTotal": {
-        "additionalProperties": false,
-        "properties": {
-          "season_year": {
-            "title": "Season Year",
-            "type": "integer"
-          },
-          "total_mm": {
-            "title": "Total Mm",
-            "type": "number"
-          },
-          "window_end": {
-            "title": "Window End",
-            "type": "string"
-          },
-          "window_start": {
-            "title": "Window Start",
-            "type": "string"
-          }
-        },
-        "required": [
-          "season_year",
-          "window_start",
-          "window_end",
-          "total_mm"
-        ],
-        "title": "YearTotal",
-        "type": "object"
-      }
-    }
-  },
-  "info": {
-    "description": "Evidence-grounded agricultural drought adaptation decision support. Indicators describe rainfall, temperature, and soil moisture relative to reference periods; they do not measure drought impact or classify severity.",
-    "title": "ClimateAdapt Lab API",
-    "version": "0.1.0"
-  },
-  "openapi": "3.1.0",
-  "paths": {
-    "/health": {
-      "get": {
-        "operationId": "health_health_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HealthResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "Health",
-        "tags": [
-          "system"
-        ]
-      }
+      "title": "Indicators",
+      "type": "array"
+     },
+     "land_fallback_max_km": {
+      "anyOf": [
+       {
+        "exclusiveMinimum": 0.0,
+        "maximum": 25.0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Land Fallback Max Km"
+     },
+     "latitude": {
+      "maximum": 90.0,
+      "minimum": -90.0,
+      "title": "Latitude",
+      "type": "number"
+     },
+     "longitude": {
+      "maximum": 180.0,
+      "minimum": -180.0,
+      "title": "Longitude",
+      "type": "number"
+     },
+     "min_reference_years": {
+      "default": 30,
+      "maximum": 100.0,
+      "minimum": 10.0,
+      "title": "Min Reference Years",
+      "type": "integer"
+     },
+     "production_system": {
+      "anyOf": [
+       {
+        "pattern": "^(irrigated|rainfed)$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Production System"
+     },
+     "query": {
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "Query",
+      "type": "string"
+     },
+     "reference_end_year": {
+      "default": 2020,
+      "maximum": 9999.0,
+      "minimum": 1.0,
+      "title": "Reference End Year",
+      "type": "integer"
+     },
+     "reference_start_year": {
+      "default": 1991,
+      "maximum": 9999.0,
+      "minimum": 1.0,
+      "title": "Reference Start Year",
+      "type": "integer"
+     },
+     "season": {
+      "anyOf": [
+       {
+        "maxLength": 40,
+        "minLength": 1,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Season"
+     },
+     "target_end_month": {
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+      "title": "Target End Month",
+      "type": "string"
+     },
+     "timescale_months": {
+      "maximum": 48.0,
+      "minimum": 1.0,
+      "title": "Timescale Months",
+      "type": "integer"
+     },
+     "top_k": {
+      "default": 5,
+      "maximum": 20.0,
+      "minimum": 1.0,
+      "title": "Top K",
+      "type": "integer"
+     }
     },
-    "/v1/analysis/chirps-rainfall-anomaly": {
-      "post": {
-        "description": "Compares the observed calendar-month window total with the mean of the same window over the baseline years, at the CHIRPS grid cell containing the point. The first request for a period reads many monthly values and may be slow; later requests use the local cache. Not a drought-severity classification.",
-        "operationId": "chirps_rainfall_anomaly_endpoint_v1_analysis_chirps_rainfall_anomaly_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ChirpsRainfallAnomalyRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChirpsRainfallAnomalyResult"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Precipitation percentage anomaly computed from CHIRPS v3 Final",
-        "tags": [
-          "analysis"
-        ]
-      }
+    "required": [
+     "latitude",
+     "longitude",
+     "target_end_month",
+     "timescale_months",
+     "query"
+    ],
+    "title": "AgentScenario",
+    "type": "object"
+   },
+   "AnalysisScenario": {
+    "additionalProperties": false,
+    "description": "Optional descriptive context for an analysis. Informational only in Milestone 0.",
+    "properties": {
+     "baseline_description": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Free-text description of the baseline, e.g. '1991-2020 mean, Mar-May, source: <dataset>'. Not validated.",
+      "title": "Baseline Description"
+     },
+     "crop": {
+      "anyOf": [
+       {
+        "maxLength": 100,
+        "minLength": 1,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Crop"
+     },
+     "location": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/Location"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "name": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Name"
+     },
+     "observation_period": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/ObservationPeriod"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
     },
-    "/v1/analysis/chirps-spi": {
-      "post": {
-        "description": "SPI for the window ending at target_end_month, calibrated on the reference period (gamma distribution per calendar month; WMO-No. 1090). Precipitation only: it does not measure agricultural drought impact and no severity labels are returned. A cold request reads about timescale x reference-years monthly values and may take a minute or more.",
-        "operationId": "chirps_spi_endpoint_v1_analysis_chirps_spi_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ChirpsSpiRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChirpsSpiResult"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Standardized Precipitation Index (SPI) from CHIRPS v3 Final",
-        "tags": [
-          "analysis"
-        ]
-      }
+    "title": "AnalysisScenario",
+    "type": "object"
+   },
+   "BundleIndicatorResult": {
+    "additionalProperties": false,
+    "description": "One indicator's outcome inside a bundle. Failures are reported, never hidden.",
+    "properties": {
+     "error_message": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Human-readable cause.",
+      "title": "Error Message"
+     },
+     "error_type": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Machine-readable error code (failed only).",
+      "title": "Error Type"
+     },
+     "grid_point_latitude": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Used grid point/cell (null unless computed).",
+      "title": "Grid Point Latitude"
+     },
+     "grid_point_longitude": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Used grid point/cell (null unless computed).",
+      "title": "Grid Point Longitude"
+     },
+     "indicator": {
+      "description": "Indicator name, as in the request selector.",
+      "title": "Indicator",
+      "type": "string"
+     },
+     "requested_latitude": {
+      "title": "Requested Latitude",
+      "type": "number"
+     },
+     "requested_longitude": {
+      "title": "Requested Longitude",
+      "type": "number"
+     },
+     "result": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Full pipeline result (values, provenance, limitations, grid cells).",
+      "title": "Result"
+     },
+     "status": {
+      "description": "'ok': computed. 'undefined': computed but indeterminate (e.g. SPI with no variance). 'failed': error below. 'skipped': not requested.",
+      "enum": [
+       "ok",
+       "undefined",
+       "failed",
+       "skipped"
+      ],
+      "title": "Status",
+      "type": "string"
+     }
     },
-    "/v1/analysis/environmental-bundle": {
-      "post": {
-        "description": "Queues one bundle run over CHIRPS SPI, ERA5-Land SPI, temperature anomaly and soil-moisture anomaly (layer 1) and returns 202 + job id immediately; poll GET /v1/jobs/{job_id} for the result. Each indicator reports its own status (ok / undefined / failed / skipped) with result or error type, provenance, limitations, and coordinates. Failures are never hidden, never merged into a composite score, and never labelled by severity.",
-        "operationId": "environmental_bundle_endpoint_v1_analysis_environmental_bundle_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EnvironmentalBundleRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "202": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JobSubmitted"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Per-indicator environmental bundle: CHIRPS SPI + ERA5 trio (job)",
-        "tags": [
-          "analysis"
-        ]
-      }
+    "required": [
+     "indicator",
+     "status",
+     "requested_latitude",
+     "requested_longitude"
+    ],
+    "title": "BundleIndicatorResult",
+    "type": "object"
+   },
+   "ChirpsRainfallAnomalyRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "baseline_end_year": {
+      "maximum": 9999.0,
+      "minimum": 1.0,
+      "title": "Baseline End Year",
+      "type": "integer"
+     },
+     "baseline_start_year": {
+      "maximum": 9999.0,
+      "minimum": 1.0,
+      "title": "Baseline Start Year",
+      "type": "integer"
+     },
+     "latitude": {
+      "maximum": 90.0,
+      "minimum": -90.0,
+      "title": "Latitude",
+      "type": "number"
+     },
+     "longitude": {
+      "maximum": 180.0,
+      "minimum": -180.0,
+      "title": "Longitude",
+      "type": "number"
+     },
+     "observed_start_month": {
+      "description": "First month of the observation window, formatted YYYY-MM.",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+      "title": "Observed Start Month",
+      "type": "string"
+     },
+     "window_months": {
+      "description": "Number of whole calendar months in the window (may cross a year end).",
+      "maximum": 12.0,
+      "minimum": 1.0,
+      "title": "Window Months",
+      "type": "integer"
+     }
     },
-    "/v1/analysis/era5-soil-moisture-anomaly": {
-      "post": {
-        "description": "Queues an ERA5-Land soil-moisture-anomaly computation (layers 1-3) and returns 202 + job id immediately; poll GET /v1/jobs/{job_id} for the result. Values in m3/m3 with standardized anomaly; anomalies only, no category labels. Cold CDS requests take minutes.",
-        "operationId": "era5_soil_moisture_anomaly_endpoint_v1_analysis_era5_soil_moisture_anomaly_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Era5SoilMoistureAnomalyRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "202": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JobSubmitted"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Soil-moisture window anomaly from ERA5-Land (background job)",
-        "tags": [
-          "analysis"
-        ]
-      }
+    "required": [
+     "latitude",
+     "longitude",
+     "observed_start_month",
+     "window_months",
+     "baseline_start_year",
+     "baseline_end_year"
+    ],
+    "title": "ChirpsRainfallAnomalyRequest",
+    "type": "object"
+   },
+   "ChirpsRainfallAnomalyResult": {
+    "additionalProperties": false,
+    "properties": {
+     "absolute_difference_mm": {
+      "title": "Absolute Difference Mm",
+      "type": "number"
+     },
+     "baseline_end_year": {
+      "title": "Baseline End Year",
+      "type": "integer"
+     },
+     "baseline_excluded": {
+      "items": {
+       "$ref": "#/components/schemas/ExcludedYear"
+      },
+      "title": "Baseline Excluded",
+      "type": "array"
+     },
+     "baseline_includes_observed_period": {
+      "title": "Baseline Includes Observed Period",
+      "type": "boolean"
+     },
+     "baseline_mean_mm": {
+      "title": "Baseline Mean Mm",
+      "type": "number"
+     },
+     "baseline_start_year": {
+      "title": "Baseline Start Year",
+      "type": "integer"
+     },
+     "baseline_totals": {
+      "items": {
+       "$ref": "#/components/schemas/YearTotal"
+      },
+      "title": "Baseline Totals",
+      "type": "array"
+     },
+     "baseline_years_used": {
+      "title": "Baseline Years Used",
+      "type": "integer"
+     },
+     "citation": {
+      "title": "Citation",
+      "type": "string"
+     },
+     "data_source": {
+      "title": "Data Source",
+      "type": "string"
+     },
+     "direction": {
+      "enum": [
+       "below_baseline",
+       "above_baseline",
+       "equal_to_baseline"
+      ],
+      "title": "Direction",
+      "type": "string"
+     },
+     "doi": {
+      "title": "Doi",
+      "type": "string"
+     },
+     "formula": {
+      "title": "Formula",
+      "type": "string"
+     },
+     "grid_cell_center_latitude": {
+      "title": "Grid Cell Center Latitude",
+      "type": "number"
+     },
+     "grid_cell_center_longitude": {
+      "title": "Grid Cell Center Longitude",
+      "type": "number"
+     },
+     "indicator": {
+      "const": "precipitation_percentage_anomaly",
+      "default": "precipitation_percentage_anomaly",
+      "title": "Indicator",
+      "type": "string"
+     },
+     "license_note": {
+      "title": "License Note",
+      "type": "string"
+     },
+     "limitations": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+     },
+     "message": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Message"
+     },
+     "min_baseline_years": {
+      "title": "Min Baseline Years",
+      "type": "integer"
+     },
+     "observed_total_mm": {
+      "title": "Observed Total Mm",
+      "type": "number"
+     },
+     "observed_window_end": {
+      "title": "Observed Window End",
+      "type": "string"
+     },
+     "observed_window_start": {
+      "title": "Observed Window Start",
+      "type": "string"
+     },
+     "percentage_anomaly": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Percentage Anomaly"
+     },
+     "point_on_cell_boundary": {
+      "title": "Point On Cell Boundary",
+      "type": "boolean"
+     },
+     "requested_latitude": {
+      "title": "Requested Latitude",
+      "type": "number"
+     },
+     "requested_longitude": {
+      "title": "Requested Longitude",
+      "type": "number"
+     },
+     "source_files": {
+      "items": {
+       "$ref": "#/components/schemas/SourceFileRecord"
+      },
+      "title": "Source Files",
+      "type": "array"
+     },
+     "status": {
+      "enum": [
+       "ok",
+       "undefined"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "window_months": {
+      "title": "Window Months",
+      "type": "integer"
+     }
     },
-    "/v1/analysis/era5-spi": {
-      "post": {
-        "description": "Queues an ERA5-Land SPI computation and returns 202 + job id immediately; poll GET /v1/jobs/{job_id} for the result. Gamma fit per calendar month (WMO-No. 1090); no severity labels. Cold CDS requests take minutes.",
-        "operationId": "era5_spi_endpoint_v1_analysis_era5_spi_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Era5SpiRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "202": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JobSubmitted"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Standardized Precipitation Index (SPI) from ERA5-Land (background job)",
-        "tags": [
-          "analysis"
-        ]
-      }
+    "required": [
+     "status",
+     "data_source",
+     "percentage_anomaly",
+     "absolute_difference_mm",
+     "direction",
+     "observed_total_mm",
+     "baseline_mean_mm",
+     "formula",
+     "requested_latitude",
+     "requested_longitude",
+     "grid_cell_center_latitude",
+     "grid_cell_center_longitude",
+     "point_on_cell_boundary",
+     "observed_window_start",
+     "observed_window_end",
+     "window_months",
+     "baseline_start_year",
+     "baseline_end_year",
+     "min_baseline_years",
+     "baseline_years_used",
+     "baseline_totals",
+     "baseline_excluded",
+     "baseline_includes_observed_period",
+     "source_files",
+     "citation",
+     "doi",
+     "license_note",
+     "limitations"
+    ],
+    "title": "ChirpsRainfallAnomalyResult",
+    "type": "object"
+   },
+   "ChirpsSpiRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "latitude": {
+      "maximum": 90.0,
+      "minimum": -90.0,
+      "title": "Latitude",
+      "type": "number"
+     },
+     "longitude": {
+      "maximum": 180.0,
+      "minimum": -180.0,
+      "title": "Longitude",
+      "type": "number"
+     },
+     "min_reference_years": {
+      "default": 30,
+      "description": "Minimum usable reference years (WMO recommends at least 30).",
+      "maximum": 100.0,
+      "minimum": 10.0,
+      "title": "Min Reference Years",
+      "type": "integer"
+     },
+     "reference_end_year": {
+      "default": 2020,
+      "maximum": 9999.0,
+      "minimum": 1.0,
+      "title": "Reference End Year",
+      "type": "integer"
+     },
+     "reference_start_year": {
+      "default": 1991,
+      "maximum": 9999.0,
+      "minimum": 1.0,
+      "title": "Reference Start Year",
+      "type": "integer"
+     },
+     "target_end_month": {
+      "description": "Last month of the SPI window, formatted YYYY-MM.",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+      "title": "Target End Month",
+      "type": "string"
+     },
+     "timescale_months": {
+      "description": "Accumulation period in months (1-48).",
+      "maximum": 48.0,
+      "minimum": 1.0,
+      "title": "Timescale Months",
+      "type": "integer"
+     }
     },
-    "/v1/analysis/era5-temperature-anomaly": {
-      "post": {
-        "description": "Queues an ERA5-Land temperature-anomaly computation and returns 202 + job id immediately; poll GET /v1/jobs/{job_id} for the result. Day-weighted window means in degC with standardized anomaly and percentile rank. Cold CDS requests take minutes.",
-        "operationId": "era5_temperature_anomaly_endpoint_v1_analysis_era5_temperature_anomaly_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Era5TemperatureAnomalyRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "202": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JobSubmitted"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Temperature window anomaly from ERA5-Land (background job)",
-        "tags": [
-          "analysis"
-        ]
-      }
+    "required": [
+     "latitude",
+     "longitude",
+     "target_end_month",
+     "timescale_months"
+    ],
+    "title": "ChirpsSpiRequest",
+    "type": "object"
+   },
+   "ChirpsSpiResult": {
+    "additionalProperties": false,
+    "properties": {
+     "citation": {
+      "title": "Citation",
+      "type": "string"
+     },
+     "cumulative_probability": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Cumulative Probability"
+     },
+     "data_source": {
+      "title": "Data Source",
+      "type": "string"
+     },
+     "doi": {
+      "title": "Doi",
+      "type": "string"
+     },
+     "gamma_scale_mm": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Gamma Scale Mm"
+     },
+     "gamma_shape": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Gamma Shape"
+     },
+     "grid_cell_center_latitude": {
+      "title": "Grid Cell Center Latitude",
+      "type": "number"
+     },
+     "grid_cell_center_longitude": {
+      "title": "Grid Cell Center Longitude",
+      "type": "number"
+     },
+     "indicator": {
+      "const": "standardized_precipitation_index",
+      "default": "standardized_precipitation_index",
+      "title": "Indicator",
+      "type": "string"
+     },
+     "license_note": {
+      "title": "License Note",
+      "type": "string"
+     },
+     "limitations": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+     },
+     "message": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Message"
+     },
+     "method": {
+      "title": "Method",
+      "type": "string"
+     },
+     "min_reference_years": {
+      "title": "Min Reference Years",
+      "type": "integer"
+     },
+     "point_on_cell_boundary": {
+      "title": "Point On Cell Boundary",
+      "type": "boolean"
+     },
+     "reference_end_year": {
+      "title": "Reference End Year",
+      "type": "integer"
+     },
+     "reference_nonzero_count": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Reference Nonzero Count"
+     },
+     "reference_spi_mean": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Reference Spi Mean"
+     },
+     "reference_spi_std": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Reference Spi Std"
+     },
+     "reference_start_year": {
+      "title": "Reference Start Year",
+      "type": "integer"
+     },
+     "reference_years_excluded": {
+      "items": {
+       "$ref": "#/components/schemas/ExcludedReferenceYear"
+      },
+      "title": "Reference Years Excluded",
+      "type": "array"
+     },
+     "reference_years_included": {
+      "items": {
+       "type": "integer"
+      },
+      "title": "Reference Years Included",
+      "type": "array"
+     },
+     "reference_years_used": {
+      "title": "Reference Years Used",
+      "type": "integer"
+     },
+     "reference_zero_count": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Reference Zero Count"
+     },
+     "requested_latitude": {
+      "title": "Requested Latitude",
+      "type": "number"
+     },
+     "requested_longitude": {
+      "title": "Requested Longitude",
+      "type": "number"
+     },
+     "source_files": {
+      "items": {
+       "$ref": "#/components/schemas/SourceFileRecord"
+      },
+      "title": "Source Files",
+      "type": "array"
+     },
+     "spi": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Spi"
+     },
+     "status": {
+      "enum": [
+       "ok",
+       "undefined"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "target_in_reference_period": {
+      "title": "Target In Reference Period",
+      "type": "boolean"
+     },
+     "target_window_end": {
+      "title": "Target Window End",
+      "type": "string"
+     },
+     "target_window_start": {
+      "title": "Target Window Start",
+      "type": "string"
+     },
+     "timescale_months": {
+      "title": "Timescale Months",
+      "type": "integer"
+     },
+     "window_total_mm": {
+      "title": "Window Total Mm",
+      "type": "number"
+     },
+     "zero_probability": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Zero Probability"
+     }
     },
-    "/v1/analysis/rainfall-anomaly": {
-      "post": {
-        "operationId": "rainfall_anomaly_v1_analysis_rainfall_anomaly_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RainfallAnalysisRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RainfallAnalysisResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Prototype precipitation percentage anomaly from user-supplied totals",
-        "tags": [
-          "analysis"
-        ]
-      }
+    "required": [
+     "status",
+     "data_source",
+     "method",
+     "timescale_months",
+     "target_window_start",
+     "target_window_end",
+     "window_total_mm",
+     "spi",
+     "cumulative_probability",
+     "message",
+     "requested_latitude",
+     "requested_longitude",
+     "grid_cell_center_latitude",
+     "grid_cell_center_longitude",
+     "point_on_cell_boundary",
+     "reference_start_year",
+     "reference_end_year",
+     "min_reference_years",
+     "reference_years_used",
+     "reference_years_included",
+     "reference_years_excluded",
+     "target_in_reference_period",
+     "gamma_shape",
+     "gamma_scale_mm",
+     "zero_probability",
+     "reference_zero_count",
+     "reference_nonzero_count",
+     "reference_spi_mean",
+     "reference_spi_std",
+     "source_files",
+     "citation",
+     "doi",
+     "license_note",
+     "limitations"
+    ],
+    "title": "ChirpsSpiResult",
+    "type": "object"
+   },
+   "EnvironmentalBundleRequest": {
+    "additionalProperties": false,
+    "description": "Request schema for the environmental-bundle endpoint.\n\nThe bundle always uses soil layer 1; layers 2-3 are available on the single\nsoil-moisture endpoint.",
+    "example": {
+     "indicators": [
+      "chirps_spi",
+      "era5_spi",
+      "era5_temperature_anomaly",
+      "era5_soil_moisture_anomaly"
+     ],
+     "land_fallback_max_km": 15.0,
+     "latitude": 30.43,
+     "longitude": -9.61,
+     "min_reference_years": 30,
+     "reference_end_year": 2020,
+     "reference_start_year": 1991,
+     "target_end_month": "2024-03",
+     "timescale_months": 3
     },
-    "/v1/jobs/{job_id}": {
-      "get": {
-        "description": "Returns the job snapshot: queued / running / succeeded / failed / timed_out, step progress, and the result or typed error once terminal. Unknown or TTL-expired ids return 404 (job_not_found).",
-        "operationId": "job_status_endpoint_v1_jobs__job_id__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "job_id",
-            "required": true,
-            "schema": {
-              "title": "Job Id",
-              "type": "string"
-            }
-          }
+    "properties": {
+     "indicators": {
+      "default": [
+       "chirps_spi",
+       "era5_spi",
+       "era5_temperature_anomaly",
+       "era5_soil_moisture_anomaly"
+      ],
+      "description": "Subset to compute; unlisted indicators return status 'skipped'.",
+      "items": {
+       "enum": [
+        "chirps_spi",
+        "era5_spi",
+        "era5_temperature_anomaly",
+        "era5_soil_moisture_anomaly"
+       ],
+       "type": "string"
+      },
+      "title": "Indicators",
+      "type": "array"
+     },
+     "land_fallback_max_km": {
+      "anyOf": [
+       {
+        "exclusiveMinimum": 0.0,
+        "maximum": 25.0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Opt in: use the nearest valid neighbouring ERA5-Land grid point within this distance (0-25 km) when the nearest point is masked. Always reported.",
+      "title": "Land Fallback Max Km"
+     },
+     "latitude": {
+      "maximum": 90.0,
+      "minimum": -90.0,
+      "title": "Latitude",
+      "type": "number"
+     },
+     "longitude": {
+      "maximum": 180.0,
+      "minimum": -180.0,
+      "title": "Longitude",
+      "type": "number"
+     },
+     "min_reference_years": {
+      "default": 30,
+      "description": "Minimum usable reference years (WMO recommends at least 30).",
+      "maximum": 100.0,
+      "minimum": 10.0,
+      "title": "Min Reference Years",
+      "type": "integer"
+     },
+     "reference_end_year": {
+      "default": 2020,
+      "maximum": 9999.0,
+      "minimum": 1.0,
+      "title": "Reference End Year",
+      "type": "integer"
+     },
+     "reference_start_year": {
+      "default": 1991,
+      "maximum": 9999.0,
+      "minimum": 1.0,
+      "title": "Reference Start Year",
+      "type": "integer"
+     },
+     "target_end_month": {
+      "description": "Last month of the analysis window, formatted YYYY-MM.",
+      "examples": [
+       "2024-03"
+      ],
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+      "title": "Target End Month",
+      "type": "string"
+     },
+     "timescale_months": {
+      "description": "Accumulation period in months (1-48).",
+      "maximum": 48.0,
+      "minimum": 1.0,
+      "title": "Timescale Months",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "latitude",
+     "longitude",
+     "target_end_month",
+     "timescale_months"
+    ],
+    "title": "EnvironmentalBundleRequest",
+    "type": "object"
+   },
+   "EnvironmentalBundleResponse": {
+    "additionalProperties": false,
+    "description": "Per-indicator environmental results. Never a composite score or severity label.",
+    "properties": {
+     "entries": {
+      "items": {
+       "$ref": "#/components/schemas/BundleIndicatorResult"
+      },
+      "title": "Entries",
+      "type": "array"
+     },
+     "indicator": {
+      "const": "environmental_bundle",
+      "default": "environmental_bundle",
+      "title": "Indicator",
+      "type": "string"
+     },
+     "latitude": {
+      "title": "Latitude",
+      "type": "number"
+     },
+     "longitude": {
+      "title": "Longitude",
+      "type": "number"
+     },
+     "reference_end_year": {
+      "title": "Reference End Year",
+      "type": "integer"
+     },
+     "reference_start_year": {
+      "title": "Reference Start Year",
+      "type": "integer"
+     },
+     "target_end_month": {
+      "title": "Target End Month",
+      "type": "string"
+     },
+     "timescale_months": {
+      "title": "Timescale Months",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "latitude",
+     "longitude",
+     "target_end_month",
+     "timescale_months",
+     "reference_start_year",
+     "reference_end_year",
+     "entries"
+    ],
+    "title": "EnvironmentalBundleResponse",
+    "type": "object"
+   },
+   "Era5SoilMoistureAnomalyRequest": {
+    "additionalProperties": false,
+    "description": "Request schema for the ERA5-Land soil-moisture-anomaly endpoint.",
+    "example": {
+     "land_fallback_max_km": 15.0,
+     "latitude": 30.43,
+     "longitude": -9.61,
+     "min_reference_years": 30,
+     "reference_end_year": 2020,
+     "reference_start_year": 1991,
+     "target_end_month": "2024-03",
+     "timescale_months": 3,
+     "variable": "volumetric_soil_water_layer_1"
+    },
+    "properties": {
+     "land_fallback_max_km": {
+      "anyOf": [
+       {
+        "exclusiveMinimum": 0.0,
+        "maximum": 25.0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Opt in: use the nearest valid neighbouring ERA5-Land grid point within this distance (0-25 km) when the nearest point is masked. Always reported.",
+      "title": "Land Fallback Max Km"
+     },
+     "latitude": {
+      "maximum": 90.0,
+      "minimum": -90.0,
+      "title": "Latitude",
+      "type": "number"
+     },
+     "longitude": {
+      "maximum": 180.0,
+      "minimum": -180.0,
+      "title": "Longitude",
+      "type": "number"
+     },
+     "min_reference_years": {
+      "default": 30,
+      "description": "Minimum usable reference years (WMO recommends at least 30).",
+      "maximum": 100.0,
+      "minimum": 10.0,
+      "title": "Min Reference Years",
+      "type": "integer"
+     },
+     "reference_end_year": {
+      "default": 2020,
+      "maximum": 9999.0,
+      "minimum": 1.0,
+      "title": "Reference End Year",
+      "type": "integer"
+     },
+     "reference_start_year": {
+      "default": 1991,
+      "maximum": 9999.0,
+      "minimum": 1.0,
+      "title": "Reference Start Year",
+      "type": "integer"
+     },
+     "target_end_month": {
+      "description": "Last month of the analysis window, formatted YYYY-MM.",
+      "examples": [
+       "2024-03"
+      ],
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+      "title": "Target End Month",
+      "type": "string"
+     },
+     "timescale_months": {
+      "description": "Accumulation period in months (1-48).",
+      "maximum": 48.0,
+      "minimum": 1.0,
+      "title": "Timescale Months",
+      "type": "integer"
+     },
+     "variable": {
+      "default": "volumetric_soil_water_layer_1",
+      "description": "Soil layer (0-7, 7-28, 28-100 cm). Layer 4 is excluded: its documented depth is contested.",
+      "enum": [
+       "volumetric_soil_water_layer_1",
+       "volumetric_soil_water_layer_2",
+       "volumetric_soil_water_layer_3"
+      ],
+      "title": "Variable",
+      "type": "string"
+     }
+    },
+    "required": [
+     "latitude",
+     "longitude",
+     "target_end_month",
+     "timescale_months"
+    ],
+    "title": "Era5SoilMoistureAnomalyRequest",
+    "type": "object"
+   },
+   "Era5SpiRequest": {
+    "additionalProperties": false,
+    "description": "Request schema for the ERA5-Land SPI endpoint.",
+    "example": {
+     "land_fallback_max_km": 15.0,
+     "latitude": 30.43,
+     "longitude": -9.61,
+     "min_reference_years": 30,
+     "reference_end_year": 2020,
+     "reference_start_year": 1991,
+     "target_end_month": "2024-03",
+     "timescale_months": 3
+    },
+    "properties": {
+     "land_fallback_max_km": {
+      "anyOf": [
+       {
+        "exclusiveMinimum": 0.0,
+        "maximum": 25.0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Opt in: use the nearest valid neighbouring ERA5-Land grid point within this distance (0-25 km) when the nearest point is masked. Always reported.",
+      "title": "Land Fallback Max Km"
+     },
+     "latitude": {
+      "maximum": 90.0,
+      "minimum": -90.0,
+      "title": "Latitude",
+      "type": "number"
+     },
+     "longitude": {
+      "maximum": 180.0,
+      "minimum": -180.0,
+      "title": "Longitude",
+      "type": "number"
+     },
+     "min_reference_years": {
+      "default": 30,
+      "description": "Minimum usable reference years (WMO recommends at least 30).",
+      "maximum": 100.0,
+      "minimum": 10.0,
+      "title": "Min Reference Years",
+      "type": "integer"
+     },
+     "reference_end_year": {
+      "default": 2020,
+      "maximum": 9999.0,
+      "minimum": 1.0,
+      "title": "Reference End Year",
+      "type": "integer"
+     },
+     "reference_start_year": {
+      "default": 1991,
+      "maximum": 9999.0,
+      "minimum": 1.0,
+      "title": "Reference Start Year",
+      "type": "integer"
+     },
+     "target_end_month": {
+      "description": "Last month of the analysis window, formatted YYYY-MM.",
+      "examples": [
+       "2024-03"
+      ],
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+      "title": "Target End Month",
+      "type": "string"
+     },
+     "timescale_months": {
+      "description": "Accumulation period in months (1-48).",
+      "maximum": 48.0,
+      "minimum": 1.0,
+      "title": "Timescale Months",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "latitude",
+     "longitude",
+     "target_end_month",
+     "timescale_months"
+    ],
+    "title": "Era5SpiRequest",
+    "type": "object"
+   },
+   "Era5TemperatureAnomalyRequest": {
+    "additionalProperties": false,
+    "description": "Request schema for the ERA5-Land temperature-anomaly endpoint.",
+    "example": {
+     "land_fallback_max_km": 15.0,
+     "latitude": 30.43,
+     "longitude": -9.61,
+     "min_reference_years": 30,
+     "reference_end_year": 2020,
+     "reference_start_year": 1991,
+     "target_end_month": "2024-03",
+     "timescale_months": 3
+    },
+    "properties": {
+     "land_fallback_max_km": {
+      "anyOf": [
+       {
+        "exclusiveMinimum": 0.0,
+        "maximum": 25.0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Opt in: use the nearest valid neighbouring ERA5-Land grid point within this distance (0-25 km) when the nearest point is masked. Always reported.",
+      "title": "Land Fallback Max Km"
+     },
+     "latitude": {
+      "maximum": 90.0,
+      "minimum": -90.0,
+      "title": "Latitude",
+      "type": "number"
+     },
+     "longitude": {
+      "maximum": 180.0,
+      "minimum": -180.0,
+      "title": "Longitude",
+      "type": "number"
+     },
+     "min_reference_years": {
+      "default": 30,
+      "description": "Minimum usable reference years (WMO recommends at least 30).",
+      "maximum": 100.0,
+      "minimum": 10.0,
+      "title": "Min Reference Years",
+      "type": "integer"
+     },
+     "reference_end_year": {
+      "default": 2020,
+      "maximum": 9999.0,
+      "minimum": 1.0,
+      "title": "Reference End Year",
+      "type": "integer"
+     },
+     "reference_start_year": {
+      "default": 1991,
+      "maximum": 9999.0,
+      "minimum": 1.0,
+      "title": "Reference Start Year",
+      "type": "integer"
+     },
+     "target_end_month": {
+      "description": "Last month of the analysis window, formatted YYYY-MM.",
+      "examples": [
+       "2024-03"
+      ],
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+      "title": "Target End Month",
+      "type": "string"
+     },
+     "timescale_months": {
+      "description": "Accumulation period in months (1-48).",
+      "maximum": 48.0,
+      "minimum": 1.0,
+      "title": "Timescale Months",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "latitude",
+     "longitude",
+     "target_end_month",
+     "timescale_months"
+    ],
+    "title": "Era5TemperatureAnomalyRequest",
+    "type": "object"
+   },
+   "EvidenceItem": {
+    "additionalProperties": false,
+    "description": "One cited chunk. Every field is verified against the chunk + manifest.",
+    "properties": {
+     "chunk_id": {
+      "minLength": 1,
+      "title": "Chunk Id",
+      "type": "string"
+     },
+     "citation": {
+      "maxLength": 600,
+      "minLength": 1,
+      "title": "Citation",
+      "type": "string"
+     },
+     "doc_id": {
+      "minLength": 1,
+      "title": "Doc Id",
+      "type": "string"
+     },
+     "landing_url": {
+      "minLength": 1,
+      "title": "Landing Url",
+      "type": "string"
+     },
+     "license": {
+      "minLength": 1,
+      "title": "License",
+      "type": "string"
+     },
+     "license_status": {
+      "minLength": 1,
+      "title": "License Status",
+      "type": "string"
+     },
+     "pages": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Pages",
+      "type": "string"
+     }
+    },
+    "required": [
+     "chunk_id",
+     "doc_id",
+     "citation",
+     "pages",
+     "landing_url",
+     "license",
+     "license_status"
+    ],
+    "title": "EvidenceItem",
+    "type": "object"
+   },
+   "EvidenceReference": {
+    "additionalProperties": false,
+    "description": "A catalog evidence link resolved against the manifest (no invented fields).",
+    "properties": {
+     "citation": {
+      "title": "Citation",
+      "type": "string"
+     },
+     "doc_id": {
+      "title": "Doc Id",
+      "type": "string"
+     },
+     "landing_url": {
+      "title": "Landing Url",
+      "type": "string"
+     },
+     "license": {
+      "title": "License",
+      "type": "string"
+     },
+     "license_status": {
+      "title": "License Status",
+      "type": "string"
+     },
+     "pdf_page": {
+      "title": "Pdf Page",
+      "type": "integer"
+     },
+     "reference": {
+      "title": "Reference",
+      "type": "string"
+     },
+     "unverified_fields": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Unverified Fields",
+      "type": "array"
+     }
+    },
+    "required": [
+     "doc_id",
+     "pdf_page",
+     "reference",
+     "citation",
+     "landing_url",
+     "license",
+     "license_status",
+     "unverified_fields"
+    ],
+    "title": "EvidenceReference",
+    "type": "object"
+   },
+   "ExcludedReferenceYear": {
+    "additionalProperties": false,
+    "properties": {
+     "reason": {
+      "title": "Reason",
+      "type": "string"
+     },
+     "year": {
+      "title": "Year",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "year",
+     "reason"
+    ],
+    "title": "ExcludedReferenceYear",
+    "type": "object"
+   },
+   "ExcludedYear": {
+    "additionalProperties": false,
+    "properties": {
+     "reason": {
+      "title": "Reason",
+      "type": "string"
+     },
+     "season_year": {
+      "title": "Season Year",
+      "type": "integer"
+     },
+     "window_end": {
+      "title": "Window End",
+      "type": "string"
+     },
+     "window_start": {
+      "title": "Window Start",
+      "type": "string"
+     }
+    },
+    "required": [
+     "season_year",
+     "window_start",
+     "window_end",
+     "reason"
+    ],
+    "title": "ExcludedYear",
+    "type": "object"
+   },
+   "ExclusionReason": {
+    "additionalProperties": false,
+    "description": "One machine-readable exclusion reason (``code``) with a human message.",
+    "properties": {
+     "code": {
+      "title": "Code",
+      "type": "string"
+     },
+     "message": {
+      "title": "Message",
+      "type": "string"
+     }
+    },
+    "required": [
+     "code",
+     "message"
+    ],
+    "title": "ExclusionReason",
+    "type": "object"
+   },
+   "HTTPValidationError": {
+    "properties": {
+     "detail": {
+      "items": {
+       "$ref": "#/components/schemas/ValidationError"
+      },
+      "title": "Detail",
+      "type": "array"
+     }
+    },
+    "title": "HTTPValidationError",
+    "type": "object"
+   },
+   "HealthResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "environment": {
+      "title": "Environment",
+      "type": "string"
+     },
+     "status": {
+      "const": "ok",
+      "title": "Status",
+      "type": "string"
+     },
+     "version": {
+      "title": "Version",
+      "type": "string"
+     }
+    },
+    "required": [
+     "status",
+     "version",
+     "environment"
+    ],
+    "title": "HealthResponse",
+    "type": "object"
+   },
+   "JobError": {
+    "additionalProperties": false,
+    "properties": {
+     "message": {
+      "title": "Message",
+      "type": "string"
+     },
+     "type": {
+      "title": "Type",
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "message"
+    ],
+    "title": "JobError",
+    "type": "object"
+   },
+   "JobProgress": {
+    "additionalProperties": false,
+    "properties": {
+     "completed_steps": {
+      "title": "Completed Steps",
+      "type": "integer"
+     },
+     "total_steps": {
+      "title": "Total Steps",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "completed_steps",
+     "total_steps"
+    ],
+    "title": "JobProgress",
+    "type": "object"
+   },
+   "JobStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "error": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/JobError"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "finished_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Finished At"
+     },
+     "job_id": {
+      "title": "Job Id",
+      "type": "string"
+     },
+     "label": {
+      "title": "Label",
+      "type": "string"
+     },
+     "progress": {
+      "$ref": "#/components/schemas/JobProgress"
+     },
+     "result": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Result"
+     },
+     "started_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Started At"
+     },
+     "status": {
+      "enum": [
+       "queued",
+       "running",
+       "succeeded",
+       "failed",
+       "timed_out"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "submitted_at": {
+      "format": "date-time",
+      "title": "Submitted At",
+      "type": "string"
+     }
+    },
+    "required": [
+     "job_id",
+     "label",
+     "status",
+     "submitted_at",
+     "started_at",
+     "finished_at",
+     "progress",
+     "result",
+     "error"
+    ],
+    "title": "JobStatus",
+    "type": "object"
+   },
+   "JobSubmitted": {
+    "additionalProperties": false,
+    "properties": {
+     "job_id": {
+      "title": "Job Id",
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "queued",
+       "running",
+       "succeeded",
+       "failed",
+       "timed_out"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "status_url": {
+      "title": "Status Url",
+      "type": "string"
+     }
+    },
+    "required": [
+     "job_id",
+     "status",
+     "status_url"
+    ],
+    "title": "JobSubmitted",
+    "type": "object"
+   },
+   "Location": {
+    "additionalProperties": false,
+    "description": "A point location in WGS84 decimal degrees.",
+    "properties": {
+     "latitude": {
+      "maximum": 90.0,
+      "minimum": -90.0,
+      "title": "Latitude",
+      "type": "number"
+     },
+     "longitude": {
+      "maximum": 180.0,
+      "minimum": -180.0,
+      "title": "Longitude",
+      "type": "number"
+     }
+    },
+    "required": [
+     "latitude",
+     "longitude"
+    ],
+    "title": "Location",
+    "type": "object"
+   },
+   "ObservationPeriod": {
+    "additionalProperties": false,
+    "description": "Inclusive date range of the observed precipitation total.",
+    "properties": {
+     "end_date": {
+      "format": "date",
+      "title": "End Date",
+      "type": "string"
+     },
+     "start_date": {
+      "format": "date",
+      "title": "Start Date",
+      "type": "string"
+     }
+    },
+    "required": [
+     "start_date",
+     "end_date"
+    ],
+    "title": "ObservationPeriod",
+    "type": "object"
+   },
+   "RainfallAnalysisRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "baseline_mean_mm": {
+      "description": "Historical baseline mean for the same window, in millimetres.",
+      "minimum": 0.0,
+      "title": "Baseline Mean Mm",
+      "type": "number"
+     },
+     "data_origin": {
+      "default": "user_supplied",
+      "description": "Declares whether the numbers are a synthetic example or user-supplied.",
+      "enum": [
+       "synthetic_example",
+       "user_supplied"
+      ],
+      "title": "Data Origin",
+      "type": "string"
+     },
+     "observed_total_mm": {
+      "description": "Observed-period precipitation total in millimetres.",
+      "minimum": 0.0,
+      "title": "Observed Total Mm",
+      "type": "number"
+     },
+     "scenario": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/AnalysisScenario"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "required": [
+     "observed_total_mm",
+     "baseline_mean_mm"
+    ],
+    "title": "RainfallAnalysisRequest",
+    "type": "object"
+   },
+   "RainfallAnalysisResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "absolute_difference_mm": {
+      "title": "Absolute Difference Mm",
+      "type": "number"
+     },
+     "baseline_mean_mm": {
+      "title": "Baseline Mean Mm",
+      "type": "number"
+     },
+     "data_origin": {
+      "enum": [
+       "synthetic_example",
+       "user_supplied"
+      ],
+      "title": "Data Origin",
+      "type": "string"
+     },
+     "direction": {
+      "enum": [
+       "below_baseline",
+       "above_baseline",
+       "equal_to_baseline"
+      ],
+      "title": "Direction",
+      "type": "string"
+     },
+     "formula": {
+      "title": "Formula",
+      "type": "string"
+     },
+     "indicator": {
+      "const": "precipitation_percentage_anomaly",
+      "default": "precipitation_percentage_anomaly",
+      "title": "Indicator",
+      "type": "string"
+     },
+     "limitations": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+     },
+     "message": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Message"
+     },
+     "observed_total_mm": {
+      "title": "Observed Total Mm",
+      "type": "number"
+     },
+     "percentage_anomaly": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Anomaly in percent, or null when undefined. Never a placeholder number.",
+      "title": "Percentage Anomaly"
+     },
+     "scenario": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/AnalysisScenario"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "status": {
+      "enum": [
+       "ok",
+       "undefined"
+      ],
+      "title": "Status",
+      "type": "string"
+     }
+    },
+    "required": [
+     "status",
+     "percentage_anomaly",
+     "absolute_difference_mm",
+     "direction",
+     "observed_total_mm",
+     "baseline_mean_mm",
+     "formula",
+     "data_origin",
+     "limitations"
+    ],
+    "title": "RainfallAnalysisResponse",
+    "type": "object"
+   },
+   "RankedOption": {
+    "additionalProperties": false,
+    "description": "A ranked intervention with its full score breakdown and unknowns.",
+    "properties": {
+     "benefit": {
+      "title": "Benefit",
+      "type": "string"
+     },
+     "category": {
+      "enum": [
+       "irrigation",
+       "soil_management",
+       "crop_management",
+       "planning",
+       "other"
+      ],
+      "title": "Category",
+      "type": "string"
+     },
+     "cost": {
+      "title": "Cost",
+      "type": "string"
+     },
+     "evidence": {
+      "items": {
+       "$ref": "#/components/schemas/EvidenceReference"
+      },
+      "title": "Evidence",
+      "type": "array"
+     },
+     "intervention_id": {
+      "title": "Intervention Id",
+      "type": "string"
+     },
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "risk": {
+      "title": "Risk",
+      "type": "string"
+     },
+     "score_components": {
+      "additionalProperties": {
+       "type": "number"
+      },
+      "title": "Score Components",
+      "type": "object"
+     },
+     "score_inputs": {
+      "additionalProperties": true,
+      "title": "Score Inputs",
+      "type": "object"
+     },
+     "score_total": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Score Total",
+      "type": "number"
+     },
+     "score_weights": {
+      "additionalProperties": {
+       "type": "number"
+      },
+      "title": "Score Weights",
+      "type": "object"
+     },
+     "unknowns": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Unknowns",
+      "type": "array"
+     }
+    },
+    "required": [
+     "intervention_id",
+     "name",
+     "category",
+     "score_total",
+     "score_components",
+     "score_weights",
+     "score_inputs",
+     "unknowns",
+     "evidence",
+     "benefit",
+     "cost",
+     "risk"
+    ],
+    "title": "RankedOption",
+    "type": "object"
+   },
+   "RankedRecommendation": {
+    "additionalProperties": false,
+    "description": "One ranked option: identifiers, echoes, and a traceable narrative.",
+    "properties": {
+     "benefit": {
+      "maxLength": 280,
+      "minLength": 1,
+      "title": "Benefit",
+      "type": "string"
+     },
+     "cost": {
+      "maxLength": 280,
+      "minLength": 1,
+      "title": "Cost",
+      "type": "string"
+     },
+     "intervention_id": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Intervention Id",
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     },
+     "narrative": {
+      "$ref": "#/components/schemas/Statement"
+     },
+     "risk": {
+      "maxLength": 280,
+      "minLength": 1,
+      "title": "Risk",
+      "type": "string"
+     }
+    },
+    "required": [
+     "intervention_id",
+     "name",
+     "benefit",
+     "cost",
+     "risk",
+     "narrative"
+    ],
+    "title": "RankedRecommendation",
+    "type": "object"
+   },
+   "RecommendationResponse": {
+    "additionalProperties": false,
+    "description": "Ranked options, exclusions, unknowns, evidence, warnings and limitations.",
+    "properties": {
+     "catalog_version": {
+      "title": "Catalog Version",
+      "type": "integer"
+     },
+     "excluded": {
+      "items": {
+       "$ref": "#/components/schemas/climateadapt__recommend__schema__ExcludedOption"
+      },
+      "title": "Excluded",
+      "type": "array"
+     },
+     "limitations": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Limitations",
+      "type": "array"
+     },
+     "ranked": {
+      "items": {
+       "$ref": "#/components/schemas/RankedOption"
+      },
+      "title": "Ranked",
+      "type": "array"
+     },
+     "scenario": {
+      "$ref": "#/components/schemas/ScenarioContext"
+     },
+     "warnings": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+     }
+    },
+    "required": [
+     "catalog_version",
+     "scenario",
+     "ranked",
+     "excluded",
+     "warnings",
+     "limitations"
+    ],
+    "title": "RecommendationResponse",
+    "type": "object"
+   },
+   "Report": {
+    "additionalProperties": false,
+    "description": "The validated report contract (model draft or deterministic fallback).",
+    "properties": {
+     "assumptions": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Assumptions",
+      "type": "array"
+     },
+     "data_coverage": {
+      "$ref": "#/components/schemas/Statement"
+     },
+     "environmental_findings": {
+      "items": {
+       "$ref": "#/components/schemas/Statement"
+      },
+      "minItems": 1,
+      "title": "Environmental Findings",
+      "type": "array"
+     },
+     "evidence": {
+      "items": {
+       "$ref": "#/components/schemas/EvidenceItem"
+      },
+      "title": "Evidence",
+      "type": "array"
+     },
+     "excluded_options": {
+      "items": {
+       "$ref": "#/components/schemas/climateadapt__llm__report__ExcludedOption"
+      },
+      "title": "Excluded Options",
+      "type": "array"
+     },
+     "fallback": {
+      "default": false,
+      "title": "Fallback",
+      "type": "boolean"
+     },
+     "fallback_note": {
+      "anyOf": [
+       {
+        "maxLength": 600,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Fallback Note"
+     },
+     "generator": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Generator",
+      "type": "string"
+     },
+     "limitations": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Limitations",
+      "type": "array"
+     },
+     "provenance_refs": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Provenance Refs",
+      "type": "array"
+     },
+     "ranked_recommendations": {
+      "items": {
+       "$ref": "#/components/schemas/RankedRecommendation"
+      },
+      "title": "Ranked Recommendations",
+      "type": "array"
+     },
+     "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+     },
+     "summary": {
+      "$ref": "#/components/schemas/Statement"
+     }
+    },
+    "required": [
+     "generator",
+     "summary",
+     "environmental_findings",
+     "limitations",
+     "data_coverage",
+     "provenance_refs"
+    ],
+    "title": "Report",
+    "type": "object"
+   },
+   "ReportedNumber": {
+    "additionalProperties": false,
+    "description": "One number copied verbatim from a deterministic tool output.",
+    "properties": {
+     "field": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Field",
+      "type": "string"
+     },
+     "tool_output_id": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Tool Output Id",
+      "type": "string"
+     },
+     "unit": {
+      "anyOf": [
+       {
+        "maxLength": 24,
+        "minLength": 1,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Unit"
+     },
+     "value": {
+      "title": "Value",
+      "type": "number"
+     }
+    },
+    "required": [
+     "value",
+     "tool_output_id",
+     "field"
+    ],
+    "title": "ReportedNumber",
+    "type": "object"
+   },
+   "RunTrace": {
+    "additionalProperties": false,
+    "properties": {
+     "agent_version": {
+      "title": "Agent Version",
+      "type": "integer"
+     },
+     "component_versions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "title": "Component Versions",
+      "type": "object"
+     },
+     "config": {
+      "additionalProperties": true,
+      "title": "Config",
+      "type": "object"
+     },
+     "duration_ms_total": {
+      "default": 0.0,
+      "title": "Duration Ms Total",
+      "type": "number"
+     },
+     "ended_at": {
+      "default": "",
+      "title": "Ended At",
+      "type": "string"
+     },
+     "outcome": {
+      "default": "",
+      "title": "Outcome",
+      "type": "string"
+     },
+     "problems": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Problems",
+      "type": "array"
+     },
+     "run_id": {
+      "title": "Run Id",
+      "type": "string"
+     },
+     "scenario": {
+      "additionalProperties": true,
+      "title": "Scenario",
+      "type": "object"
+     },
+     "stages": {
+      "items": {
+       "$ref": "#/components/schemas/StageRecord"
+      },
+      "title": "Stages",
+      "type": "array"
+     },
+     "started_at": {
+      "title": "Started At",
+      "type": "string"
+     },
+     "tool_calls": {
+      "items": {
+       "$ref": "#/components/schemas/ToolCallRecord"
+      },
+      "title": "Tool Calls",
+      "type": "array"
+     },
+     "usage": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Usage"
+     },
+     "validator_verdicts": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Validator Verdicts",
+      "type": "array"
+     },
+     "warnings": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+     }
+    },
+    "required": [
+     "run_id",
+     "agent_version",
+     "started_at"
+    ],
+    "title": "RunTrace",
+    "type": "object"
+   },
+   "ScenarioContext": {
+    "additionalProperties": false,
+    "description": "Scenario inputs. Every field may be unknown (``None``).\n\n``season`` and the location are accepted and echoed but no v1 hard\nconstraint uses them; location matters through the environmental bundle.",
+    "properties": {
+     "crop": {
+      "anyOf": [
+       {
+        "maxLength": 80,
+        "minLength": 1,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Crop"
+     },
+     "has_irrigation_equipment": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Has Irrigation Equipment"
+     },
+     "has_water_source": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Has Water Source"
+     },
+     "latitude": {
+      "anyOf": [
+       {
+        "maximum": 90.0,
+        "minimum": -90.0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Latitude"
+     },
+     "longitude": {
+      "anyOf": [
+       {
+        "maximum": 180.0,
+        "minimum": -180.0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Longitude"
+     },
+     "production_system": {
+      "anyOf": [
+       {
+        "enum": [
+         "irrigated",
+         "rainfed"
         ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JobStatus"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Production System"
+     },
+     "season": {
+      "anyOf": [
+       {
+        "maxLength": 40,
+        "minLength": 1,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Season"
+     }
+    },
+    "title": "ScenarioContext",
+    "type": "object"
+   },
+   "ScenarioCreated": {
+    "additionalProperties": false,
+    "properties": {
+     "job_id": {
+      "title": "Job Id",
+      "type": "string"
+     },
+     "scenario_id": {
+      "title": "Scenario Id",
+      "type": "string"
+     },
+     "scenario_url": {
+      "title": "Scenario Url",
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "queued",
+       "running",
+       "complete",
+       "partial",
+       "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "status_url": {
+      "title": "Status Url",
+      "type": "string"
+     },
+     "version": {
+      "const": 1,
+      "default": 1,
+      "title": "Version",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "scenario_id",
+     "job_id",
+     "status",
+     "status_url",
+     "scenario_url"
+    ],
+    "title": "ScenarioCreated",
+    "type": "object"
+   },
+   "ScenarioDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "bundle": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/EnvironmentalBundleResponse"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+     },
+     "job_id": {
+      "title": "Job Id",
+      "type": "string"
+     },
+     "problems": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Problems",
+      "type": "array"
+     },
+     "ranking": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/RecommendationResponse"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "report": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/Report"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "scenario": {
+      "$ref": "#/components/schemas/AgentScenario"
+     },
+     "scenario_id": {
+      "title": "Scenario Id",
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "queued",
+       "running",
+       "complete",
+       "partial",
+       "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "trace": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/RunTrace"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+     },
+     "version": {
+      "const": 1,
+      "default": 1,
+      "title": "Version",
+      "type": "integer"
+     },
+     "warnings": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+     }
+    },
+    "required": [
+     "scenario_id",
+     "job_id",
+     "status",
+     "created_at",
+     "updated_at",
+     "scenario",
+     "bundle",
+     "ranking",
+     "report",
+     "trace",
+     "problems",
+     "warnings"
+    ],
+    "title": "ScenarioDetail",
+    "type": "object"
+   },
+   "ScenarioList": {
+    "additionalProperties": false,
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/ScenarioSummary"
+      },
+      "title": "Items",
+      "type": "array"
+     },
+     "limit": {
+      "minimum": 1.0,
+      "title": "Limit",
+      "type": "integer"
+     },
+     "offset": {
+      "minimum": 0.0,
+      "title": "Offset",
+      "type": "integer"
+     },
+     "total": {
+      "minimum": 0.0,
+      "title": "Total",
+      "type": "integer"
+     },
+     "version": {
+      "const": 1,
+      "default": 1,
+      "title": "Version",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "total",
+     "limit",
+     "offset",
+     "items"
+    ],
+    "title": "ScenarioList",
+    "type": "object"
+   },
+   "ScenarioSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+     },
+     "job_id": {
+      "title": "Job Id",
+      "type": "string"
+     },
+     "latitude": {
+      "title": "Latitude",
+      "type": "number"
+     },
+     "longitude": {
+      "title": "Longitude",
+      "type": "number"
+     },
+     "query": {
+      "title": "Query",
+      "type": "string"
+     },
+     "scenario_id": {
+      "title": "Scenario Id",
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "queued",
+       "running",
+       "complete",
+       "partial",
+       "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "target_end_month": {
+      "title": "Target End Month",
+      "type": "string"
+     },
+     "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+     },
+     "version": {
+      "const": 1,
+      "default": 1,
+      "title": "Version",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "scenario_id",
+     "job_id",
+     "status",
+     "created_at",
+     "updated_at",
+     "latitude",
+     "longitude",
+     "target_end_month",
+     "query"
+    ],
+    "title": "ScenarioSummary",
+    "type": "object"
+   },
+   "SourceFileRecord": {
+    "additionalProperties": false,
+    "properties": {
+     "access_mode": {
+      "enum": [
+       "download",
+       "remote_range_read"
+      ],
+      "title": "Access Mode",
+      "type": "string"
+     },
+     "month": {
+      "title": "Month",
+      "type": "integer"
+     },
+     "remote_etag": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Remote Etag"
+     },
+     "remote_last_modified": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Remote Last Modified"
+     },
+     "retrieved_at_utc": {
+      "format": "date-time",
+      "title": "Retrieved At Utc",
+      "type": "string"
+     },
+     "sha256": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Sha256"
+     },
+     "size_bytes": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Size Bytes"
+     },
+     "source_url": {
+      "title": "Source Url",
+      "type": "string"
+     },
+     "year": {
+      "title": "Year",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "year",
+     "month",
+     "source_url",
+     "access_mode",
+     "sha256",
+     "size_bytes",
+     "remote_etag",
+     "remote_last_modified",
+     "retrieved_at_utc"
+    ],
+    "title": "SourceFileRecord",
+    "type": "object"
+   },
+   "StageRecord": {
+    "additionalProperties": false,
+    "properties": {
+     "detail": {
+      "default": "",
+      "title": "Detail",
+      "type": "string"
+     },
+     "duration_ms": {
+      "minimum": 0.0,
+      "title": "Duration Ms",
+      "type": "number"
+     },
+     "error_code": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Error Code"
+     },
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "started_at": {
+      "title": "Started At",
+      "type": "string"
+     },
+     "status": {
+      "pattern": "^(ok|failed|skipped)$",
+      "title": "Status",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "status",
+     "started_at",
+     "duration_ms"
+    ],
+    "title": "StageRecord",
+    "type": "object"
+   },
+   "Statement": {
+    "additionalProperties": false,
+    "description": "One prose claim plus the ids that make it traceable.",
+    "properties": {
+     "evidence_ids": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Evidence Ids",
+      "type": "array"
+     },
+     "numbers": {
+      "items": {
+       "$ref": "#/components/schemas/ReportedNumber"
+      },
+      "title": "Numbers",
+      "type": "array"
+     },
+     "text": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Text",
+      "type": "string"
+     },
+     "tool_output_ids": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Tool Output Ids",
+      "type": "array"
+     }
+    },
+    "required": [
+     "text"
+    ],
+    "title": "Statement",
+    "type": "object"
+   },
+   "ToolCallRecord": {
+    "additionalProperties": false,
+    "properties": {
+     "duration_ms": {
+      "minimum": 0.0,
+      "title": "Duration Ms",
+      "type": "number"
+     },
+     "error_code": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Error Code"
+     },
+     "input_summary": {
+      "default": "",
+      "title": "Input Summary",
+      "type": "string"
+     },
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "ok": {
+      "title": "Ok",
+      "type": "boolean"
+     },
+     "output_summary": {
+      "default": "",
+      "title": "Output Summary",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "ok",
+     "duration_ms"
+    ],
+    "title": "ToolCallRecord",
+    "type": "object"
+   },
+   "ValidationError": {
+    "properties": {
+     "ctx": {
+      "title": "Context",
+      "type": "object"
+     },
+     "input": {
+      "title": "Input"
+     },
+     "loc": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "string"
         },
-        "summary": "Poll a background job for status, progress, result, or error",
-        "tags": [
-          "jobs"
-        ]
-      }
-    }
+        {
+         "type": "integer"
+        }
+       ]
+      },
+      "title": "Location",
+      "type": "array"
+     },
+     "msg": {
+      "title": "Message",
+      "type": "string"
+     },
+     "type": {
+      "title": "Error Type",
+      "type": "string"
+     }
+    },
+    "required": [
+     "loc",
+     "msg",
+     "type"
+    ],
+    "title": "ValidationError",
+    "type": "object"
+   },
+   "YearTotal": {
+    "additionalProperties": false,
+    "properties": {
+     "season_year": {
+      "title": "Season Year",
+      "type": "integer"
+     },
+     "total_mm": {
+      "title": "Total Mm",
+      "type": "number"
+     },
+     "window_end": {
+      "title": "Window End",
+      "type": "string"
+     },
+     "window_start": {
+      "title": "Window Start",
+      "type": "string"
+     }
+    },
+    "required": [
+     "season_year",
+     "window_start",
+     "window_end",
+     "total_mm"
+    ],
+    "title": "YearTotal",
+    "type": "object"
+   },
+   "climateadapt__llm__report__ExcludedOption": {
+    "additionalProperties": false,
+    "description": "One excluded option with machine-readable reason codes.",
+    "properties": {
+     "intervention_id": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Intervention Id",
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     },
+     "narrative": {
+      "$ref": "#/components/schemas/Statement"
+     },
+     "reason_codes": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Reason Codes",
+      "type": "array"
+     }
+    },
+    "required": [
+     "intervention_id",
+     "name",
+     "reason_codes",
+     "narrative"
+    ],
+    "title": "ExcludedOption",
+    "type": "object"
+   },
+   "climateadapt__recommend__schema__ExcludedOption": {
+    "additionalProperties": false,
+    "description": "An ineligible intervention with machine-readable reasons.",
+    "properties": {
+     "category": {
+      "enum": [
+       "irrigation",
+       "soil_management",
+       "crop_management",
+       "planning",
+       "other"
+      ],
+      "title": "Category",
+      "type": "string"
+     },
+     "evidence_status": {
+      "enum": [
+       "supported",
+       "needs_evidence"
+      ],
+      "title": "Evidence Status",
+      "type": "string"
+     },
+     "intervention_id": {
+      "title": "Intervention Id",
+      "type": "string"
+     },
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "reasons": {
+      "items": {
+       "$ref": "#/components/schemas/ExclusionReason"
+      },
+      "minItems": 1,
+      "title": "Reasons",
+      "type": "array"
+     }
+    },
+    "required": [
+     "intervention_id",
+     "name",
+     "category",
+     "evidence_status",
+     "reasons"
+    ],
+    "title": "ExcludedOption",
+    "type": "object"
+   }
   }
+ },
+ "info": {
+  "description": "Evidence-grounded agricultural drought adaptation decision support. Indicators describe rainfall, temperature, and soil moisture relative to reference periods; they do not measure drought impact or classify severity.",
+  "title": "ClimateAdapt Lab API",
+  "version": "0.1.0"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/health": {
+   "get": {
+    "operationId": "health_health_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HealthResponse"
+        }
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "Health",
+    "tags": [
+     "system"
+    ]
+   }
+  },
+  "/v1/analysis/chirps-rainfall-anomaly": {
+   "post": {
+    "description": "Compares the observed calendar-month window total with the mean of the same window over the baseline years, at the CHIRPS grid cell containing the point. The first request for a period reads many monthly values and may be slow; later requests use the local cache. Not a drought-severity classification.",
+    "operationId": "chirps_rainfall_anomaly_endpoint_v1_analysis_chirps_rainfall_anomaly_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ChirpsRainfallAnomalyRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ChirpsRainfallAnomalyResult"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Precipitation percentage anomaly computed from CHIRPS v3 Final",
+    "tags": [
+     "analysis"
+    ]
+   }
+  },
+  "/v1/analysis/chirps-spi": {
+   "post": {
+    "description": "SPI for the window ending at target_end_month, calibrated on the reference period (gamma distribution per calendar month; WMO-No. 1090). Precipitation only: it does not measure agricultural drought impact and no severity labels are returned. A cold request reads about timescale x reference-years monthly values and may take a minute or more.",
+    "operationId": "chirps_spi_endpoint_v1_analysis_chirps_spi_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ChirpsSpiRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ChirpsSpiResult"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Standardized Precipitation Index (SPI) from CHIRPS v3 Final",
+    "tags": [
+     "analysis"
+    ]
+   }
+  },
+  "/v1/analysis/environmental-bundle": {
+   "post": {
+    "description": "Queues one bundle run over CHIRPS SPI, ERA5-Land SPI, temperature anomaly and soil-moisture anomaly (layer 1) and returns 202 + job id immediately; poll GET /v1/jobs/{job_id} for the result. Each indicator reports its own status (ok / undefined / failed / skipped) with result or error type, provenance, limitations, and coordinates. Failures are never hidden, never merged into a composite score, and never labelled by severity.",
+    "operationId": "environmental_bundle_endpoint_v1_analysis_environmental_bundle_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/EnvironmentalBundleRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "202": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/JobSubmitted"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Per-indicator environmental bundle: CHIRPS SPI + ERA5 trio (job)",
+    "tags": [
+     "analysis"
+    ]
+   }
+  },
+  "/v1/analysis/era5-soil-moisture-anomaly": {
+   "post": {
+    "description": "Queues an ERA5-Land soil-moisture-anomaly computation (layers 1-3) and returns 202 + job id immediately; poll GET /v1/jobs/{job_id} for the result. Values in m3/m3 with standardized anomaly; anomalies only, no category labels. Cold CDS requests take minutes.",
+    "operationId": "era5_soil_moisture_anomaly_endpoint_v1_analysis_era5_soil_moisture_anomaly_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Era5SoilMoistureAnomalyRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "202": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/JobSubmitted"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Soil-moisture window anomaly from ERA5-Land (background job)",
+    "tags": [
+     "analysis"
+    ]
+   }
+  },
+  "/v1/analysis/era5-spi": {
+   "post": {
+    "description": "Queues an ERA5-Land SPI computation and returns 202 + job id immediately; poll GET /v1/jobs/{job_id} for the result. Gamma fit per calendar month (WMO-No. 1090); no severity labels. Cold CDS requests take minutes.",
+    "operationId": "era5_spi_endpoint_v1_analysis_era5_spi_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Era5SpiRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "202": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/JobSubmitted"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Standardized Precipitation Index (SPI) from ERA5-Land (background job)",
+    "tags": [
+     "analysis"
+    ]
+   }
+  },
+  "/v1/analysis/era5-temperature-anomaly": {
+   "post": {
+    "description": "Queues an ERA5-Land temperature-anomaly computation and returns 202 + job id immediately; poll GET /v1/jobs/{job_id} for the result. Day-weighted window means in degC with standardized anomaly and percentile rank. Cold CDS requests take minutes.",
+    "operationId": "era5_temperature_anomaly_endpoint_v1_analysis_era5_temperature_anomaly_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Era5TemperatureAnomalyRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "202": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/JobSubmitted"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Temperature window anomaly from ERA5-Land (background job)",
+    "tags": [
+     "analysis"
+    ]
+   }
+  },
+  "/v1/analysis/rainfall-anomaly": {
+   "post": {
+    "operationId": "rainfall_anomaly_v1_analysis_rainfall_anomaly_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RainfallAnalysisRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RainfallAnalysisResponse"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Prototype precipitation percentage anomaly from user-supplied totals",
+    "tags": [
+     "analysis"
+    ]
+   }
+  },
+  "/v1/jobs/{job_id}": {
+   "get": {
+    "description": "Returns the job snapshot: queued / running / succeeded / failed / timed_out, step progress, and the result or typed error once terminal. Unknown or TTL-expired ids return 404 (job_not_found).",
+    "operationId": "job_status_endpoint_v1_jobs__job_id__get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "job_id",
+      "required": true,
+      "schema": {
+       "title": "Job Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/JobStatus"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Poll a background job for status, progress, result, or error",
+    "tags": [
+     "jobs"
+    ]
+   }
+  },
+  "/v1/scenarios": {
+   "get": {
+    "operationId": "list_scenarios_endpoint_v1_scenarios_get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "limit",
+      "required": false,
+      "schema": {
+       "default": 20,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "offset",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ScenarioList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "List stored scenarios, newest first (paginated)",
+    "tags": [
+     "scenarios"
+    ]
+   },
+   "post": {
+    "description": "Validates the scenario, persists it, queues one bounded agent run (bundle, retrieval, ranking, draft, validate), and returns 202 with the scenario and job ids. Poll GET /v1/scenarios/{id} for the stored bundle, ranking, report, and trace. No authentication in this demo API. A full job store returns 503 (server_busy).",
+    "operationId": "create_scenario_endpoint_v1_scenarios_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AgentScenario"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "202": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ScenarioCreated"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Create a scenario: run the agent pipeline as a background job",
+    "tags": [
+     "scenarios"
+    ]
+   }
+  },
+  "/v1/scenarios/{scenario_id}": {
+   "delete": {
+    "description": "Removes the scenario row; a still-running worker discards its result. Unknown ids return 404 (scenario_not_found).",
+    "operationId": "delete_scenario_endpoint_v1_scenarios__scenario_id__delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "scenario_id",
+      "required": true,
+      "schema": {
+       "title": "Scenario Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Delete a stored scenario (a running job is left to finish unseen)",
+    "tags": [
+     "scenarios"
+    ]
+   },
+   "get": {
+    "description": "While the run is queued/running, outputs are null. Terminal runs carry the deterministic bundle and ranking plus either the validated report (complete) or the labelled fallback (partial), with problems and warnings explaining why. Unknown ids return 404 (scenario_not_found).",
+    "operationId": "get_scenario_endpoint_v1_scenarios__scenario_id__get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "scenario_id",
+      "required": true,
+      "schema": {
+       "title": "Scenario Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ScenarioDetail"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Retrieve one scenario with bundle, ranking, report, and trace",
+    "tags": [
+     "scenarios"
+    ]
+   }
+  }
+ }
 }

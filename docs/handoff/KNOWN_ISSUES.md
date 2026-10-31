@@ -169,10 +169,12 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 - **Evidence:** `api/main.py` (as delivered) has no `CORSMiddleware`; endpoints are synchronous; the shared client has no shutdown hook; offline-mode error text includes a local cache path.
 - **Resolution (P05/P11):** CORS for the dev origin, request timeouts/jobs, lifespan shutdown, remove local paths from client-facing messages.
 - **P05 evidence (2026-10-30; offline-tested):** CORS from settings (Vite origin default) with preflight tests; new endpoints are 202 + poll jobs (timeout/TTL/workers); lifespan closes the CHIRPS store and cancels queued jobs; local path removed from the offline error text. Remaining: no auth, no rate limiting (P11 scope). Submission backpressure added (follow-up 2026-10-30): a full store returns 503 `server_busy` instead of growing.
+- **P11 evidence (2026-10-31):** CORS `allow_methods` extended with DELETE (preflight test added); request bodies capped at 1 MB via middleware (413 `request_too_large`, new deliberately-added code); scenario CRUD behind the same error contract. Still open: **no auth, no rate limiting** — now a documented limitation (README + route descriptions); do not expose beyond localhost.
 
-### KI-29 — No scenario persistence (Medium)
+### KI-29 — No scenario persistence (Medium) — ✅ RESOLVED 2026-10-31
 - **Evidence:** No database or history store. Blueprint calls for PostgreSQL/PostGIS.
 - **Resolution (P11):** minimal, justified persistence (SQLite for the demo unless the owner wants PostgreSQL now).
+- **P11 evidence (2026-10-31):** `ScenarioStore` protocol + stdlib-SQLite store (WAL, `user_version` migrations, schema v1, thread-safe) persisting inputs, bundle, ranking, report, trace, status, and timestamps; scenario CRUD + paginated history + 204 delete; PostgreSQL stays owner-optional (seam is the protocol). Sync store tests ran green; TestClient API tests written but sandbox-unrunnable (see KI-34 note).
 
 ---
 
@@ -197,6 +199,7 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 ### KI-34 — Windows/console quirks (Low)
 - **Evidence:** RAG scripts call `sys.stdout.reconfigure(encoding="utf-8")` for Arabic/French output; earlier scripts do not. Paths in docs use backslashes.
 - **Resolution:** keep commands PowerShell-safe; check encoding handling when scripts print non-ASCII.
+- **Sandbox note (P11, 2026-10-31):** the agent sandbox blocks `listen()`/`socketpair()` (WinError 10013), which breaks `asyncio`, Starlette `TestClient`, and `uvicorn` entirely. Pre-existing and environmental: untouched `tests/test_api_era5.py` fails identically. P11's 14 TestClient tests are therefore written-but-unrun here; the same behaviors were verified with a throwaway direct-call probe (all passed). The owner must run `uv run pytest tests/test_api_scenarios.py` and the README manual calls on their machine.
 
 ### KI-35 — Model invents tool-output ids; prompt never states the registry vocabulary (High for draft acceptance)
 - **Evidence (P10 live run 2026-10-31; CONFIRMED):** the first full draft used `environmental_bundle` and `environmental_bundle:entries[N].result.<field>` instead of the registry ids (`bundle`, `chirps_spi`, …) — 22 of its 44 validator problems — plus undeclared numbers, 2 altered citations, missing ranking/constraints refs, and 2 efficacy claims. The prompt shows TOOL DATA as raw bundle/ranking JSON, which does not expose the `(output_id, field)` vocabulary.

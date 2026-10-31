@@ -66,6 +66,10 @@ Docs: http://127.0.0.1:8000/docs
 | `POST /v1/analysis/era5-soil-moisture-anomaly` | ERA5-Land soil-moisture anomaly as a job (layers 1-3) |
 | `POST /v1/analysis/environmental-bundle` | CHIRPS SPI + ERA5 trio as one job; per-indicator statuses |
 | `GET /v1/jobs/{job_id}` | Poll a job: queued / running / succeeded / failed / timed_out |
+| `POST /v1/scenarios` | Create a scenario: queue one bounded agent run (202 + ids) |
+| `GET /v1/scenarios` | List stored scenarios, newest first (paginated) |
+| `GET /v1/scenarios/{id}` | Retrieve bundle, ranking, report, and trace |
+| `DELETE /v1/scenarios/{id}` | Delete a stored scenario |
 
 ERA5-Land endpoints never block: each POST returns 202 with a `job_id` immediately
 and the client polls `GET /v1/jobs/{job_id}` (per-job timeout 900 s, results kept
@@ -73,6 +77,47 @@ and the client polls `GET /v1/jobs/{job_id}` (per-job timeout 900 s, results kep
 indicator separately (`ok` / `undefined` / `failed` / `skipped`) with its result
 or typed error, provenance, limitations, and grid cells — never a composite score
 or severity label. CHIRPS endpoints stay synchronous. Full contract: `docs/openapi.json`.
+
+Scenarios (the React frontend contract): `POST /v1/scenarios` validates the
+request, persists it to SQLite (`data/scenarios.sqlite3` by default), queues
+one fixed-pipeline agent run, and returns 202 with `scenario_id` and `job_id`.
+`GET /v1/scenarios/{id}` returns the stored input, deterministic bundle and
+ranking, and either the validated report (`complete`) or the labelled fallback
+(`partial`), plus the trace, problems, and warnings. History is paginated
+(`limit` 1-100, `offset`). All scenario responses carry `"version": 1`; the
+frontend must gate on it. Request bodies over 1 MB get 413
+(`request_too_large`). Error codes: `scenario_not_found` (404), `job_not_found`
+(404), `server_busy` (503), plus the analysis codes. **No authentication:**
+anyone who can reach the server can create, read, and delete scenarios; do not
+expose it beyond localhost without adding auth. Regenerate the contract after
+any route change with `uv run python scripts/export_openapi.py`; generate the
+frontend client from `docs/openapi.json` (e.g. `openapi-typescript`) rather
+than hand-writing it, and keep a contract test against the `version` field.
+
+```powershell
+# Create a scenario (needs warm caches for an offline run; without a Baseten
+# key the report is the labelled deterministic fallback -- no credits spent)
+$body = @{
+  latitude = 30.43; longitude = -9.61; target_end_month = "2024-03"
+  timescale_months = 3; reference_start_year = 1991; reference_end_year = 2020
+  min_reference_years = 30; land_fallback_max_km = 15.0
+  query = "deficit irrigation scheduling"; top_k = 5
+  crop = "wheat"; has_water_source = $true
+  has_irrigation_equipment = $true; production_system = "irrigated"
+  season = "2024-03"
+} | ConvertTo-Json
+$created = Invoke-RestMethod -Uri http://127.0.0.1:8000/v1/scenarios `
+  -Method Post -Body $body -ContentType "application/json"
+$created.scenario_id; $created.job_id
+
+# Poll the job, then read the stored result
+Invoke-RestMethod http://127.0.0.1:8000/v1/jobs/$($created.job_id)
+Invoke-RestMethod http://127.0.0.1:8000/v1/scenarios/$($created.scenario_id)
+
+# History (paginated) and deletion
+Invoke-RestMethod "http://127.0.0.1:8000/v1/scenarios?limit=20&offset=0"
+Invoke-RestMethod http://127.0.0.1:8000/v1/scenarios/$($created.scenario_id) -Method Delete
+```
 
 ## Scripts
 

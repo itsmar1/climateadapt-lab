@@ -113,6 +113,8 @@ class AgentResult:
     completion_tokens: int = 0
     llm_calls: int = 0
     tool_calls_made: int = 0
+    bundle: Any = None  # EnvironmentalBundleResponse (kept for API persistence)
+    ranking: Any = None  # RecommendationResponse (kept for API persistence)
 
 
 def _record_stage(
@@ -252,6 +254,7 @@ def run_agent(
             result.problems.append(f"[{code}] Environmental bundle failed: {exc}")
             raise _Abort(code) from exc
         result.tool_calls_made += 1
+        result.bundle = bundle
         statuses = {entry.indicator: entry.status for entry in bundle.entries}
         trace.tool_calls.append(
             ToolCallRecord(
@@ -368,6 +371,7 @@ def run_agent(
             result.problems.append(f"[ranking-error] Ranking failed: {exc}")
             raise _Abort("ranking-error") from exc
         result.tool_calls_made += 1
+        result.ranking = ranking
         trace.tool_calls.append(
             ToolCallRecord(
                 name="rank_adaptation_options", ok=True,
@@ -543,6 +547,7 @@ def run_agent(
                     ingested_doc_ids={c.doc_id for c in retrieved},
                 )
                 result.tool_calls_made += 1
+                result.ranking = ranking
                 trace.tool_calls.append(
                     ToolCallRecord(
                         name="rank_adaptation_options", ok=True,

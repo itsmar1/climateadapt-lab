@@ -140,8 +140,24 @@ Note: `spi_era5.py` and `temperature_anomaly.py` used to duplicate window-assemb
 | `POST /v1/analysis/era5-soil-moisture-anomaly` → 202 job (P05) | T (offline; live uvicorn check not yet run) |
 | `POST /v1/analysis/environmental-bundle` → 202 job (P05) | T; **R (live uvicorn 2026-10-30: 202 + poll → succeeded, 4/4 ok, ~21 s)** |
 | `GET /v1/jobs/{job_id}` (P05) | T; **R (live poll to terminal)** |
+| `POST /v1/scenarios` → 202 + ids (P11) | U (14 TestClient tests written; sandbox blocks sockets so none ran — see KI-34 note; equivalent direct-call probe passed) |
+| `GET /v1/scenarios` paginated (P11) | U (same as above) |
+| `GET /v1/scenarios/{id}` (P11) | U (same as above) |
+| `DELETE /v1/scenarios/{id}` → 204 (P11) | U (same as above) |
 
 Files: `api/main.py` (factory, validation-error handler that never echoes input, domain-error handlers, CORS, lifespan), `api/dependencies.py` (`get_chirps_client`, `get_era5_client`, `get_job_store`, shutdown), `api/jobs.py` (in-memory store: bounded workers, per-job timeout, TTL), `api/bundle.py` (per-indicator statuses), `api/errors.py` (shared codes), `schemas.py`, `schemas_chirps.py`, `schemas_spi.py`, `schemas_era5.py`, `analysis.py`, `geo.py`, `docs/openapi.json` (generated contract, matches routes). **No RAG routes, no auth, no rate limiting.**
+
+### 2.13 Scenario API + SQLite persistence (P11 2026-10-31)
+| Path | Purpose | Evidence |
+|---|---|---|
+| `api/schemas_scenarios.py` | Versioned (`"version": 1`) created/summary/list/detail contracts; detail separates bundle, ranking, report, trace | U (probe-verified, TestClient suite unrunnable in sandbox) |
+| `api/store.py` | `ScenarioStore` protocol + thread-safe stdlib-SQLite store (WAL, `user_version` migrations, schema v1) | T (sync tests ran green) + probe |
+| `api/scenarios.py` | Background worker (run agent → persist terminal outputs; deleted-mid-run safe) + row assembly | U (probe-verified, TestClient suite unrunnable in sandbox) |
+| `api/body_limit.py` | Body-cap middleware (1 MB default → 413 `request_too_large`, CORS headers kept) | U (probe-verified incl. exact 413 shape) |
+| `api/dependencies.py` | `get_scenario_store`, `get_agent_deps`, `get_llm_provider` (live Baseten or honest unavailable stand-in → labelled fallback) | U (probe-verified via direct route calls) |
+| `scripts/export_openapi.py` | Deterministic `docs/openapi.json` regeneration (11 paths) | R (ran 2026-10-31) |
+
+Tests: `tests/test_api_scenarios.py` (14 TestClient tests: lifecycle, restart on a temp DB, failed runs, validation shape, pagination, delete, 503 rollback, no-key partial, CORS preflight, 413, openapi routes) — written but never run green in this sandbox (socket block, KI-34 note); a throwaway direct-call probe verified the same behaviors and passed. Standalone `POST /v1/evidence/search` deliberately NOT added: the report already carries cited evidence, and an extra endpoint would widen unauthenticated corpus-text exposure. No auth, no rate limiting (documented limitation).
 
 ### 2.6 Scientific RAG (`src/climateadapt/rag/`, first batch)
 | Path | Purpose | Evidence |
@@ -245,7 +261,7 @@ Retrieval evaluation so far: 10 of 15 queries evaluable, 5 skipped (q01, q03, q0
 - Area/polygon analysis (all analyses are single-point); crop context/calendar; vegetation (Sentinel-2/NDVI); WaPOR.
 - ~~Intervention catalog, constraints, ranking, evidence strength metadata (Milestone 5).~~ **Delivered 2026-10-31 (P08):** engine + 3-entry v1 catalog; catalog *growth* still needs owner-approved sources.
 - ~~LLM provider adapter (Baseten), report schema, agent workflow (Milestone 6).~~ **Adapter + schema + validator delivered 2026-10-31 (P09):** `src/climateadapt/llm/` with 51 offline tests and one gated live call (fallback served, see §2.11). **Agent workflow delivered 2026-10-31 (P10):** fixed pipeline in `src/climateadapt/agent/` with 22 offline tests and one gated live run (see §2.12).
-- Scenario persistence/history, API auth and rate limiting. (P05 delivered the OpenAPI contract and CORS.)
+- ~~Scenario persistence/history, API auth and rate limiting.~~ **Persistence delivered 2026-10-31 (P11):** scenario CRUD + SQLite history (see §2.13). API auth and rate limiting still missing (documented limitation, KI-28).
 - **React + Vite frontend** (no `frontend/` directory expected).
 - Computer-vision baseline (CropHarvest) — deferred.
 - MLOps: Docker/Compose, GitHub Actions CI/CD, MLflow, Optuna, Airflow, PostgreSQL/PostGIS, Prometheus, Evidently, Grafana. Of the owner's eleven named tools only Pytest and FastAPI exist.

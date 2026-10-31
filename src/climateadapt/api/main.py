@@ -9,30 +9,49 @@ past its own request/response round trip.
 from __future__ import annotations
 
 import logging
+import uuid
 from contextlib import asynccontextmanager
 from typing import Annotated, Any
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from climateadapt import __version__
+from climateadapt.agent.schemas import AgentConfig, AgentDeps, AgentScenario
 from climateadapt.analysis import analyze_rainfall
+from climateadapt.api.body_limit import BodyLimitMiddleware
 from climateadapt.api.bundle import run_environmental_bundle
 from climateadapt.api.dependencies import (
     close_shared_clients,
+    get_agent_deps,
     get_chirps_client,
     get_era5_client,
     get_job_store,
+    get_llm_provider,
+    get_scenario_store,
 )
-from climateadapt.api.errors import DOMAIN_ERRORS, JOB_NOT_FOUND
+from climateadapt.api.errors import (
+    DOMAIN_ERRORS,
+    JOB_NOT_FOUND,
+    SCENARIO_NOT_FOUND,
+    JobStoreFullError,
+)
 from climateadapt.api.jobs import JobStatus, JobStore, JobSubmitted
+from climateadapt.api.scenarios import run_scenario_job, to_detail, to_summary
+from climateadapt.api.schemas_scenarios import (
+    ScenarioCreated,
+    ScenarioDetail,
+    ScenarioList,
+)
+from climateadapt.api.store import ScenarioStore
 from climateadapt.config import get_settings
 from climateadapt.data.chirps import ChirpsV3Client
 from climateadapt.data.era5_land import Era5LandClient
 from climateadapt.data.periods import YearMonth
 from climateadapt.indicators.rainfall import InvalidPrecipitationError
+from climateadapt.llm.provider import LLMProvider
 from climateadapt.pipelines.rainfall_anomaly import (
     ChirpsRainfallAnomalyResult,
     chirps_rainfall_anomaly,
@@ -120,10 +139,12 @@ def create_app() -> FastAPI:
         ),
         lifespan=lifespan,
     )
+    # Body limit first = runs inside CORS, so 413s still carry CORS headers.
+    app.add_middleware(BodyLimitMiddleware, max_bytes=settings.api_max_body_bytes)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.api_cors_origins,
-        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
         allow_headers=["Content-Type"],
         allow_credentials=False,
         max_age=600,
@@ -363,6 +384,112 @@ def create_app() -> FastAPI:
         if snapshot is None:
             return _error_response(404, JOB_NOT_FOUND, "Unknown or expired job id.")
         return JobStatus.model_validate(snapshot)
+
+    @app.post(
+        "/v1/scenarios",
+        response_model=ScenarioCreated,
+        status_code=202,
+        tags=["scenarios"],
+        summary="Create a scenario: run the agent pipeline as a background job",
+        description=(
+            "Validates the scenario, persists it, queues one bounded agent run "
+            "(bundle, retrieval, ranking, draft, validate), and returns 202 with "
+            "the scenario and job ids. Poll GET /v1/scenarios/{id} for the stored "
+            "bundle, ranking, report, and trace. No authentication in this demo "
+            "API. A full job store returns 503 (server_busy)."
+        ),
+    )
+    def create_scenario_endpoint(
+        request: AgentScenario,
+        jobs: Annotated[JobStore, Depends(get_job_store)],
+        store: Annotated[ScenarioStore, Depends(get_scenario_store)],
+        deps: Annotated[AgentDeps, Depends(get_agent_deps)],
+        provider: Annotated[LLMProvider, Depends(get_llm_provider)],
+    ) -> ScenarioCreated:
+        scenario_id = uuid.uuid4().hex
+        store.create(scenario_id, "", request.model_dump(mode="json"))
+        # Keep the agent's own clock inside the job clock so a timeout lands on
+        # the scenario row (partial/failed) instead of only on the job snapshot.
+        agent_timeout = min(600.0, max(60.0, jobs.timeout_seconds - 5.0))
+        try:
+            job_id = jobs.submit(
+                "scenario", 1,
+                run_scenario_job(
+                    scenario_id,
+                    store=store,
+                    deps=deps,
+                    provider=provider,
+                    config=AgentConfig(total_timeout_seconds=agent_timeout),
+                ),
+            )
+        except JobStoreFullError:
+            store.delete(scenario_id)
+            raise
+        store.set_job_id(scenario_id, job_id)
+        return ScenarioCreated(
+            scenario_id=scenario_id,
+            job_id=job_id,
+            status="queued",
+            status_url=f"/v1/jobs/{job_id}",
+            scenario_url=f"/v1/scenarios/{scenario_id}",
+        )
+
+    @app.get(
+        "/v1/scenarios",
+        response_model=ScenarioList,
+        tags=["scenarios"],
+        summary="List stored scenarios, newest first (paginated)",
+    )
+    def list_scenarios_endpoint(
+        store: Annotated[ScenarioStore, Depends(get_scenario_store)],
+        limit: Annotated[int, Query(ge=1, le=100)] = 20,
+        offset: Annotated[int, Query(ge=0)] = 0,
+    ) -> ScenarioList:
+        total, rows = store.list_recent(limit, offset)
+        return ScenarioList(
+            total=total,
+            limit=limit,
+            offset=offset,
+            items=[to_summary(row) for row in rows],
+        )
+
+    @app.get(
+        "/v1/scenarios/{scenario_id}",
+        response_model=ScenarioDetail,
+        tags=["scenarios"],
+        summary="Retrieve one scenario with bundle, ranking, report, and trace",
+        description=(
+            "While the run is queued/running, outputs are null. Terminal runs "
+            "carry the deterministic bundle and ranking plus either the validated "
+            "report (complete) or the labelled fallback (partial), with problems "
+            "and warnings explaining why. Unknown ids return 404 "
+            "(scenario_not_found)."
+        ),
+    )
+    def get_scenario_endpoint(
+        scenario_id: str, store: Annotated[ScenarioStore, Depends(get_scenario_store)]
+    ) -> ScenarioDetail | JSONResponse:
+        row = store.get(scenario_id)
+        if row is None:
+            return _error_response(404, SCENARIO_NOT_FOUND, "Unknown scenario id.")
+        return to_detail(row)
+
+    @app.delete(
+        "/v1/scenarios/{scenario_id}",
+        status_code=204,
+        tags=["scenarios"],
+        summary="Delete a stored scenario (a running job is left to finish unseen)",
+        description=(
+            "Removes the scenario row; a still-running worker discards its result. "
+            "Unknown ids return 404 (scenario_not_found)."
+        ),
+    )
+    def delete_scenario_endpoint(
+        scenario_id: str, store: Annotated[ScenarioStore, Depends(get_scenario_store)]
+    ) -> Response:
+        if not store.delete(scenario_id):
+            return _error_response(404, SCENARIO_NOT_FOUND, "Unknown scenario id.")
+        return Response(status_code=204)
 
     return app
 

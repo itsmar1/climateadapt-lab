@@ -11,6 +11,11 @@ for the P05 job surface (documented in README):
 * ``internal`` (job/bundle record): unexpected failure; the message is generic and the
   original error is logged server-side only.
 * ``server_busy`` (HTTP 503): the job store is at capacity; retry shortly.
+
+Two deliberate additions exist for the P11 scenario surface:
+
+* ``scenario_not_found`` (HTTP 404): unknown or deleted scenario id.
+* ``request_too_large`` (HTTP 413): the request body exceeded the configured cap.
 """
 
 from __future__ import annotations
@@ -46,6 +51,8 @@ DOMAIN_ERRORS: tuple[tuple[type[Exception], int, str], ...] = (
 JOB_NOT_FOUND = "job_not_found"
 JOB_TIMEOUT = "timeout"
 JOB_INTERNAL = "internal"
+SCENARIO_NOT_FOUND = "scenario_not_found"
+REQUEST_TOO_LARGE = "request_too_large"
 
 
 def domain_error_status(exc: Exception) -> tuple[int, str] | None:
