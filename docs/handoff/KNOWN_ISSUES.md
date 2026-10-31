@@ -147,11 +147,12 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 
 ## D. Model access, agent, recommendations, frontend
 
-### KI-25 — Baseten model access details unverified; no LLM code exists (High) — route VERIFIED 2026-10-30, adapter still not built
+### KI-25 — Baseten model access details unverified; no LLM code exists (High) — adapter BUILT 2026-10-31, agent still not built
 - **Evidence:** Owner states access to `meta-models/muse-spark-open-1026` with credits and rate limits. Endpoint, auth, tool calling, schema-constrained output, context size, and limits are unverified.
 - **Impact:** Agent design depends on tool-calling support; an unsupported feature would change the architecture.
 - **Resolution (P03):** verify from current Baseten documentation; run a tiny gated smoke script; record findings; design the adapter around verified capabilities with a deterministic fallback.
 - **P03 evidence (2026-10-30; CONFIRMED, see `docs/LLM_PROVIDER_NOTES.md`):** base URL `https://inference.baseten.co/v1` + Bearer auth verified from official docs; `-1026` slug, tool-call round trip, and malformed-body error shape verified by one gated live run (5 calls, ≈$0.002); structured output verified *unsupported* for this model (docs: accepted but not enforced → P09 must validate client-side). Still open: numeric rate/context limits, credit budget, and all of P09/P10 (no adapter/agent code exists).
+- **P09 evidence (2026-10-31; CONFIRMED, see `docs/LLM_PROVIDER_NOTES.md` §4):** adapter + versioned report schema + client-side validator + deterministic fallback + prompt templates built (`src/climateadapt/llm/`, 51 offline tests green, ruff clean); one gated live report call ran (HTTP 200 in 46.6 s, 26965/4000 tokens ≈$0.051, `finish_reason=length` → empty draft → labelled fallback served and re-validated clean). No model draft has ever been *accepted* yet: `max_tokens=4000` is far too small for this reasoning model on a ~27k prompt, so a larger-budget retry (owner-approved) is needed before P10. Still open: numeric rate/context limits, credit budget, accepted-draft behavior, and all of P10 (no agent code exists).
 
 ### KI-26 — No recommendation engine or evidence-backed catalog (High) — ✅ RESOLVED 2026-10-31 (engine done; catalog small by design)
 - **Evidence:** Not started. Corpus currently covers irrigation-related practices (deficit and supplemental irrigation, crop water response) and indicator/dataset documentation; it contains little on other adaptation options (e.g., varieties, sowing dates, mulching, water harvesting).

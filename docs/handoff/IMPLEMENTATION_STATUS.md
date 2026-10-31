@@ -67,8 +67,10 @@ so this mapping follows the handoff's implied milestones. "Complete" = implement
 M5 (recommendations) / M6 (agent + LLM), frontend, persistence, and Docker/CI are all
 **not started** — no code, not partial (AUDIT_REPORT §6). **P08 update 2026-10-31:**
 M5 engine is **implemented + tested** (`src/climateadapt/recommend/`, 3-entry v1 catalog,
-`scripts/validate_catalog.py`, 80 offline tests; see §2.10). M6, frontend, persistence
-and Docker/CI remain not started.
+`scripts/validate_catalog.py`, 80 offline tests; see §2.10). **P09 update 2026-10-31:**
+M6 adapter half is **implemented + tested** (`src/climateadapt/llm/`, 51 offline tests,
+one gated live call with fallback served; see §2.11). The M6 agent workflow (P10),
+frontend, persistence and Docker/CI remain not started.
 
 ### Environment note (verified 2026-10-30; CONFIRMED)
 
@@ -171,6 +173,19 @@ Files: `api/main.py` (factory, validation-error handler that never echoes input,
 
 Catalog v1: `deficit-irrigation` + `irrigation-scheduling` supported by IDDP66 pp. 22/70 and 25/66; `supplemental-irrigation` is `needs_evidence` (ICARDA docs not ingested). No LLM, no invented figures. Details: `docs/RECOMMENDATION_ENGINE.md`.
 
+### 2.11 LLM adapter and validated reports (`src/climateadapt/llm/`, P09 2026-10-31)
+| Path | Purpose | Evidence |
+|---|---|---|
+| `provider.py` | `LLMProvider` protocol; `BasetenProvider` (verified Chat Completions API only: bounded retries/backoff, timeouts, 429/529 handling, secret-safe logging, usage incl. cached tokens); `FakeProvider` | T |
+| `report.py` | Versioned report schema (summary, findings, evidence, ranked, excluded, limitations, assumptions, coverage, provenance) + deterministic tool-output registry with bundle/ranking builders | T |
+| `validator.py` | Client-side draft validation: schema, known evidence/tool ids, citations rebuilt verbatim + `verify_citation`, prose numerals traced to registry values, mandatory limitations/provenance, bans on severity labels / efficacy claims / currency+percent | T |
+| `fallback.py` | Deterministic fallback report (fixed templates, labelled `deterministic-fallback`, no AI text) | T |
+| `prompts.py`, `prompts/*.txt` | Versioned prompt templates with an explicit instruction hierarchy; retrieved text wrapped as escaped untrusted data | T |
+| `service.py` | `generate_report`: one draft call, strict validation, labelled fallback on any failure | T |
+| `scripts/llm_report.py` | Gated one-call live report (warm-cache bundle + offline BM25 + ranking + 1 Baseten call) | T (gate), R (1 call 2026-10-31: HTTP 200, 46.6 s, 26965/4000 tokens, `finish_reason=length` → empty draft → fallback served and re-validated clean; ≈$0.051) |
+
+Tests: `tests/test_llm_provider.py`, `tests/test_report_schema.py`, `tests/test_report_validator.py` + `tests/report_helpers.py` (51 offline tests, all synthetic; injection, tampered chunks, altered numbers, timeout/rate-limit, and fallback paths covered). No agent graph/tool loop (P10 scope).
+
 ## 3. Real-data verification log (CONFIRMED from owner's logs)
 
 **CHIRPS v3.** HTTPS monthly URL pattern works (`.../monthly/global/tifs/chirps-v3.0.YYYY.MM.tif`); files ≈22 MB, 7200×2400 float32 EPSG:4326, **LZW strips, not tiled, no overviews, no nodata tag** (so the −9999 sentinel logic matters). Remote single-pixel read matched the downloaded value exactly (27.39597511291504). Download mode: 33 files ≈17 min cold; remote mode: same anomaly digits (0.5543783725454325), ≈30 s cold. File ETags/Last-Modified captured; 2014-03 was revised 2025-04-22 while the rest were 2024-11/12.
@@ -215,7 +230,7 @@ Retrieval evaluation so far: 10 of 15 queries evaluable, 5 skipped (q01, q03, q0
 - Dense retrieval (multilingual E5 + Qdrant); RAG API routes.
 - Area/polygon analysis (all analyses are single-point); crop context/calendar; vegetation (Sentinel-2/NDVI); WaPOR.
 - ~~Intervention catalog, constraints, ranking, evidence strength metadata (Milestone 5).~~ **Delivered 2026-10-31 (P08):** engine + 3-entry v1 catalog; catalog *growth* still needs owner-approved sources.
-- LLM provider adapter (Baseten), report schema, agent workflow (Milestone 6). (P03 verified the route + settings only; no adapter/agent code.)
+- ~~LLM provider adapter (Baseten), report schema, agent workflow (Milestone 6).~~ **Adapter + schema + validator delivered 2026-10-31 (P09):** `src/climateadapt/llm/` with 51 offline tests and one gated live call (fallback served, see §2.11). Agent workflow (P10) still missing.
 - Scenario persistence/history, API auth and rate limiting. (P05 delivered the OpenAPI contract and CORS.)
 - **React + Vite frontend** (no `frontend/` directory expected).
 - Computer-vision baseline (CropHarvest) — deferred.

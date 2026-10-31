@@ -115,6 +115,11 @@ uv run python scripts/rag_eval.py --k-sweep
 
 # Recommendation catalog (offline; checks manifest + ingested corpus)
 uv run python scripts/validate_catalog.py
+
+# Validated LLM report (one gated Baseten call; needs CLIMATEADAPT_RUN_LIVE_LLM=1
+# plus a configured key, warm caches, and an ingested corpus; falls back
+# deterministically when the draft is invalid -- see docs/LLM_PROVIDER_NOTES.md)
+$env:CLIMATEADAPT_RUN_LIVE_LLM = "1"; uv run python scripts/llm_report.py
 ```
 
 ERA5-Land variables: `2m_temperature`, `total_precipitation`,

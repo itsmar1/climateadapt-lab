@@ -199,3 +199,41 @@ Warnings for P09/P10 (observed):
   multi-second latency plus queueing.
 - Probe (e), a rate-limit probe, was deliberately skipped: hammering limits is unsafe.
   No rate-limit or credit-balance information was returned or requested.
+
+## 4. P09 adapter + live report call — RAN 2026-10-31 (1 call, owner-tasked)
+
+Adapter: `src/climateadapt/llm/` (`provider.py` protocol + Baseten + fake,
+`report.py` schema + tool-output registry, `validator.py` client-side checks,
+`fallback.py` deterministic fallback, `prompts/` templates, `service.py`
+draft-or-fallback orchestration). The provider implements only this document's
+verified API: `POST {base}/chat/completions`, Bearer auth, no `n > 1`, bounded
+retries with backoff on 429/529/5xx + transport errors (honouring Retry-After),
+typed errors, secret-safe logging, usage accounting incl. cached tokens.
+
+Live call (`scripts/llm_report.py`, gate + key set for that one process only):
+warm-cache 4/4-ok bundle + offline BM25 top-5 + deterministic ranking, then one
+`meta-models/muse-spark-open-1026` completion (`max_tokens=4000`):
+
+```text
+bundle statuses: 4/4 ok (warm cache, downloads forced off)
+retrieved: 5 chunks (IDDP66 x4, WR45 x1); ranking: 2 ranked, 1 excluded
+accepted: False (fallback=True)
+latency_ms: 46641; attempts: 1
+usage: prompt_tokens=26965 completion_tokens=4000 total=30965 cached=0
+problems: [empty-content] Model returned no text (finish_reason=length).
+saved: data\llm_reports\report-20261031T143521Z.json (git-ignored)
+```
+
+Verified live: the adapter path works end to end (HTTP 200, usage returned);
+the validator correctly rejected the empty draft and the labelled fallback was
+served (4 findings, 5 citations, 2 ranked + 1 excluded, 4 limitations); the
+saved fallback re-validates clean offline (`allow_fallback=True`, 0 problems).
+Cost ≈ $0.051 at list rates (26965 in × $1.25 + 4000 out × $4.25 per 1M).
+
+Lesson (confirms the §3 warning, now with a real prompt): `max_tokens=4000`
+is far too small for this reasoning model on a ~27k-token prompt — all 4000
+completion tokens went to reasoning and the visible content was cut. A retry
+that accepts a model draft needs a much larger completion budget (and the
+prompt trimmed: the full bundle + ranking JSON is verbose). NOT retried: the
+task authorised one call. No second call was made; credit balance still
+UNVERIFIED.

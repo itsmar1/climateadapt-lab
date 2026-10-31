@@ -63,6 +63,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "climateadapt.recommend" = ["*.json"]
+"climateadapt.llm" = ["prompts/*.txt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
