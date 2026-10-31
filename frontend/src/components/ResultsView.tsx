@@ -1,6 +1,9 @@
 import type { ScenarioDetail } from '../api/client';
+import { downloadMarkdown, reportToMarkdown } from '../api/export';
 import { toCardModel } from '../api/presenters';
 import IndicatorCard from './IndicatorCard';
+import RecommendationPanel from './RecommendationPanel';
+import ReportView from './ReportView';
 import StatusBadge from './StatusBadge';
 
 function splitProblem(problem: string): { code: string | null; text: string } {
@@ -83,6 +86,20 @@ export default function ResultsView({
           <button type="button" className="ghost" onClick={onNew}>
             New scenario
           </button>
+          {detail.report && (
+            <button
+              type="button"
+              className="ghost"
+              onClick={() =>
+                downloadMarkdown(
+                  `scenario-${detail.scenario_id}-report.md`,
+                  reportToMarkdown(detail),
+                )
+              }
+            >
+              Export report (Markdown)
+            </button>
+          )}
         </div>
       </div>
 
@@ -91,6 +108,24 @@ export default function ResultsView({
           {entries.map((entry) => (
             <IndicatorCard key={entry.indicator} model={toCardModel(entry)} />
           ))}
+        </div>
+      )}
+
+      {detail.ranking ? (
+        <RecommendationPanel ranking={detail.ranking} />
+      ) : (
+        <div className="card">
+          <h2>Recommendations</h2>
+          <p className="subtle">No ranking stored for this run.</p>
+        </div>
+      )}
+
+      {detail.report ? (
+        <ReportView report={detail.report} />
+      ) : (
+        <div className="card">
+          <h2>Report</h2>
+          <p className="subtle">No report stored for this run.</p>
         </div>
       )}
     </div>

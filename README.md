@@ -10,7 +10,7 @@ catalog, deterministic constraints/ranking, `scripts/validate_catalog.py`; see
 `docs/RECOMMENDATION_ENGINE.md`). Agent pipeline delivered 2026-10-31 (P10: fixed
 workflow, `docs/AGENT_WORKFLOW.md`; scenario API + SQLite persistence in P11).
 React input/analysis UI delivered 2026-10-31 (P12: `frontend/`, 42 Vitest tests
-green; recommendations/report UI is P13).
+green; recommendations/report UI delivered 2026-10-31 (P13: cited report, ranking panel, history, Markdown export; 72 Vitest tests green).
 Verified baseline (2026-10-30): 536 tests passed in 9 min 36 s, `ruff check .` clean;
 details in `docs/handoff/IMPLEMENTATION_STATUS.md`, issues in `docs/handoff/KNOWN_ISSUES.md`.
 Full evidence: `docs/handoff/AUDIT_REPORT.md`.
@@ -136,7 +136,7 @@ npm install
 npm run dev              # strict port 5173, matching the API CORS default
 ```
 
-`npm run lint`, `npm run test` (Vitest, 42 tests), `npm run build` (`tsc` +
+`npm run lint`, `npm run test` (Vitest, 72 tests), `npm run build` (`tsc` +
 `vite build`). After any backend route change, regenerate the typed client
 with `npm run gen:api` (openapi-typescript from `docs/openapi.json`); a
 contract test fails on drift.
@@ -147,8 +147,8 @@ job progress with polling/timeout/keep-waiting, and one results card per
 indicator (value, units, reference period, source + coverage, status,
 limitations, provenance, fallback/cell-edge warnings) with a reference-summary
 chart. No composite scores or severity labels are rendered anywhere; every API
-error `type` code maps to one specific message. Recommendations/report UI is
-P13 scope.
+error `type` code maps to one specific message. P13 adds the cited report (every claim with evidence links and platform-value chips, AI-vs-platform labels, fallback banner, always-visible limitations), the deterministic ranking panel (score breakdowns, unknowns, excluded reasons), scenario history with open/delete, and one-click Markdown export.
+Out of scope: authentication, mobile polish.
 
 ## Scripts
 

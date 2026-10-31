@@ -306,3 +306,227 @@ export function scenarioCreatedFixture() {
     scenario_url: '/v1/scenarios/sc-new',
   };
 }
+
+export type ReportModel = NonNullable<ScenarioDetailFixture['report']>;
+export type RankingModel = NonNullable<ScenarioDetailFixture['ranking']>;
+export type StatementModel = ReportModel['summary'];
+export type EvidenceItemModel = NonNullable<ReportModel['evidence']>[number];
+export type RankedRecommendationModel = NonNullable<
+  ReportModel['ranked_recommendations']
+>[number];
+export type ReportExcludedModel = NonNullable<ReportModel['excluded_options']>[number];
+export type RankedOptionModel = RankingModel['ranked'][number];
+export type RankingExcludedModel = RankingModel['excluded'][number];
+export type EvidenceReferenceModel = RankedOptionModel['evidence'][number];
+
+export function statementFixture(
+  text: string,
+  overrides: Partial<StatementModel> = {},
+): StatementModel {
+  return {
+    text,
+    evidence_ids: [],
+    tool_output_ids: ['bundle'],
+    numbers: [],
+    ...overrides,
+  };
+}
+
+export function evidenceItemFixture(
+  overrides: Partial<EvidenceItemModel> = {},
+): EvidenceItemModel {
+  return {
+    chunk_id: 'fao-iddp66-crop-yield-response-to-water:00001',
+    doc_id: 'fao-iddp66-crop-yield-response-to-water',
+    citation:
+      'Steduto et al. (2012). Crop yield response to water. FAO. ' +
+      'PDF p. 22 (printed p. 22).',
+    pages: 'PDF p. 22 (printed p. 22)',
+    landing_url: 'https://example.invalid/fao-iddp66',
+    license: 'CC BY-NC-SA 3.0 IGO',
+    license_status: 'verified_in_record',
+    ...overrides,
+  };
+}
+
+export function rankedRecommendationFixture(
+  overrides: Partial<RankedRecommendationModel> = {},
+): RankedRecommendationModel {
+  return {
+    intervention_id: 'deficit-irrigation',
+    name: 'Deficit irrigation',
+    benefit: 'unknown',
+    cost: 'unknown',
+    risk: 'unknown',
+    narrative: statementFixture('Synthetic recommendation narrative.', {
+      evidence_ids: ['fao-iddp66-crop-yield-response-to-water:00001'],
+      tool_output_ids: ['ranking:deficit-irrigation'],
+    }),
+    ...overrides,
+  };
+}
+
+export function reportExcludedFixture(
+  overrides: Partial<ReportExcludedModel> = {},
+): ReportExcludedModel {
+  return {
+    intervention_id: 'supplemental-irrigation',
+    name: 'Supplemental irrigation of rainfed crops',
+    reason_codes: ['needs_evidence'],
+    narrative: statementFixture('Synthetic exclusion narrative.', {
+      tool_output_ids: ['constraints:supplemental-irrigation'],
+    }),
+    ...overrides,
+  };
+}
+
+export function evidenceReferenceFixture(
+  overrides: Partial<EvidenceReferenceModel> = {},
+): EvidenceReferenceModel {
+  return {
+    doc_id: 'fao-iddp66-crop-yield-response-to-water',
+    pdf_page: 22,
+    reference: 'yield response factors for wheat',
+    citation:
+      'Steduto et al. (2012). Crop yield response to water. FAO. ' +
+      'PDF p. 22 (printed p. 22).',
+    landing_url: 'https://example.invalid/fao-iddp66',
+    license: 'CC BY-NC-SA 3.0 IGO',
+    license_status: 'verified_in_record',
+    unverified_fields: [],
+    ...overrides,
+  };
+}
+
+export function rankedOptionFixture(
+  overrides: Partial<RankedOptionModel> = {},
+): RankedOptionModel {
+  return {
+    intervention_id: 'deficit-irrigation',
+    name: 'Deficit irrigation',
+    category: 'irrigation',
+    score_total: 1.0,
+    score_components: {
+      evidence_strength: 1.0,
+      indicator_relevance: 1.0,
+      constraint_fit: 1.0,
+    },
+    score_weights: {
+      evidence_strength: 0.5,
+      indicator_relevance: 0.3,
+      constraint_fit: 0.2,
+    },
+    score_inputs: {
+      evidence_level: 2,
+      evidence_doc_ids: ['fao-iddp66-crop-yield-response-to-water'],
+      indicator_statuses: { chirps_spi: 'ok' },
+      exclusion_reasons: 0,
+    },
+    unknowns: ['soil type at the farm'],
+    evidence: [evidenceReferenceFixture()],
+    benefit: 'unknown',
+    cost: 'unknown',
+    risk: 'unknown',
+    ...overrides,
+  };
+}
+
+export function rankingExcludedFixture(
+  overrides: Partial<RankingExcludedModel> = {},
+): RankingExcludedModel {
+  return {
+    intervention_id: 'supplemental-irrigation',
+    name: 'Supplemental irrigation of rainfed crops',
+    category: 'irrigation',
+    evidence_status: 'needs_evidence',
+    reasons: [
+      {
+        code: 'needs_evidence',
+        message: 'No resolvable evidence links; candidate manuals are not ingested.',
+      },
+    ],
+    ...overrides,
+  };
+}
+
+export function rankingFixtureFull(): RankingModel {
+  return {
+    catalog_version: 1,
+    scenario: {},
+    ranked: [rankedOptionFixture()],
+    excluded: [rankingExcludedFixture()],
+    warnings: ['Synthetic ranking warning.'],
+    limitations: ['Synthetic ranking limitation.'],
+  };
+}
+
+export function reportFixtureFull(fallback: boolean): ReportModel {
+  return {
+    schema_version: 1,
+    generator: fallback ? 'deterministic-fallback' : 'fake:test-model',
+    fallback,
+    fallback_note: fallback ? 'Model output rejected (test); deterministic values only.' : null,
+    summary: statementFixture('Synthetic summary.'),
+    environmental_findings: [
+      statementFixture('Synthetic finding with a traced value.', {
+        evidence_ids: ['fao-iddp66-crop-yield-response-to-water:00001'],
+        tool_output_ids: ['chirps_spi'],
+        numbers: [
+          {
+            value: -0.517,
+            unit: 'SPI',
+            tool_output_id: 'chirps_spi',
+            field: 'spi',
+          },
+        ],
+      }),
+    ],
+    evidence: [evidenceItemFixture()],
+    ranked_recommendations: [rankedRecommendationFixture()],
+    excluded_options: [reportExcludedFixture()],
+    limitations: ['Synthetic limitation.'],
+    assumptions: ['Synthetic assumption.'],
+    data_coverage: statementFixture('Synthetic coverage.'),
+    provenance_refs: ['bundle', 'chirps_spi'],
+  };
+}
+
+export function fullDetailFixture(
+  overrides: Partial<ScenarioDetailFixture> = {},
+): ScenarioDetailFixture {
+  return scenarioDetailFixture({
+    bundle: bundleFixture([spiEntryOk(), failedEntry()]),
+    ranking: rankingFixtureFull(),
+    report: reportFixtureFull(true),
+    ...overrides,
+  });
+}
+
+export type ScenarioSummaryModel = components['schemas']['ScenarioSummary'];
+export type ScenarioListModel = components['schemas']['ScenarioList'];
+
+export function scenarioSummaryFixture(
+  overrides: Partial<ScenarioSummaryModel> = {},
+): ScenarioSummaryModel {
+  return {
+    version: 1,
+    scenario_id: 'sc-1',
+    job_id: 'job-1',
+    status: 'complete',
+    created_at: '2026-10-31T00:00:00+00:00',
+    updated_at: '2026-10-31T00:01:00+00:00',
+    latitude: 30.43,
+    longitude: -9.61,
+    target_end_month: '2024-03',
+    query: 'deficit irrigation scheduling',
+    ...overrides,
+  };
+}
+
+export function scenarioListFixture(
+  items: ScenarioSummaryModel[],
+  total: number,
+  offset = 0,
+): ScenarioListModel {
+  return { version: 1, total, limit: 20, offset, items };
+}

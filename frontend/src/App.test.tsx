@@ -1,7 +1,13 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
-import { mockFetch, scenarioCreatedFixture, scenarioDetailFixture } from './test/fixtures';
+import {
+  mockFetch,
+  scenarioCreatedFixture,
+  scenarioDetailFixture,
+  scenarioListFixture,
+  scenarioSummaryFixture,
+} from './test/fixtures';
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -64,6 +70,23 @@ describe('App', () => {
     await waitFor(() => expect(screen.getByText('Polling failed')).toBeInTheDocument());
     expect(screen.getByText(/unknown or was deleted/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Back to form' }));
-    expect(screen.getByText('New analysis')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'New analysis' })).toBeInTheDocument();
+  });
+
+  it('opens the history list from the hash', async () => {
+    window.location.hash = '#/scenarios';
+    vi.stubGlobal(
+      'fetch',
+      mockFetch([
+        { body: scenarioListFixture([scenarioSummaryFixture()], 1) },
+      ]),
+    );
+
+    render(<App />);
+
+    await waitFor(() =>
+      expect(screen.getByText('Scenario history')).toBeInTheDocument(),
+    );
+    expect(screen.getByText('sc-1')).toBeInTheDocument();
   });
 });

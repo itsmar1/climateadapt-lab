@@ -25,9 +25,23 @@ export type AgentScenario = components['schemas']['AgentScenario'];
 export type ScenarioCreated = components['schemas']['ScenarioCreated'];
 export type ScenarioDetail = components['schemas']['ScenarioDetail'];
 export type ScenarioList = components['schemas']['ScenarioList'];
+export type ScenarioSummary = components['schemas']['ScenarioSummary'];
 export type JobStatus = components['schemas']['JobStatus'];
 export type BundleIndicatorResult =
   components['schemas']['BundleIndicatorResult'];
+export type Report = components['schemas']['Report'];
+export type Statement = components['schemas']['Statement'];
+export type ReportedNumber = components['schemas']['ReportedNumber'];
+export type EvidenceItem = components['schemas']['EvidenceItem'];
+export type RankedRecommendation = components['schemas']['RankedRecommendation'];
+export type ReportExcludedOption =
+  components['schemas']['climateadapt__llm__report__ExcludedOption'];
+export type RecommendationResponse =
+  components['schemas']['RecommendationResponse'];
+export type RankedOption = components['schemas']['RankedOption'];
+export type RankingExcludedOption =
+  components['schemas']['climateadapt__recommend__schema__ExcludedOption'];
+export type EvidenceReference = components['schemas']['EvidenceReference'];
 
 const REQUEST_TIMEOUT_MS = 30000;
 

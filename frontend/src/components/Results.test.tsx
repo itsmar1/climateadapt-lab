@@ -6,6 +6,7 @@ import ReferenceChart from './ReferenceChart';
 import ResultsView from './ResultsView';
 import {
   failedEntry,
+  fullDetailFixture,
   scenarioDetailFixture,
   skippedEntry,
   soilEntryOk,
@@ -129,5 +130,32 @@ describe('ResultsView', () => {
     render(<ResultsView detail={detail} onNew={() => undefined} />);
     expect(screen.getByText(/This run failed/)).toBeInTheDocument();
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
+
+  it('shows ranking, report, and export for a full run', () => {
+    render(<ResultsView detail={fullDetailFixture()} onNew={() => undefined} />);
+    expect(screen.getByRole('heading', { name: 'Recommendations' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Report' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Export report (Markdown)' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Deficit irrigation')).toBeInTheDocument();
+    expect(screen.getAllByText('Computed by the platform')).toHaveLength(2);
+  });
+
+  it('is honest when ranking and report are missing', () => {
+    const detail = scenarioDetailFixture({
+      status: 'partial',
+      bundle: null,
+      ranking: null,
+      report: null,
+      trace: null,
+    });
+    render(<ResultsView detail={detail} onNew={() => undefined} />);
+    expect(screen.getByText('No ranking stored for this run.')).toBeInTheDocument();
+    expect(screen.getByText('No report stored for this run.')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Export report (Markdown)' }),
+    ).not.toBeInTheDocument();
   });
 });

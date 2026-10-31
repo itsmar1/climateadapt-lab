@@ -1,13 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ScenarioDetail } from './api/client';
 import { API_BASE_URL } from './api/client';
+import HistoryView from './components/HistoryView';
 import JobProgress from './components/JobProgress';
 import ResultsView from './components/ResultsView';
 import ScenarioForm from './components/ScenarioForm';
 
-type Route = { view: 'form' } | { view: 'scenario'; id: string };
+type Route = { view: 'form' } | { view: 'history' } | { view: 'scenario'; id: string };
 
 function routeFromHash(): Route {
+  if (window.location.hash === '#/scenarios') {
+    return { view: 'history' };
+  }
   const match = /^#\/scenarios\/([A-Za-z0-9_-]+)$/.exec(window.location.hash);
   if (match?.[1]) {
     return { view: 'scenario', id: match[1] };
@@ -54,6 +58,10 @@ export default function App() {
       <header className="app-header">
         <h1>ClimateAdapt Lab</h1>
         <p>Evidence-grounded agricultural drought adaptation (demo)</p>
+        <nav className="app-nav" aria-label="Sections">
+          <a href="#">New analysis</a>
+          <a href="#/scenarios">History</a>
+        </nav>
       </header>
       <main>
         {route.view === 'form' ? (
@@ -65,6 +73,8 @@ export default function App() {
             </p>
             <ScenarioForm onCreated={openScenario} />
           </div>
+        ) : route.view === 'history' ? (
+          <HistoryView onOpen={openScenario} />
         ) : (
           <ScenarioRun id={route.id} onBack={openForm} />
         )}
