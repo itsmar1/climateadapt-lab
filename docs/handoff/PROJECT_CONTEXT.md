@@ -34,9 +34,9 @@ Provisional proxies used by the roadmap (assumptions, to be replaced by the real
 
 ## 4. Model access and constraints
 
-- Application inference: Baseten model **`meta-models/muse-spark-open-1026`**, with credits and rate-limit restrictions (stated by owner; REPORTED).
-- **P03 verified 2026-10-30 (see `docs/LLM_PROVIDER_NOTES.md`):** endpoint `https://inference.baseten.co/v1/chat/completions` (OpenAI-compatible), `Authorization: Bearer` auth, `-1026` slug, and tool-call round trip all work live; structured output is *not enforced* for this model (docs) so P09 must validate client-side. No LLM integration code exists in the repo yet (settings + gated smoke script only). Do not assume another model ID or provider is available.
-- **Still UNVERIFIED:** numeric rate/context/output limits for this model, credit balance/budget; live behavior beyond the 5-call smoke run.
+- Application inference: Baseten model **`meta-models/muse-spark-open-1026`**, with credits and rate-limit restrictions (owner statement; access CONFIRMED live P03, see `docs/LLM_PROVIDER_NOTES.md`).
+- **P03 verified 2026-10-30 (see `docs/LLM_PROVIDER_NOTES.md`):** endpoint `https://inference.baseten.co/v1/chat/completions` (OpenAI-compatible), `Authorization: Bearer` auth, `-1026` slug, and tool-call round trip all work live; structured output is *not enforced* for this model (docs) so validation stays client-side. LLM integration code exists: provider adapter (`llm/`), agent workflow (`agent/`), gated live scripts (`llm_report.py`, `run_agent.py`). Do not assume another model ID or provider is available.
+- **Still UNVERIFIED:** numeric rate/context/output limits for this model, credit balance/budget.
 - The blueprint's "Meta Model API" wording is superseded by the Baseten route above. The blueprint's risk table already requires isolating model calls behind a provider adapter; keep that.
 - Credentials: Muse Code's own login/auth and the application's Baseten key are different things. The app key lives in environment configuration only.
 - Design for graceful degradation: if the model is unavailable or rate-limited, deterministic outputs (indicators, retrieval, ranking) must still be viewable, clearly marked as having no AI narrative.
@@ -46,19 +46,19 @@ Provisional proxies used by the roadmap (assumptions, to be replaced by the real
 | Area | Decision | Status |
 |---|---|---|
 | Language/tooling | Python 3.11, `uv`, pytest, ruff | Implemented, CONFIRMED running on owner's Windows machine (Python 3.11.17, pytest 9.1.1) |
-| Backend | FastAPI + Pydantic v2 | Implemented (4 routes) |
-| Frontend | **React + Vite** (supersedes blueprint's Streamlit/Plotly) | Input/analysis screens delivered (P12 2026-10-31; 42 tests green); recommendations/report UI is P13 |
+| Backend | FastAPI + Pydantic v2 | Implemented (15 route decorators: sync + job endpoints, scenarios, demo; CONFIRMED) |
+| Frontend | **React + Vite** (supersedes blueprint's Streamlit/Plotly) | Input/analysis (P12) + recommendations/report UI (P13) delivered; demo/e2e in P14 |
 | Rainfall data | CHIRPS v3 Final monthly, 0.05°, 60°S–60°N, 1981→ | Implemented, real-data CONFIRMED |
 | Climate data | ERA5-Land monthly means via Copernicus CDS, 0.1° grid, 1950→ | Implemented, real-data CONFIRMED (tp, t2m, swvl1) |
 | Indicators | Percentage anomaly (prototype), SPI (gamma, Thom fit), temperature window anomaly, SPI fit diagnostics | Implemented, real-data CONFIRMED |
-| RAG | BM25 + RRF implemented; **dense retrieval (multilingual-E5 + Qdrant) planned** | Partial |
-| Embeddings | `intfloat/multilingual-e5-*` (small=118M/384-d, base=278M, large=560M; blueprint named large; small preferred for CPU laptops, configurable). Requires `query: `/`passage: ` prefixes | Planned, UNVERIFIED in this repo |
-| Vector DB | Qdrant client local mode (in-memory or path, no server) | Planned; local-mode support verified from docs, not exercised |
-| Agent | LangGraph bounded workflow, tools named in blueprint | Not started |
-| Recommendation | Structured intervention catalog + deterministic constraints/ranking | Not started |
-| Computer vision | PyTorch/timm on CropHarvest crop/non-crop | Not started; deferred (decision pending) |
-| Persistence | Blueprint: PostgreSQL/PostGIS | Not started |
-| MLOps tools named by owner | MLflow, Pytest, Optuna, CI/CD, Docker, FastAPI, Airflow, PostgreSQL, Prometheus, Evidently, Grafana | Only Pytest and FastAPI exist (2 of 11) |
+| RAG | BM25 + RRF implemented; dense retrieval (multilingual-E5-small + Qdrant-local) implemented (P07) | Implemented; RAG API routes not built |
+| Embeddings | `intfloat/multilingual-e5-small` (384-d) with `query: `/`passage: ` prefixes | Implemented, tested with fake embedder; real-model runs gated |
+| Vector DB | Qdrant client local mode (in-memory or path, no server) | Implemented (fingerprinted local indexing) |
+| Agent | Fixed 7-stage pipeline, tools per blueprint (LangGraph deliberately not adopted) | Implemented (P10; live runs gated) |
+| Recommendation | Structured intervention catalog v1 + deterministic constraints/ranking | Implemented (P09) |
+| Computer vision | Classical logreg/RF baseline on CropHarvest crop/non-crop (P16); neural deferred | Implemented + evaluated, MLflow-tracked |
+| Persistence | SQLite scenario store (schema v1, WAL) + scenario CRUD routes (PostgreSQL not adopted) | Implemented (P11) |
+| MLOps tools named by owner | MLflow, Pytest, Optuna, CI/CD, Docker, FastAPI, Airflow, PostgreSQL, Prometheus, Evidently, Grafana | Pytest, FastAPI, Docker, CI exist; MLflow runs for vision only (outside `uv.lock`); rest explicitly not implemented (P15 core-only) |
 
 ## 6. Intended architecture (target)
 
@@ -70,14 +70,14 @@ Blueprint MVP ("must work reliably"): location and coverage validation; CHIRPS +
 
 ## 7. What is implemented vs. planned (summary)
 
-Implemented (details and evidence in `IMPLEMENTATION_STATUS.md`): configuration; CHIRPS and ERA5-Land point connectors with caching, provenance, coverage checks; precipitation anomaly, SPI, temperature anomaly and SPI diagnostics; three CHIRPS-based API endpoints plus health; CLI scripts; a curated source manifest, PDF fetch/ingest/chunk, BM25, RRF, citations and an evaluation harness (4 of 8 documents ingested).
+Implemented (details and evidence in `IMPLEMENTATION_STATUS.md`): configuration; CHIRPS and ERA5-Land point connectors with caching, provenance, coverage checks; precipitation anomaly, SPI, temperature and soil-moisture anomalies, SPI diagnostics; full v1 API (sync + job endpoints, scenarios, demo mode) plus health; CLI scripts; curated source manifest, PDF fetch/ingest/chunk, BM25, RRF, dense E5 + Qdrant retrieval, citations, evaluation harness (5 of 8 documents ingested); recommendation catalog + ranking; LLM provider adapter + agent workflow with gated live runs; scenario persistence; React frontend (input/analysis, recommendations/report, demo, e2e); Docker + CI; classical CropHarvest vision baseline with MLflow tracking.
 
-Planned / not built: dense retrieval; soil-moisture anomaly; ERA5 API endpoints; recommendation engine and intervention catalog; LLM provider adapter and agent; scenario persistence; React frontend; Docker/CI and the remaining MLOps tools; computer vision; Sentinel-2/WaPOR/SAM.
+Planned / not built: RAG API routes; Optuna tuning; neural vision model; Airflow/Prometheus/Evidently/Grafana/PostgreSQL (explicitly out, P15 core-only); Sentinel-2/WaPOR/SAM.
 
 ## 8. Decisions that changed since the blueprint
 
 1. Frontend: Streamlit → **React + Vite** (owner requirement).
-2. Model route: "Meta Model API" → **Baseten** `meta-models/muse-spark-open-1026` (owner statement; unverified API details).
+2. Model route: "Meta Model API" → **Baseten** `meta-models/muse-spark-open-1026` (owner statement; endpoint/auth/tool-calling verified live P03).
 3. Milestone order: computer vision (M3) deferred; scientific RAG built first because the recommendation engine and agent depend on retrieval, not on CV.
 4. Embedding model: default proposed as `multilingual-e5-small` (CPU practicality) instead of `-large`; configurable.
 5. Retrieval: BM25 and RRF implemented by hand (small, tested) instead of a library.

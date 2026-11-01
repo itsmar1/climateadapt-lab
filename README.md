@@ -1,26 +1,28 @@
 # ClimateAdapt Lab
 
 Evidence-grounded AI agent for agricultural drought adaptation (Meta Global Developer AI
-Hackathon project). **Status (verified 2026-10-30, see `docs/handoff/AUDIT_REPORT.md`):**
+Hackathon project). **Status (P-final reconciliation 2026-11-01; P00 audit in `docs/handoff/AUDIT_REPORT.md`, final evidence in `docs/FINAL_VERIFICATION.md`):**
 Milestones 0-2 are implemented (tested data connectors and precipitation/temperature
 indicators). Scientific RAG first batch is partially complete (BM25 + RRF retrieval,
-citations, evaluation harness; 4 of 8 corpus documents ingested; dense retrieval and RAG
-API routes missing). Recommendation engine delivered 2026-10-31 (P08: versioned
+citations, evaluation harness; 5 of 8 corpus documents ingested; dense E5 + Qdrant retrieval delivered (P07);
+RAG API routes still missing). Recommendation engine delivered 2026-10-31 (P08: versioned
 catalog, deterministic constraints/ranking, `scripts/validate_catalog.py`; see
 `docs/RECOMMENDATION_ENGINE.md`). Agent pipeline delivered 2026-10-31 (P10: fixed
 workflow, `docs/AGENT_WORKFLOW.md`; scenario API + SQLite persistence in P11).
 React input/analysis UI delivered 2026-10-31 (P12: `frontend/`, 42 Vitest tests
-green; recommendations/report UI delivered 2026-10-31 (P13: cited report, ranking panel, history, Markdown export; 72 Vitest tests green).
-Verified baseline (2026-10-30): 536 tests passed in 9 min 36 s, `ruff check .` clean;
+green; recommendations/report UI delivered 2026-10-31 (P13: cited report, ranking panel, history, Markdown export; 79 Vitest tests green). Demo mode + e2e delivered (P14), Docker + CI authored but UNVERIFIED (P15), classical CropHarvest vision baseline delivered (P16, MLflow-tracked; see `docs/VISION_BASELINE.md`).
+Verified 2026-11-01: backend 773 passed + 84 sandbox-blocked socket tests (WinError 10013, zero assertion failures) in 18 min 33 s, vision 35/35, frontend 79/79, `ruff check .` clean;
 details in `docs/handoff/IMPLEMENTATION_STATUS.md`, issues in `docs/handoff/KNOWN_ISSUES.md`.
-Full evidence: `docs/handoff/AUDIT_REPORT.md`.
+Full evidence: `docs/FINAL_VERIFICATION.md`; submission checklist: `docs/SUBMISSION_CHECKLIST.md`.
 
 ## Scientific scope and limitations
 
 - Indicators implemented: precipitation **percentage anomaly**, **SPI** (gamma fit per calendar
-  month, WMO-No. 1090), and an ERA5-Land **temperature window anomaly** (degC difference,
-  standardized anomaly, empirical percentile). All are *relative to a reference period*. None
-  measures drought impact, and none returns severity labels.
+  month, WMO-No. 1090), and ERA5-Land **temperature** and **soil-moisture window
+  anomalies** (difference, standardized anomaly, empirical percentile). All are
+  *relative to a reference period*. None measures drought impact, and none returns
+  severity labels.
+
 - The percentage anomaly is mean-based and can mislead on skewed rainfall records. SPI is more
   appropriate, but its gamma fit is not goodness-of-fit tested; `scripts/spi_diagnostics.py`
   reports how sensitive SPI is to that assumption.
@@ -37,6 +39,14 @@ Full evidence: `docs/handoff/AUDIT_REPORT.md`.
   always reports the substitution.
 - A point exactly on a CHIRPS cell edge or corner is flagged. Use points that are not
   multiples of 0.05 degrees.
+
+## Data sources and licences
+
+- CHIRPS v3 Final (UC Santa Barbara Climate Hazards Center; monthly precipitation, 0.05 degree, 60S-60N, 1981-present). Citation and terms are served with every result (`CITATION`, `LICENSE_NOTE` in `src/climateadapt/data/chirps.py`): Funk, C. et al., Scientific Data 13, 718 (2026), https://doi.org/10.1038/s41597-026-07096-4; data DOI https://doi.org/10.15780/G2JQ0P; "Public domain / CC BY 4.0 as stated by the Climate Hazards Center and the Scientific Data descriptor."
+- ERA5-Land monthly means (Copernicus Climate Change Service, CDS; 0.1 degree reanalysis, 1950-present). Copernicus licence terms apply; the dataset's terms of use must be accepted in the CDS before downloading; acknowledge "Copernicus Climate Change Service Information" and check the dataset page for the current licence text (served as `LICENSE_NOTE` in `src/climateadapt/data/era5_land.py`).
+- CropHarvest v14 (vision baseline only; Zenodo record 10251170): CC-BY-SA-4.0. Never used as drought or intervention evidence — see `docs/VISION_BASELINE.md` §1.
+- Evidence corpus: 8 curated sources (FAO, WMO, journals, ICARDA) with mixed licences, some NC/ND — see `corpus/manifest.json` (`license`, `license_status`, `unverified_fields` per document). Only the manifest + `corpus/eval/` are versioned; PDFs and extracted text are never committed (KI-23).
+- Dependencies are permissive-licensed (MIT / BSD / Apache-2.0 family; full table in `docs/FINAL_VERIFICATION.md` §4). No GPL/AGPL dependency: the closest cases are tqdm (MPL-2.0 AND MIT dual) and matplotlib's bundled FreeType (FTL-or-GPL at the user's choice).
 
 ## Setup (repo root, PowerShell)
 
@@ -136,7 +146,7 @@ npm install
 npm run dev              # strict port 5173, matching the API CORS default
 ```
 
-`npm run lint`, `npm run test` (Vitest, 72 tests), `npm run build` (`tsc` +
+`npm run lint`, `npm run test` (Vitest, 79 tests), `npm run build` (`tsc` +
 `vite build`). After any backend route change, regenerate the typed client
 with `npm run gen:api` (openapi-typescript from `docs/openapi.json`); a
 contract test fails on drift.
@@ -147,7 +157,7 @@ job progress with polling/timeout/keep-waiting, and one results card per
 indicator (value, units, reference period, source + coverage, status,
 limitations, provenance, fallback/cell-edge warnings) with a reference-summary
 chart. No composite scores or severity labels are rendered anywhere; every API
-error `type` code maps to one specific message. P13 adds the cited report (every claim with evidence links and platform-value chips, AI-vs-platform labels, fallback banner, always-visible limitations), the deterministic ranking panel (score breakdowns, unknowns, excluded reasons), scenario history with open/delete, and one-click Markdown export.
+error `type` code maps to one specific message. P13 delivered the cited report (every claim with evidence links and platform-value chips, AI-vs-platform labels, fallback banner, always-visible limitations), the deterministic ranking panel (score breakdowns, unknowns, excluded reasons), scenario history with open/delete, and one-click Markdown export.
 Out of scope: authentication, mobile polish.
 
 ## Demo mode
@@ -195,8 +205,9 @@ daemon in this environment) — the owner must run the command above and report.
 CI (`.github/workflows/ci.yml`: ruff, offline pytest, compose-config check,
 frontend lint/test/build, uv + npm caching, no live APIs or secrets) is
 authored and YAML-validated but has never executed on GitHub. Prometheus,
-MLflow, Optuna, Evidently, Airflow, Grafana, and PostgreSQL are explicitly NOT
-IMPLEMENTED (owner chose core-only on 2026-11-01; see KI-30).
+Optuna, Evidently, Airflow, Grafana, and PostgreSQL are explicitly NOT
+IMPLEMENTED (owner chose core-only on 2026-11-01; see KI-30); MLflow runs
+for the vision baseline only (outside `uv.lock`).
 
 ## Scripts
 
@@ -287,6 +298,19 @@ Never commit your token. Tests never need credentials or network access.
 `CLIMATEADAPT_CDS_TIMEOUT_SECONDS` bound cdsapi's retries (applied only if your installed
 cdsapi exposes those options; otherwise a warning is logged).
 
+## Model access (Baseten inference)
+
+Reports are drafted by `meta-models/muse-spark-open-1026` through Baseten Model APIs (OpenAI-compatible `POST https://inference.baseten.co/v1/chat/completions`, `Authorization: Bearer` key). Full verification record: `docs/LLM_PROVIDER_NOTES.md` (docs read 2026-10-30; 5-call smoke test ≈$0.002; one report call ≈$0.051; one agent run ≈$0.098). Structured output is NOT enforced server-side for this model, so every draft is validated client-side against the report schema; rejected drafts fall back to a labelled deterministic report.
+
+Setup (no secrets in the repo — the key lives only in your shell or untracked `.env`):
+
+```powershell
+copy .env.example .env   # then set CLIMATEADAPT_BASETEN_API_KEY (or BASETEN_API_KEY)
+$env:CLIMATEADAPT_RUN_LIVE_LLM = "1"; uv run python scripts/llm_smoke.py   # tiny gated check
+```
+
+Without a key (or without the flag) the app serves the deterministic fallback and spends nothing. Numeric rate/context limits and the credit balance are UNVERIFIED — confirm with the owner before any live run beyond the smoke test (KI-25).
+
 ## Error behaviour
 
 All errors use `{"detail": [{"loc": [], "msg": "...", "type": "<code>"}]}` with codes:
@@ -303,14 +327,16 @@ message, details logged server-side only). A zero baseline returns 200 with
 
 Cached CHIRPS remote values are not revalidated against ETag changes (CHC revised at least one
 file after release). The SPI gamma fit is not goodness-of-fit tested and there are no SPI
-category labels. Still missing: dense
-retrieval + RAG routes (BM25 batch exists). The soil-moisture pipeline, agent workflow, scenario persistence, and input/analysis UI are delivered (P04, P08–P12). The recommendation catalog
+category labels. Still missing: RAG API routes (BM25 + dense + hybrid all exist
+without HTTP exposure). Soil-moisture, agent, scenarios, recommendations/report UI, demo, and vision baseline are delivered. The recommendation catalog
 covers irrigation options only (v1, 3 entries; other options unranked by design).
 
-## Verified environment and audit limits (2026-10-30)
+## Verified environment and audit limits (2026-11-01)
 
 - Verified with Python 3.11.17 (uv-managed), pytest 9.1.1, ruff 0.17.2, uv 0.13.5.
-- Frontend prerequisite: Node 20.19+ is required (Vite 8), but only Node v16.13.1 is installed system-wide; P12 was built and verified with a portable Node v26.13.0 + npm 11.20.0 (untracked `node-tmp/`).
+- Frontend prerequisite: Node 20.19+ is required (Vite 8), but only Node v16.13.1 is installed system-wide; P12 was built and P-final re-verified (lint/test/build green, 79/79 Vitest) with a portable Node v26.13.0 + npm 11.20.0 (git-ignored `node-tmp/`).
   Upgrade the system Node or keep the portable toolchain for further frontend work.
-- P00 audit was offline and read-only: live CDS behavior, Baseten model access, and `.env`
+- P-final verification ran 2026-11-01 with real outputs recorded in `docs/FINAL_VERIFICATION.md`. Still UNVERIFIED: full suite green on an unsandboxed machine (84 API tests blocked here by WinError 10013), Docker image build/container start (daemon down), CI's first GitHub run, CDS retry behavior under real failure, and live Baseten behavior beyond the small 2026-10-30 smoke runs.
+- `uv sync --extra dev` was deliberately NOT re-run in P-final: vision tools (MLflow, h5py, scikit-learn) are installed in `.venv` outside `uv.lock`, and a plain sync would strip them. Add a `vision` extra + `uv lock` on a networked machine first, and use `uv run --no-sync` meanwhile.
+- P00 audit (2026-10-30) was offline and read-only: live CDS behavior, Baseten model access, and `.env`
   contents were deliberately not verified. No new source-code defects were found.

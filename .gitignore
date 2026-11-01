@@ -25,21 +25,24 @@ htmlcov/
 .env
 .env.*
 !.env.example
+!.env.docker.example
 
 # Editors / OS
 .vscode/
 .idea/
 .DS_Store
 
-# Future data and experiment artifacts (not used yet)
-data/raw/
-data/cache/
-data/corpus/
-data/qdrant/
-data/demo_snapshots/
-data/capture-tmp.sqlite3*
-# P16 vision baseline: CropHarvest downloads + MLflow file store
-data/cropharvest/
-data/mlruns/
+# Data and experiment artifacts (P-final 2026-11-01: blanket rule; the old
+# subdir allowlist let data/agent_runs/ + data/llm_reports/ get tracked).
+# Nothing under data/ is versioned. Corpus PDFs/extracted text are never
+# committed either; only corpus/manifest.json + corpus/eval/ are tracked.
+data/
+corpus/**/*.pdf
+corpus/**/*.txt
+corpus/raw/
+# Stray root run debris (untracked 2026-11-01; file stays in working tree).
+remote_run.json
+# Pytest tmp root lands in the workspace on this machine.
+pytest-of-dell/
 mlruns/
 *.sqlite3

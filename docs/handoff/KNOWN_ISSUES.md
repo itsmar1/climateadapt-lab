@@ -20,13 +20,14 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 - **Audit evidence (P00, 2026-10-30; CONFIRMED):** reconciliation done (AUDIT_REPORT §2.3) — all 41 `src`, 31 `tests`, 13 `scripts`, corpus and doc paths present, no renames, no extra source files. The repo matches the conversation code. Retired by the audit; the repository remains authoritative for any future discrepancy.
 
 ### KI-03 — Slow test suite (Low/Medium) — still open
-- **Evidence:** 7 min 44 s (464 s); earlier 4–5 min. Dominated by creating synthetic rasters in SPI/pipeline tests. **P00 audit 2026-10-30 (CONFIRMED): suite now takes 9 min 36 s (576.54 s) and is growing.**
+- **Evidence:** 7 min 44 s (464 s); earlier 4–5 min. Dominated by creating synthetic rasters in SPI/pipeline tests. **P00 audit 2026-10-30 (CONFIRMED): suite now takes 9 min 36 s (576.54 s) and is growing. **P-final 2026-11-01 (CONFIRMED): 18 min 33 s (1113.59 s) for 858 tests.**
 - **Impact:** Slows every Muse Code iteration.
 - **Resolution:** reuse a session-scoped synthetic raster set or smaller grids; optionally try `uv run --with pytest-xdist pytest -n auto` (UNVERIFIED on this machine). Do not weaken assertions.
 
 ### KI-04 — Starlette/httpx deprecation warning (Low) — still open
 - **Evidence:** `StarletteDeprecationWarning ... install httpx2 instead` on every run. **P00 audit 2026-10-30 (CONFIRMED): warning observed verbatim in the green 536-passed run (the suite's single warning); cause still uninvestigated, harmless but noisy.**
 - **Resolution:** investigate versions/pins; if no clean fix, leave and document. Do not silence blindly.
+- **P-final note (2026-11-01):** the suite now emits 80 warnings (was 1); taxonomy uninvestigated — still open.
 
 ---
 
@@ -139,6 +140,7 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 - **Evidence:** Manifest marks WMO, ESSD and Sci Data licences as unverified; ICARDA records state CC-BY-NC-ND / CC-BY-SA; FAO items carry FAO notices.
 - **Impact:** Redistribution/packaging risk for submission.
 - **Resolution:** keep `data/corpus/` out of git and out of submission artifacts; verify licences on landing pages before any redistribution; owner decides.
+- **P-final note (2026-11-01; CONFIRMED):** working-tree `corpus/` holds only `manifest.json` + `eval/queries.json` (no PDFs or extracted text on disk); tracked corpus is identical; `.gitignore` covers `corpus/**/*.pdf`, `corpus/**/*.txt`, `corpus/raw/`. Licence verification itself remains owner action.
 
 ### KI-24 — Manifest authors/year partially unverified (Low)
 - **Evidence:** `unverified_fields` lists authors/year for some entries (e.g., ICARDA 1997 year and co-authors; WMO and journal author lists).
@@ -148,8 +150,8 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 
 ## D. Model access, agent, recommendations, frontend
 
-### KI-25 — Baseten model access details unverified; no LLM code exists (High) — adapter BUILT 2026-10-31, agent still not built
-- **Evidence:** Owner states access to `meta-models/muse-spark-open-1026` with credits and rate limits. Endpoint, auth, tool calling, schema-constrained output, context size, and limits are unverified.
+### KI-25 — Baseten numeric limits unverified (Medium; access + adapter + agent done)
+- **Evidence:** Owner states access to `meta-models/muse-spark-open-1026` with credits and rate limits. Endpoint, auth and tool calling verified live (P03); structured output confirmed NOT enforced (client-side validation). Provider adapter + 7-stage agent built (P09/P10) with deterministic fallback. Still UNVERIFIED: numeric rate/context/output limits, credit budget.
 - **Impact:** Agent design depends on tool-calling support; an unsupported feature would change the architecture.
 - **Resolution (P03):** verify from current Baseten documentation; run a tiny gated smoke script; record findings; design the adapter around verified capabilities with a deterministic fallback.
 - **P03 evidence (2026-10-30; CONFIRMED, see `docs/LLM_PROVIDER_NOTES.md`):** base URL `https://inference.baseten.co/v1` + Bearer auth verified from official docs; `-1026` slug, tool-call round trip, and malformed-body error shape verified by one gated live run (5 calls, ≈$0.002); structured output verified *unsupported* for this model (docs: accepted but not enforced → P09 must validate client-side). Still open: numeric rate/context limits, credit budget, and all of P09/P10 (no adapter/agent code exists).
@@ -164,8 +166,9 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 
 ### KI-27 — No frontend; blueprint says Streamlit (High) — ✅ RESOLVED 2026-10-31 (input/analysis UI; P13 extends it)
 - **Evidence:** No `frontend/`; blueprint and early requirements named Streamlit/Plotly. Requirement is now React + Vite.
-- **Resolution (P11–P13):** React + Vite; remove stale Streamlit mentions in docs.
-- **P12 evidence (2026-10-31; CONFIRMED):** `frontend/` delivers the React + Vite input/analysis screens (typed client from `docs/openapi.json`, scenario form, polling, indicator cards + reference chart, error-code mapping; 42/42 Vitest green, tsc/eslint/build clean, verified against real backend outputs — see IMPLEMENTATION_STATUS §2.14). No Streamlit anywhere in code; remaining "Streamlit" hits are historical records (audit report, task prompts, decision log) plus the standing AGENTS.md rule. P13 adds the recommendations/report UI.
+- **Resolution (P11–P13):** React + Vite; stale Streamlit statements removed, standing rule + decision history kept (see below).
+- **P12 evidence (2026-10-31; CONFIRMED):** `frontend/` delivers the React + Vite input/analysis screens (typed client from `docs/openapi.json`, scenario form, polling, indicator cards + reference chart, error-code mapping; 42/42 Vitest green, tsc/eslint/build clean, verified against real backend outputs — see IMPLEMENTATION_STATUS §2.14). P13 delivered the recommendations/report UI (CONFIRMED 2026-11-01: `RecommendationPanel`, `ReportView`, `EvidenceView` exist).
+- **P-final disposition (2026-11-01; CONFIRMED):** 15 `git grep -i` lines re-verified (the earlier "14" predates this note itself, which names Streamlit twice on one line) — all in docs: standing AGENTS.md prohibition, PROJECT_CONTEXT decision log, AUDIT_REPORT frozen ledger, frozen P17 prompt text in MUSE_CODE_TASK_PROMPTS.md, and this entry. Zero in code/tests/scripts/frontend. Nothing was deleted: the audit report is dated evidence and must not be rewritten; the rest is intentional rule + history.
 
 ### KI-28 — API has no CORS, no auth, no rate limiting, synchronous long calls (Medium/High for frontend) — P05 parts DONE 2026-10-30, auth/rate limiting still open
 - **Evidence:** `api/main.py` (as delivered) has no `CORSMiddleware`; endpoints are synchronous; the shared client has no shutdown hook; offline-mode error text includes a local cache path.
@@ -182,11 +185,12 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 
 ## E. MLOps and scope
 
-### KI-30 — Nine of eleven named MLOps tools not started (Medium; depends on rubric)
-- **Evidence:** Only Pytest and FastAPI exist. No Docker, CI, MLflow, Optuna, Airflow, PostgreSQL, Prometheus, Evidently, Grafana.
+### KI-30 — Six of eleven named MLOps tools not started (Medium; depends on rubric)
+- **Evidence (P-final 2026-11-01):** Pytest, FastAPI, Docker, CI exist; MLflow runs for the vision baseline only (outside `uv.lock`). Not implemented by explicit P15 core-only decision: Optuna, Airflow, PostgreSQL, Prometheus, Evidently, Grafana.
 - **Resolution (P15):** Docker + CI first; others only as thin, genuinely functioning integrations (e.g., MLflow/Optuna on retrieval evaluation, Prometheus `/metrics`, Evidently on input-data drift). Never claim an integration that does not run.
 - **P15 evidence (2026-11-01):** backend + frontend/nginx Dockerfiles, compose stack (health check, `./data` bind-mount), `.dockerignore`, `.env.docker.example`, and a CI workflow (ruff, offline pytest, compose-config check, frontend lint/test/build, uv/npm caching) are authored; `docker compose config --quiet` passes (Compose v5.6.0, CONFIRMED). Image build, container start, and CI's first GitHub execution are UNVERIFIED (no Docker daemon in the agent environment) — the owner must run `docker compose up --build` and report. Owner chose core-only: Prometheus, MLflow, Optuna, Evidently, Airflow, Grafana, PostgreSQL are explicitly NOT IMPLEMENTED.
 - **P16 addendum (2026-11-01):** MLflow 3.17.2 tracking now runs (SQLite store, verified with two real runs) for the vision baseline only, installed into the local `.venv` outside `uv.lock`. Retrieval-eval MLflow/Optuna and all other extras remain NOT IMPLEMENTED.
+- **P-final note (2026-11-01; CONFIRMED):** Docker client 29.8.2 is present but the daemon is down (`failed to connect to the docker API at npipe:////./pipe/docker_engine ... The system cannot find the file specified`) — image build and container start remain UNVERIFIED, owner action unchanged. CI has still never executed on GitHub.
 
 ### KI-31 — Computer-vision milestone undecided (Medium) — ✅ RESOLVED 2026-11-01 (classical baseline delivered; neural/Optuna deferred)
 - **Evidence:** Deferred by Claude's proposal (RAG first); the owner approved P16 in-session on 2026-11-01.
@@ -196,14 +200,16 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 - **Evidence:** Not in the blueprint or conversation.
 - **Resolution:** owner supplies; revise `IMPLEMENTATION_ROADMAP.md` priorities accordingly.
 
-### KI-33 — README stale (Low/Medium)
+### KI-33 — README stale (Low/Medium) — ✅ RESOLVED 2026-11-01 (P-final refresh)
 - **Evidence:** No RAG commands, no soil-moisture/CDS-retry notes.
 - **Resolution (P06, P17):** update alongside each change.
+- **P-final evidence (2026-11-01):** README now covers setup, configuration, all command groups, scope/limitations, data sources and licences, Baseten model access (no secrets), demo steps, and current verification counts (backend 773 passed + 84 sandbox-blocked, vision 35, Vitest 79). Counts will drift again with the next code change — re-check then.
 
 ### KI-34 — Windows/console quirks (Low)
 - **Evidence:** RAG scripts call `sys.stdout.reconfigure(encoding="utf-8")` for Arabic/French output; earlier scripts do not. Paths in docs use backslashes.
 - **Resolution:** keep commands PowerShell-safe; check encoding handling when scripts print non-ASCII.
 - **Sandbox note (P11, 2026-10-31):** the agent sandbox blocks `listen()`/`socketpair()` (WinError 10013), which breaks `asyncio`, Starlette `TestClient`, and `uvicorn` entirely. Pre-existing and environmental: untouched `tests/test_api_era5.py` fails identically. P11's 14 TestClient tests are therefore written-but-unrun here; the same behaviors were verified with a throwaway direct-call probe (all passed). The owner must run `uv run pytest tests/test_api_scenarios.py` and the README manual calls on their machine.
+- **P-final tally (2026-11-01; CONFIRMED):** full suite `84 failed, 773 passed, 1 skipped, 80 warnings in 1113.59s (0:18:33)` — all 84 fail with `PermissionError: [WinError 10013]` in `tests/test_api*.py` (test_api 19, test_api_spi 18, test_api_era5 17, test_api_chirps 16, test_api_scenarios 12, test_api_demo 2), the same sandbox socket block, zero assertion failures. All 35 vision tests and every non-API test pass. Owner must still confirm green on an unsandboxed machine.
 
 ### KI-35 — Model invents tool-output ids; prompt never states the registry vocabulary (High for draft acceptance)
 - **Evidence (P10 live run 2026-10-31; CONFIRMED):** the first full draft used `environmental_bundle` and `environmental_bundle:entries[N].result.<field>` instead of the registry ids (`bundle`, `chirps_spi`, …) — 22 of its 44 validator problems — plus undeclared numbers, 2 altered citations, missing ranking/constraints refs, and 2 efficacy claims. The prompt shows TOOL DATA as raw bundle/ranking JSON, which does not expose the `(output_id, field)` vocabulary.

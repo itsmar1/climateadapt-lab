@@ -31,8 +31,8 @@ Never upgrade a status without running something and quoting the result. Never w
 
 - Backend: Python 3.11, `uv`, FastAPI + Pydantic v2, `src/climateadapt/` (src layout). Tests in `tests/`. Windows/PowerShell is the owner's environment — avoid bash-only commands in docs.
 - Frontend: **React + Vite** in `frontend/` (input/analysis screens delivered in P12). **Do not introduce Streamlit** (the original blueprint mentioned it; it is superseded).
-- Retrieval: BM25 + Reciprocal Rank Fusion implemented; dense retrieval (multilingual E5 + Qdrant) planned.
-- Packages: `data/` connectors, `indicators/` pure calculations, `pipelines/` connector+indicator workflows, `rag/` corpus/retrieval, `api/` FastAPI, `scripts/` developer CLIs. Layers import downward only (indicators must not import FastAPI or network code).
+- Retrieval: BM25 + Reciprocal Rank Fusion implemented; dense retrieval (multilingual-E5-small + Qdrant-local) implemented (P07).
+- Packages: `data/` connectors, `indicators/` pure calculations, `pipelines/` connector+indicator workflows, `rag/` corpus/retrieval, `recommend/` catalog/constraints/ranking, `llm/` provider adapter, `agent/` workflow, `vision/` CropHarvest baseline, `api/` FastAPI, `scripts/` developer CLIs. Layers import downward only (indicators must not import FastAPI or network code).
 
 ## 5. Commands (PowerShell, repo root)
 
@@ -43,7 +43,7 @@ uv run ruff check .
 uv run uvicorn climateadapt.api.main:app --reload
 ```
 
-The full suite is slow (~5–8 min, many synthetic rasters). Run targeted tests while iterating, then the full suite before reporting.
+The full suite is slow (~5–25 min depending on machine, many synthetic rasters; 25 min observed 2026-11-01). Run targeted tests while iterating, then the full suite before reporting.
 
 ## 6. Coding and testing conventions
 
@@ -51,7 +51,7 @@ The full suite is slow (~5–8 min, many synthetic rasters). Run targeted tests 
 - Pydantic models: `extra="forbid"`; strict numeric types on API input; no NaN/Inf accepted.
 - **Tests never use the network or credentials.** Use synthetic data and the existing fakes (`httpx.MockTransport`, `FakeDownloader`, fixtures in `tests/conftest.py`, `tests/era5_helpers.py`, `tests/rag_helpers.py`). Real-data runs happen only in `scripts/` or explicitly gated smoke tests.
 - Every behavior change ships with tests, including failure and edge cases. Assert on specific values/messages, not just "no exception".
-- API errors use one shape: `{"detail": [{"loc": [...], "msg": "...", "type": "<code>"}]}` with stable codes (`outside_coverage` 422, `data_not_available` 404, `missing_data` 422, `insufficient_baseline` 422, `insufficient_reference` 422, `download_error` 502, `data_integrity_error` 502). Add codes deliberately and document them.
+- API errors use one shape: `{"detail": [{"loc": [...], "msg": "...", "type": "<code>"}]}` with stable codes (`outside_coverage` 422, `data_not_available` 404, `missing_data` 422, `insufficient_baseline` 422, `insufficient_reference` 422, `download_error` 502, `data_integrity_error` 502, `server_busy` 503), plus supplementary codes (`job_not_found`, `timeout`, `internal`, `scenario_not_found`, `request_too_large`, `demo_mode_disabled`, `demo_snapshot_not_found`; see `api/errors.py`, the canonical list). Add codes deliberately and document them.
 - Validate everything **before** any network access (fail fast).
 
 ## 7. Scientific correctness and provenance (non-negotiable)
@@ -71,7 +71,7 @@ The full suite is slow (~5–8 min, many synthetic rasters). Run targeted tests 
 
 - Never commit or print secrets: `.env`, `%USERPROFILE%\.cdsapirc`, API keys, tokens. Do not put secrets in frontend code, logs, prompts, test fixtures or docs. `data/` is git-ignored; keep it that way.
 - Muse Code's own authentication and the **application's inference-provider credentials are separate**. Never reuse one for the other and never hard-code either.
-- Application LLM access: Baseten, model `meta-models/muse-spark-open-1026`, with credits and rate limits. **Do not assume any other model ID or provider endpoint exists.** Endpoint, auth method, tool-calling and structured-output support are UNVERIFIED until checked against current Baseten documentation and a gated smoke call. Isolate all model calls behind a provider adapter; tests use a fake provider.
+- Application LLM access: Baseten, model `meta-models/muse-spark-open-1026`, with credits and rate limits. **Do not assume any other model ID or provider endpoint exists.** Endpoint, auth and tool-calling verified live (P03, see `docs/LLM_PROVIDER_NOTES.md`); structured output is *not enforced* by this model, so validation stays client-side. Isolate all model calls behind a provider adapter; tests use a fake provider.
 - Before using any external API/SDK, read its current official documentation and record the source. Do not invent endpoints, parameters or options.
 - Copernicus CDS requires an account, dataset terms acceptance and `cdsapi`; calls queue for seconds to minutes and the service has issued protection-measure notices. Keep requests few and grouped, honour caches, and keep `CLIMATEADAPT_ALLOW_DOWNLOADS=false` available for reproducible offline runs.
 - Corpus documents have mixed licences (some NC/ND). Never commit PDFs or extracted text; only `corpus/manifest.json` and `corpus/eval/` are versioned. Keep quotes short and attributed.

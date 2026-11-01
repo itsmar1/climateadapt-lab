@@ -1,5 +1,7 @@
 # Muse Code Task Prompts
 
+> Historical record (P-final 2026-11-01): P00–P16 are done; P17 is this task. Prompt texts below are frozen as-issued (including their "verify first" instructions) and may describe long-superseded states — current truth lives in `IMPLEMENTATION_STATUS.md` and the repository. Do not re-run old prompts against the current tree.
+
 Copy one prompt at a time into Muse Code. **Do not start a prompt until the previous one is reviewed and its tests were actually run.** Each prompt is standalone but assumes the repository contains `AGENTS.md` and `docs/handoff/*`. The handoff documents were written without repository access, so each prompt tells Muse Code to verify against the real tree first.
 
 Order: P00 → P01 → P02 → P03 → P04 → P05 → P06 → P07 → P08 → P09 → P10 → P11 → P12 → P13 → P14 → P15 → (P16 optional) → P17. See `IMPLEMENTATION_ROADMAP.md` for dependencies, tiers and parallelism.

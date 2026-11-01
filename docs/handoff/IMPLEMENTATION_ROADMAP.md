@@ -17,7 +17,7 @@ The requested priority order is kept, with these evidence-based adjustments:
 2. **RAG hardening before dense retrieval.** Page labels, document completeness and a reviewed gold set (P06) make the later dense/hybrid comparison meaningful. Dense retrieval on an unreviewed 8-query set would prove nothing.
 3. **Recommendation catalog is gated by corpus coverage** (KI-26). The corpus currently supports irrigation-related options; the owner must supply or approve additional sources before the catalog can honestly include other options.
 4. **Frontend scaffolding can start once the analysis API is stable (after P05)** using the OpenAPI contract and mocked report data, so UI work runs in parallel with RAG/agent work. The evidence-linked report view (P13) waits for P11.
-5. **Computer vision (M3) is optional (P16).** It does not block anything. MLflow/Optuna can be demonstrated genuinely on retrieval evaluation if CV is skipped.
+5. **Computer vision (M3) was optional (P16) — delivered 2026-11-01** (classical baseline; neural + Optuna deferred). It blocked nothing.
 6. **MLOps is thin by design.** Docker and CI come first; other named tools only as small integrations that actually run.
 
 ## 3. Phased plan
@@ -33,14 +33,14 @@ The requested priority order is kept, with these evidence-based adjustments:
 | 6. Application | P11 scenario API/persistence/contract; P12 React+Vite scaffold + analysis views; P13 recommendations + report + history | M+L+L | P05 (P12 start), P10/P11 (P13) | Usable UI from input to cited report |
 | 7. Demo quality | P14 E2E tests, demo mode, multi-location real runs | M | P13 | Reproducible demo; honest cross-location behavior |
 | 8. MLOps essentials | P15 Docker + Compose + CI (+ thin real extras) | M | P11–P13 | One-command run; automated tests |
-| Optional | P16 CropHarvest vision baseline | L | owner go decision | Only if time and rubric reward it |
+| Optional | P16 CropHarvest vision baseline | L | owner go decision | ✅ Done 2026-11-01 (classical; see VISION_BASELINE.md) |
 | Close | P17 docs, security review, submission packaging | S–M | all | Accurate docs; no secrets/corpus text in artifacts |
 
 ## 4. Scope tiers (decide cut lines with the owner)
 
 - **Tier A — minimum credible demo (must-have):** P00, P01, P02, P03, P05 (CHIRPS + ERA5 endpoints), P06, P08 (small catalog), P09, P10, P11, P12, P13, P15 (Docker + CI). Delivers: location/season/crop → environmental evidence → cited retrieval → ranked options → Muse Spark report in a React UI, with tests.
 - **Tier B — strengthen (should-have):** P04 (soil moisture), P07 (dense + hybrid), P14 (multi-location runs, E2E), PostgreSQL for history, `/metrics` for Prometheus.
-- **Tier C — differentiators (only if time and rubric reward them):** MLflow/Optuna on retrieval evaluation, Evidently data-drift check, Airflow cache-warming DAG, Grafana dashboard, P16 vision baseline.
+- **Tier C — differentiators (only if time and rubric reward them):** MLflow/Optuna on retrieval evaluation, Evidently data-drift check, Airflow cache-warming DAG, Grafana dashboard, ~~P16 vision baseline~~ (✅ done 2026-11-01).
 - **Not planned:** area/polygon analysis, WaPOR, SAM/Sentinel-2 pipelines, additional languages beyond evaluated ones, mobile app. Revisit only with an explicit owner decision.
 
 If time collapses, protect in this order: verified baseline → honest indicators → cited retrieval → ranked options with explicit unknowns → working UI → Docker/CI. A smaller, correct, fully verified system beats a broad one with unverified claims.
@@ -58,7 +58,7 @@ If time collapses, protect in this order: verified baseline → honest indicator
 2. Before P06: provide the 3 manual PDFs (and WMO retry/mirror).
 3. Before P08: approve adaptation-option sources and the catalog scope.
 4. After P03: decide the agent design (tool calling vs fixed pipeline) from verified capabilities.
-5. Before P15/P16: decide which MLOps extras and whether to include vision.
+5. ~~Before P15/P16: decide which MLOps extras and whether to include vision.~~ Decided 2026-11-01: P15 core-only; P16 approved and delivered.
 
 ## 7. Top risks
 
