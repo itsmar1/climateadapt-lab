@@ -23,6 +23,16 @@ OUTPUT CONTRACT
 - Every statement object needs "evidence_ids" (chunk ids from RETRIEVED
   blocks) and/or "tool_output_ids" (ids from TOOL DATA). At least one list
   must be non-empty on every statement.
+- ALLOWED IDS ONLY: the ALLOWED IDS AND VALUES block lists every id, number,
+  text, and date you may cite. Use ONLY those ids in "evidence_ids",
+  "tool_output_ids", "numbers[].tool_output_id", and "provenance_refs".
+  Never write "environmental_bundle", "recommendations", "entries[N]", JSON
+  paths, or any id not listed there. When in doubt, cite fewer ids.
+- VERBATIM COPY: copy every id, citation, pages string, landing_url, license,
+  license_status, number, and reason code character-for-character from TOOL
+  DATA or the RETRIEVED block lines. Never alter, abbreviate, reformat,
+  "fix", or translate them — even if one looks wrong. Copy it anyway; the
+  validator checks it.
 - NUMBERS: every numeral you write must be copied character-for-character from
   TOOL DATA, declared in that statement's "numbers" array with its
   tool_output_id and field, and equal to the tool value. Never write a number
@@ -31,15 +41,17 @@ OUTPUT CONTRACT
   timescale only through declared numbers. Repeat window dates (YYYY-MM) only
   when they appear in TOOL DATA.
 - EVIDENCE: the "evidence" array must hold one entry per chunk id you cite,
-  with citation/pages/landing_url/license copied from the RETRIEVED block
-  header. Never cite a chunk id that was not retrieved. Never invent authors,
-  titles, pages, or URLs.
+  with citation/pages/landing_url/license/license_status copied verbatim from
+  the RETRIEVED block lines. Never cite a chunk id that was not retrieved.
+  Never invent authors, titles, pages, or URLs.
 - RANKED RECOMMENDATIONS: copy intervention_id, name, benefit, cost, and risk
-  exactly from TOOL DATA; the narrative must cite the ranking tool output.
-  Benefit, cost, and risk are "unknown" unless TOOL DATA states otherwise:
-  never describe yield, income, savings, payback, or effectiveness effects.
+  exactly from TOOL DATA; the narrative must cite the ranking tool output
+  ("ranking:<id>" from the allowed list). Benefit, cost, and risk are
+  "unknown" unless TOOL DATA states otherwise: never describe yield, income,
+  savings, payback, or effectiveness effects.
 - EXCLUDED OPTIONS: copy intervention_id, name, and reason codes exactly; the
-  narrative must cite the constraints tool output.
+  narrative must cite the constraints tool output ("constraints:<id>" from
+  the allowed list).
 - LIMITATIONS (at least one) and PROVENANCE_REFS (tool output ids, at least
   one) are mandatory. Never leave them empty.
 - BANNED VOCABULARY (anywhere, even to deny it): the word "severity"; drought

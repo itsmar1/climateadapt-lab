@@ -237,3 +237,57 @@ that accepts a model draft needs a much larger completion budget (and the
 prompt trimmed: the full bundle + ranking JSON is verbose). NOT retried: the
 task authorised one call. No second call was made; credit balance still
 UNVERIFIED.
+
+## 5. P18 prompt registry + repair attempt — NOT RUN LIVE (2026-11-01)
+
+P18 changed the prompt, not the validator (KI-35): the draft request now
+carries an ALLOWED IDS AND VALUES block (`format_registry_block`: every
+registry `(output_id, field)` value, ranking/constraints texts and reason
+codes, allowed evidence ids, repeatable dates, banned invented schemes, one
+worked `numbers[]` example built from the run's real values), full citation
+fields per retrieved chunk (verbatim `citation`/`pages`/`landing_url`/
+`license`/`license_status`), renamed TOOL DATA block labels (`bundle-json`,
+`ranking-json` — the old labels `environmental_bundle`/`recommendations` were
+the exact strings the P10 draft copied as fake ids), and stronger verbatim
+instructions. The agent also supports at most one repair attempt
+(`AgentConfig.max_repair_attempts`, 0/1, default 0): the validator's problems
+plus a capped draft excerpt go back to the model once, and the repair output
+is validated exactly as before; any failure still ships the labelled
+deterministic fallback. Validator rules are unchanged — every historic
+failure class is still rejected (fake-provider tests).
+
+`max_tokens` decision (checked against this document): the P10 run finished
+`finish_reason=stop` with 15087/16000 completion tokens, so 16000 suffices
+for a full draft and is kept. No numeric max-output limit for this model was
+found in the cited Baseten docs (§2, still UNVERIFIED), so raising the budget
+further has no verified basis and was NOT done. Model ID and endpoint are
+unchanged (`meta-models/muse-spark-open-1026`,
+`https://inference.baseten.co/v1/chat/completions`).
+
+No live call was made in P18: the `CLIMATEADAPT_RUN_LIVE_LLM=1` gate was off
+in the agent session, so the budget (max 3 calls, ~$0.50) was unspent ($0.00)
+and draft acceptance is still UNVERIFIED. Owner retry (reference scenario,
+draft + one repair = at most 2 calls):
+
+```powershell
+$env:CLIMATEADAPT_RUN_LIVE_LLM = "1"
+.venv/Scripts/python.exe scripts/run_agent.py
+```
+
+## 6. Using your own key (judges and reviewers)
+
+Base URL, model ID, and key are all plain environment configuration — no code
+change is needed to point the app at your own Baseten account. Never commit a
+real key; the app key and any coding-agent auth are separate things.
+
+| Setting | Env var (preferred) | Alt | Default |
+|---|---|---|---|
+| API base URL | `CLIMATEADAPT_BASETEN_BASE_URL` | — | `https://inference.baseten.co/v1` |
+| Model ID | `CLIMATEADAPT_BASETEN_MODEL_ID` | — | `meta-models/muse-spark-open-1026` |
+| API key | `CLIMATEADAPT_BASETEN_API_KEY` | `BASETEN_API_KEY` | none (required for live calls) |
+| Live-call gate | `CLIMATEADAPT_RUN_LIVE_LLM=1` | — | unset (live scripts refuse to run) |
+
+No other provider's endpoint is documented or supported here: the adapter
+implements only the verified Baseten Chat Completions call above (AGENTS.md
+§8). Without a key the app serves deterministic outputs plus the labelled
+fallback (`[provider-auth]`), which is the expected offline behavior.

@@ -1,12 +1,14 @@
 Write the adaptation report as ONE JSON object matching the schema below.
 Generator label for this report: {generator_label}
 
-TOOL DATA (authoritative; copy exactly, never reinterpret)
-<<<TOOL-DATA name="environmental_bundle">>>
+TOOL DATA (authoritative; copy exactly, never reinterpret).
+Block labels below are NOT citable ids: the only citable ids are listed in
+the ALLOWED IDS AND VALUES block. Never cite a block label.
+<<<TOOL-DATA name="bundle-json">>>
 {bundle_json}
 <<<END-TOOL-DATA>>>
 
-<<<TOOL-DATA name="recommendations">>>
+<<<TOOL-DATA name="ranking-json">>>
 {ranking_json}
 <<<END-TOOL-DATA>>>
 
@@ -39,6 +41,8 @@ REPORT JSON SCHEMA (all keys required unless marked optional)
 }}
 
 Rules reminder: <statement> = {{"text", "evidence_ids", "tool_output_ids",
-"numbers"}} with at least one id list non-empty. Every numeral in any text
-must be declared in that statement's numbers (copied exactly from TOOL DATA).
-No severity vocabulary, no efficacy/cost quantities, no % or currency tokens.
+"numbers"}} with at least one id list non-empty. Cite ONLY ids from the
+ALLOWED IDS AND VALUES block; copy every id, citation field, number, and
+reason code verbatim. Every numeral in any text must be declared in that
+statement's numbers (copied exactly from TOOL DATA). No severity vocabulary,
+no efficacy/cost quantities, no % or currency tokens.

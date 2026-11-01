@@ -28,7 +28,11 @@ from climateadapt.data.chirps import build_chirps_client
 from climateadapt.data.era5_land import build_era5_land_client
 from climateadapt.data.periods import YearMonth
 from climateadapt.llm.fallback import build_fallback_report
-from climateadapt.llm.prompts import build_report_request, format_evidence_block
+from climateadapt.llm.prompts import (
+    build_report_request,
+    format_evidence_block,
+    format_registry_block,
+)
 from climateadapt.llm.provider import BasetenProvider
 from climateadapt.llm.report import build_registry
 from climateadapt.llm.service import generate_report
@@ -145,9 +149,7 @@ def main() -> int:
 
     registry = build_registry(bundle, recommendations)
     citations = [build_citation(chunk, manifest.get(chunk.doc_id)) for chunk in retrieved]
-    evidence_block = format_evidence_block(
-        retrieved, [c.formatted for c in citations]
-    )
+    evidence_block = format_evidence_block(retrieved, citations)
     provider = BasetenProvider()
     request = build_report_request(
         bundle_json=bundle.model_dump_json(indent=1),
@@ -155,6 +157,9 @@ def main() -> int:
         evidence_block=evidence_block,
         generator_label=provider.label,
         max_tokens=args.max_tokens,
+        registry_block=format_registry_block(
+            registry, [c.chunk_id for c in retrieved]
+        ),
     )
     print(f"model: {provider.model_id}; max_tokens={args.max_tokens}; one call follows")
 

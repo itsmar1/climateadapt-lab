@@ -73,6 +73,7 @@ class AgentConfig(BaseModel):
     max_steps: Annotated[int, Field(strict=True, ge=1)] = 32
     max_tool_calls: Annotated[int, Field(strict=True, ge=1)] = 16
     max_llm_calls: Annotated[int, Field(strict=True, ge=1)] = 1
+    max_repair_attempts: Annotated[int, Field(strict=True, ge=0, le=1)] = 0
     token_budget: Annotated[int, Field(strict=True, ge=1)] = 100000
     total_timeout_seconds: Annotated[float, Field(gt=0)] = 600.0
     llm_timeout_seconds: Annotated[float, Field(gt=0)] = 180.0

@@ -3,7 +3,8 @@
 Runs ONLY when CLIMATEADAPT_RUN_LIVE_LLM=1 and a Baseten API key is configured.
 The environmental bundle comes from local caches (downloads forced off),
 retrieval is offline BM25, ranking is deterministic, and the pipeline makes at
-most ONE model call (AgentConfig.max_llm_calls). Prints the outcome, timings,
+most TWO model calls by default (one draft + one P18 repair attempt; set
+--max-llm-calls 1 --repair 0 for a single call). Prints the outcome, timings,
 token usage, and the saved trace/report path; never prints the API key.
 
 PowerShell, current session only:
@@ -47,6 +48,8 @@ def main() -> int:
     parser.add_argument("--token-budget", type=int, default=100000)
     parser.add_argument("--timeout", type=float, default=600.0)
     parser.add_argument("--temperature", type=float, default=None)
+    parser.add_argument("--max-llm-calls", type=int, default=2)
+    parser.add_argument("--repair", type=int, choices=(0, 1), default=1)
     parser.add_argument("--out", default=None)
     args = parser.parse_args()
 
@@ -91,10 +94,13 @@ def main() -> int:
             "total_timeout_seconds": args.timeout,
             "temperature": args.temperature,
             "max_tokens": args.max_tokens,
+            "max_llm_calls": args.max_llm_calls,
+            "max_repair_attempts": args.repair,
         }
     )
     print(f"temperature: {config.temperature} (seed: unsupported by model, not set)")
     print(f"max_tokens: {config.max_tokens}; token_budget: {config.token_budget}")
+    print(f"max_llm_calls: {config.max_llm_calls}; repair: {config.max_repair_attempts}")
 
     offline = settings.model_copy(update={"allow_downloads": False})
     chirps = build_chirps_client(offline)
@@ -116,7 +122,7 @@ def main() -> int:
         catalog=load_catalog(),
     )
     provider = BasetenProvider(timeout_seconds=config.llm_timeout_seconds)
-    print(f"model: {provider.model_id}; at most one call follows")
+    print(f"model: {provider.model_id}; at most {config.max_llm_calls} calls follow")
     try:
         result = run_agent(scenario, deps, provider, config)
     finally:

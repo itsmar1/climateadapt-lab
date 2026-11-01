@@ -1,7 +1,12 @@
 """LLM adapter: provider isolation, validated reports, deterministic fallback."""
 
 from climateadapt.llm.fallback import build_fallback_report
-from climateadapt.llm.prompts import build_report_request, format_evidence_block
+from climateadapt.llm.prompts import (
+    build_repair_request,
+    build_report_request,
+    format_evidence_block,
+    format_registry_block,
+)
 from climateadapt.llm.provider import (
     BasetenProvider,
     FakeProvider,
@@ -71,10 +76,12 @@ __all__ = [
     "ValidationResult",
     "build_fallback_report",
     "build_registry",
+    "build_repair_request",
     "build_report_request",
     "constraints_output_id",
     "dates_from_bundle",
     "format_evidence_block",
+    "format_registry_block",
     "generate_report",
     "parse_model_json",
     "ranking_output_id",

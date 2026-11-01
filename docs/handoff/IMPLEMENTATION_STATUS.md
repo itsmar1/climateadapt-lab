@@ -217,6 +217,18 @@ Gates (CONFIRMED 2026-11-01): `docker compose config --quiet` exit 0. Image buil
 
 Results (CONFIRMED 2026-11-01, train 20,000 seeded / test 543,055 evaluable): logreg pooled acc 0.5619 / macro-F1 0.5594 (MLflow `b537f8db…`); rf 0.7972 / 0.7895 (MLflow `652be435…`); per-file + crop-general metrics with 95% CIs in the doc and in git-ignored `data/cropharvest/reports/`. The `cropharvest` PyPI package is deliberately unused (pinned 2021 deps conflict with pandas 3.x/xarray); vision tools live in the local `.venv` only, not in `pyproject.toml`/`uv.lock` (owner follow-up: add a `vision` extra + `uv lock` on a networked machine). Neural model + Optuna deferred by recorded decision. Outputs are isolated from recommendations by design.
 
+### 2.19 Prompt registry + one repair attempt (P18 2026-11-01)
+| Path | Purpose | Evidence |
+|---|---|---|
+| `llm/prompts.py` | `format_registry_block` (exact allowed ids/values/dates + worked `numbers[]` example + banned invented schemes), `build_repair_request` (capped problems + draft excerpt), `format_evidence_block` full-`Citation` rendering, `build_report_request(registry_block=…)` | T (15 new fake-provider tests green) |
+| `llm/prompts/report_{system,user}.txt` | Verbatim-copy rules, allowed-ids-only rule, renamed TOOL DATA labels (`bundle-json`/`ranking-json`; old labels were the P10 draft's fake ids) | T |
+| `agent/schemas.py`, `agent/workflow.py` | `AgentConfig.max_repair_attempts` (0/1, default 0); repair inside validate (re-validated identically, fallback on failure); prompt built with registry block + full citations | T |
+| `scripts/run_agent.py` | `--repair 1 --max-llm-calls 2` defaults (single-call via `--repair 0 --max-llm-calls 1`) | T (gate) |
+| `docs/LLM_PROVIDER_NOTES.md` §5–§6 | P18 `max_tokens` decision (16000 kept: `stop` observed, no verified higher limit), $0.00 spent, owner retry command, judge env-var table | D |
+| `tests/test_llm_prompt_repair.py` | Registry content, verbatim citation fields, historic failure classes still rejected, repair success/failure/no-repair-default, fallback self-validation | T, green |
+
+Result: acceptance path (b) — honest negative. No live call was made (gate off), so no draft has been accepted yet (KI-35 stays open). Timing: saved warm trace shows the ~2 min run is LLM-dominated (draft 92.1 s of 97.4 s, 94.6%); per-stage wall-clock times already ship in `trace.stages`, so the job progress payload was deliberately left unchanged (no breaking API change).
+
 ### 2.6 Scientific RAG (`src/climateadapt/rag/`, first batch)
 | Path | Purpose | Evidence |
 |---|---|---|
@@ -272,7 +284,7 @@ Tests: `tests/test_llm_provider.py`, `tests/test_report_schema.py`, `tests/test_
 | `trace.py` | `RunTrace` (stages, tool calls, verdicts, usage; no secrets, no passage text) | T |
 | `scripts/run_agent.py` | Gated live end-to-end run (warm caches + offline BM25 + ≤1 call) | T (gate), R (1 call 2026-10-31: full draft produced, 44 validator problems → fallback served; 97 s, 26965/15087 tokens ≈$0.098; fallback re-validated clean, retrieval reproducible) |
 
-Fixed pipeline by recorded decision (LangGraph 1.2.19 checked via PyPI 2026-10-31, not adopted — see `docs/AGENT_WORKFLOW.md`). Tests: `tests/test_agent_tools.py` + `tests/test_agent_workflow.py` (22 offline tests: happy path, limit enforcement, failure injection, validator rejection, trace completeness). No model draft accepted yet (KI-35).
+Fixed pipeline by recorded decision (LangGraph 1.2.19 checked via PyPI 2026-10-31, not adopted — see `docs/AGENT_WORKFLOW.md`). Tests: `tests/test_agent_tools.py` + `tests/test_agent_workflow.py` (22 offline tests: happy path, limit enforcement, failure injection, validator rejection, trace completeness). **P18 update 2026-11-01:** prompt now states the exact registry vocabulary + worked example + verbatim citation fields, and at most one repair attempt is supported (`max_repair_attempts`, default 0; see §2.19). No model draft accepted yet (KI-35 stays open; no live call in P18).
 
 ## 3. Real-data verification log (CONFIRMED from owner's logs)
 

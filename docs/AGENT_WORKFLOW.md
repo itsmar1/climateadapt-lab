@@ -55,6 +55,7 @@ Hard limits (`AgentConfig`, all recorded on the trace):
 | `max_steps` | 32 | Abort to finalize |
 | `max_tool_calls` | 16 | Abort to finalize (the draft stage never runs) |
 | `max_llm_calls` | 1 | Draft refused |
+| `max_repair_attempts` (P18) | 0 | 0 = no repair; 1 = one repair attempt inside validate |
 | `token_budget` (prompt + completion) | 100000 | Over-budget draft discarded → fallback |
 | `total_timeout_seconds` | 600 | Abort to finalize |
 | `llm_timeout_seconds` (per-call) | 180 | Enforced by the provider (httpx timeout) |
@@ -110,7 +111,13 @@ bit-identical chunk ids on re-run.
 
 Finding (see KI-35): the prompt shows TOOL DATA as raw bundle/ranking JSON but
 never states the registry's `(output_id, field)` vocabulary, so the model
-guessed a JSONPath-like scheme. Fix proposed (not yet attempted — needs an
-owner-approved live call to verify): add the registry map as a third TOOL DATA
-block plus one in-context `numbers[]` example. No model draft has been
-accepted yet; do not present draft acceptance as demonstrated.
+guessed a JSONPath-like scheme. Worse, the TOOL DATA block labels were
+literally `environmental_bundle` and `recommendations` — the exact fake ids
+the draft used. P18 fix (implemented + fake-provider-tested 2026-11-01, live
+acceptance still UNVERIFIED): an ALLOWED IDS AND VALUES block with the exact
+registry vocabulary plus a worked `numbers[]` example, renamed block labels
+(`bundle-json`, `ranking-json`), full per-chunk citation fields for verbatim
+copying, and at most one repair attempt (`max_repair_attempts`, default 0;
+`scripts/run_agent.py` enables it with `--repair 1 --max-llm-calls 2`).
+No model draft has been accepted yet; do not present draft acceptance as
+demonstrated.
