@@ -73,7 +73,7 @@ one gated live call with fallback served; see §2.11). **P10 update 2026-10-31:*
 M6 agent workflow is **implemented + tested** as a fixed pipeline
 (`src/climateadapt/agent/`, 22 offline tests, one gated live run with
 validator-rejected draft → fallback; see §2.12 and `docs/AGENT_WORKFLOW.md`).
-**P11 update 2026-10-31:** scenario persistence is **implemented + tested** (SQLite store + CRUD API, direct-call probe green; TestClient suite written but sandbox-unrunnable; see §2.13). **P12 update 2026-10-31:** React input/analysis UI is **implemented + tested** (`frontend/`, 42 Vitest tests green, tsc/eslint/build clean, verified against real backend outputs; see §2.14). **P13 update 2026-10-31:** cited report + ranking UI is **implemented + tested** (report sections with evidence links, ranking breakdowns, history, Markdown export; 72/72 Vitest green, gates clean, verified against real outputs; see §2.15). Docker/CI remain not started.
+**P11 update 2026-10-31:** scenario persistence is **implemented + tested** (SQLite store + CRUD API, direct-call probe green; TestClient suite written but sandbox-unrunnable; see §2.13). **P12 update 2026-10-31:** React input/analysis UI is **implemented + tested** (`frontend/`, 42 Vitest tests green, tsc/eslint/build clean, verified against real backend outputs; see §2.14). **P13 update 2026-10-31:** cited report + ranking UI is **implemented + tested** (report sections with evidence links, ranking breakdowns, history, Markdown export; 72/72 Vitest green, gates clean, verified against real outputs; see §2.15). **P14 update 2026-10-31:** reproducible demo is **implemented + tested** (integration tests, demo mode + snapshots, Playwright e2e 3/3, real runs at 4 locations; see §2.16). Docker/CI remain not started.
 
 ### Environment note (verified 2026-10-30; CONFIRMED)
 
@@ -184,6 +184,19 @@ P13 delivered 2026-10-31 (see §2.15); auth and mobile polish remain out of scop
 Gates (CONFIRMED 2026-10-31, portable Node v26.13.0): `tsc` exit 0, `eslint .` exit 0, **72/72 Vitest green** (13 files), `vite build` ✓, repo `ruff check .` clean.
 Real-backend verification (CONFIRMED, $0): in-process `run_scenario_job` on the reference scenario (`partial` in 5.7 s): 2 ranked tied at 0.750 (level single_source, 7 unknowns each), 1 excluded with 2 reasons, fallback report with 5 evidence items. A throwaway test rendered the real ranking + report (exact scores, contributions, citations, Unknown badges, the "not interpreted as drought severity" disclaimer) and exported real Markdown (all 9 sections) — 3/3 passed, then deleted with all probes. In-browser check still UNVERIFIED (sandbox socket block); the owner runs the two servers.
 Design notes: title/authors/year render inside the verbatim formatted citation (the API exposes no separate fields and the UI parses nothing — no new backend capability per P13 scope); evidence chips are scroll buttons because hash links would fight the hash router; the naive "no severity words" page assertion was replaced for real data by a drought-label-pattern check after the backend's own "not interpreted as drought severity" disclaimer tripped it.
+
+### 2.16 Reproducible demo + e2e (P14 2026-10-31)
+| Path | Purpose | Evidence |
+|---|---|---|
+| `tests/test_integration_workflow.py` | Store → agent → detail with fakes only at the network boundary (4 tests) | T, green |
+| `src/climateadapt/api/demo.py`, `scripts/capture_demo_snapshot.py` | Snapshot store + capture CLI (deterministic, $0) | T |
+| `GET /v1/demo/*` + `demo_mode_disabled`/`demo_snapshot_not_found` | Demo endpoints (13 OpenAPI paths) | T direct green; TestClient written, sandbox-blocked |
+| `frontend/e2e/`, `playwright.config.ts` | Playwright 1.64.1 + system Chrome, file:// bundle, mocked HTTP (3 tests) | T, green |
+| `frontend/src/components/DemoView.tsx` | Snapshot list + bannered results | T |
+| `docs/DEMO_RUNS.md`, `docs/DEMO_SCRIPT.md` | Real results at 4 locations + walk-through | D |
+
+Gates (CONFIRMED 2026-10-31): backend integration 4/4 green; demo direct tests 6/6 green; frontend 79/79 Vitest green (14 files), tsc/eslint clean, `vite build` ✓; Playwright 3/3 green (system Chrome, file:// + route mocks, `--allow-file-access-from-files`); `ruff check .` clean. Full `pytest`: green except the pre-existing TestClient socket block (5 API files incl. the 2 new demo HTTP tests — written for the owner, failing here on WinError 10013 like all TestClient suites since P11).
+Real-data runs (CONFIRMED, $0 LLM): reference 4/4 ok; Punjab ERA5 ok via fresh CDS with CHIRPS blocked by sandbox egress; Norway CHIRPS `outside_coverage` + ERA5 ok via fresh CDS; Atlantic ERA5 `missing_data` on the masked point. All four captured as snapshots; details, failure modes, and non-claims in `docs/DEMO_RUNS.md`. KI-14 resolved within its stated scope.
 
 ### 2.6 Scientific RAG (`src/climateadapt/rag/`, first batch)
 | Path | Purpose | Evidence |

@@ -24,11 +24,15 @@ describe('backend contract', () => {
     expect(Object.keys(spec.paths)).toContain('/v1/scenarios');
     expect(Object.keys(spec.paths)).toContain('/v1/scenarios/{scenario_id}');
     expect(Object.keys(spec.paths)).toContain('/v1/jobs/{job_id}');
+    expect(Object.keys(spec.paths)).toContain('/v1/demo/snapshots');
+    expect(Object.keys(spec.paths)).toContain('/v1/demo/snapshots/{key}');
     expect(spec.paths['/v1/scenarios']).toHaveProperty('post');
     expect(spec.paths['/v1/scenarios']).toHaveProperty('get');
     expect(spec.paths['/v1/scenarios/{scenario_id}']).toHaveProperty('get');
     expect(spec.paths['/v1/scenarios/{scenario_id}']).toHaveProperty('delete');
     expect(spec.paths['/v1/jobs/{job_id}']).toHaveProperty('get');
+    expect(spec.paths['/v1/demo/snapshots']).toHaveProperty('get');
+    expect(spec.paths['/v1/demo/snapshots/{key}']).toHaveProperty('get');
   });
 
   it('keeps the fields the results page renders', () => {
@@ -42,6 +46,9 @@ describe('backend contract', () => {
       'JobStatus',
       'BundleIndicatorResult',
       'EnvironmentalBundleResponse',
+      'DemoSnapshotFile',
+      'DemoSnapshotList',
+      'DemoSnapshotSummary',
     ]) {
       expect(schemas, name).toHaveProperty(name);
     }
@@ -73,9 +80,12 @@ describe('backend contract', () => {
       '"/v1/scenarios"',
       '"/v1/scenarios/{scenario_id}"',
       '"/v1/jobs/{job_id}"',
+      '"/v1/demo/snapshots"',
+      '"/v1/demo/snapshots/{key}"',
       'AgentScenario',
       'BundleIndicatorResult',
       'ScenarioDetail',
+      'DemoSnapshotFile',
     ]) {
       expect(generated, token).toContain(token);
     }

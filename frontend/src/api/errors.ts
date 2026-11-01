@@ -26,6 +26,9 @@ export const ERROR_MESSAGES: Record<string, string> = {
   server_busy: 'The server is at capacity. Wait a few seconds and retry.',
   scenario_not_found: 'This scenario is unknown or was deleted.',
   request_too_large: 'The request body is too large. Shorten the inputs and retry.',
+  demo_mode_disabled:
+    'Demo mode is disabled on this server. Set CLIMATEADAPT_DEMO_MODE=true and restart it.',
+  demo_snapshot_not_found: 'This demo snapshot is unknown or was deleted.',
   'network-error': 'The backend could not be reached. Is it running?',
   'request-timeout': 'The request timed out. Check the backend and retry.',
   'unsupported-version':

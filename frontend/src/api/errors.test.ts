@@ -22,6 +22,8 @@ describe('error code messages', () => {
       'server_busy',
       'scenario_not_found',
       'request_too_large',
+      'demo_mode_disabled',
+      'demo_snapshot_not_found',
     ];
     for (const code of codes) {
       const message = messageForCode(code);

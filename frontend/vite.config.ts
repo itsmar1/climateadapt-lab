@@ -10,5 +10,11 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // Playwright specs have their own runner; Vitest must not collect them
+    // (its default include matches *.spec.ts).
+    exclude: ['e2e/**', 'node_modules/**', 'dist/**'],
+    // Headroom for loaded machines: the 5 s default flakes first-in-file
+    // tests when workers starve (observed on this box under parallel load).
+    testTimeout: 15000,
   },
 });

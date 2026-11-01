@@ -150,6 +150,24 @@ chart. No composite scores or severity labels are rendered anywhere; every API
 error `type` code maps to one specific message. P13 adds the cited report (every claim with evidence links and platform-value chips, AI-vs-platform labels, fallback banner, always-visible limitations), the deterministic ranking panel (score breakdowns, unknowns, excluded reasons), scenario history with open/delete, and one-click Markdown export.
 Out of scope: authentication, mobile polish.
 
+## Demo mode
+
+For offline or rate-limited demos, the API can serve stored real-data runs:
+
+```powershell
+$env:CLIMATEADAPT_DEMO_MODE = 'true'
+uv run uvicorn climateadapt.api.main:app --reload
+```
+
+`GET /v1/demo/snapshots` lists captures; `GET /v1/demo/snapshots/{key}`
+returns one. With the flag off both answer 404 (`demo_mode_disabled`).
+Capture with `uv run python scripts/capture_demo_snapshot.py --key <k>
+--label "<label>" --lat <lat> --lon <lon>` (deterministic, zero model calls)
+into git-ignored `data/demo_snapshots/`. The frontend Demo page (`#/demo`)
+renders snapshots with a "Cached real-data snapshot" banner and capture
+timestamp. See `docs/DEMO_RUNS.md` (real results at four locations) and
+`docs/DEMO_SCRIPT.md` (walk-through + fallback plan).
+
 ## Scripts
 
 ```powershell

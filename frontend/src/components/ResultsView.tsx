@@ -14,12 +14,24 @@ function splitProblem(problem: string): { code: string | null; text: string } {
   return { code: match[1] ?? null, text: match[2] ?? '' };
 }
 
+export interface SnapshotLabel {
+  label: string;
+  capturedAt: string;
+}
+
+function formatSnapshotWhen(iso: string): string {
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? iso : date.toLocaleString();
+}
+
 export default function ResultsView({
   detail,
   onNew,
+  snapshot,
 }: {
   detail: ScenarioDetail;
   onNew: () => void;
+  snapshot?: SnapshotLabel;
 }) {
   const entries = detail.bundle?.entries ?? [];
   const fallback = detail.report?.fallback === true;
@@ -27,6 +39,13 @@ export default function ResultsView({
   return (
     <div>
       <div className="card">
+        {snapshot && (
+          <div className="banner warn" role="note">
+            <strong>Cached real-data snapshot</strong>
+            {snapshot.label} — captured {formatSnapshotWhen(snapshot.capturedAt)}.
+            Stored results, not a live run.
+          </div>
+        )}
         <div className="status-line">
           <h2 style={{ margin: 0 }}>Results</h2>
           <StatusBadge status={detail.status} />

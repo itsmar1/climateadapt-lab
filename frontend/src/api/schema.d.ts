@@ -158,6 +158,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/demo/snapshots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List stored real-data demo snapshots (demo mode only)
+         * @description Catalogue of captured scenario runs served verbatim for demos. Needs CLIMATEADAPT_DEMO_MODE=true; otherwise 404 (demo_mode_disabled). Snapshots live under a git-ignored directory; see scripts/capture_demo_snapshot.py.
+         */
+        get: operations["list_demo_snapshots_endpoint_v1_demo_snapshots_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/demo/snapshots/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Fetch one stored demo snapshot by key (demo mode only)
+         * @description Returns the captured detail verbatim. Clients must label it a cached real-data snapshot with the capture timestamp, never a live result. Unknown keys return 404 (demo_snapshot_not_found).
+         */
+        get: operations["get_demo_snapshot_endpoint_v1_demo_snapshots__key__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/jobs/{job_id}": {
         parameters: {
             query?: never;
@@ -561,6 +601,61 @@ export interface components {
             window_total_mm: number;
             /** Zero Probability */
             zero_probability: number | null;
+        };
+        /**
+         * DemoSnapshotFile
+         * @description One snapshot file: capture metadata plus the stored detail.
+         */
+        DemoSnapshotFile: {
+            /**
+             * Captured At Utc
+             * Format: date-time
+             */
+            captured_at_utc: string;
+            detail: components["schemas"]["ScenarioDetail"];
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+            /**
+             * Snapshot Version
+             * @default 1
+             * @constant
+             */
+            snapshot_version: 1;
+        };
+        /**
+         * DemoSnapshotList
+         * @description Snapshot catalogue (versioned like the scenario contract).
+         */
+        DemoSnapshotList: {
+            /** Snapshots */
+            snapshots: components["schemas"]["DemoSnapshotSummary"][];
+            /**
+             * Version
+             * @default 1
+             * @constant
+             */
+            version: 1;
+        };
+        /**
+         * DemoSnapshotSummary
+         * @description List entry: identity and capture time, without the stored detail.
+         */
+        DemoSnapshotSummary: {
+            /**
+             * Captured At Utc
+             * Format: date-time
+             */
+            captured_at_utc: string;
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+            /** Scenario Id */
+            scenario_id: string;
+            /** Status */
+            status: string;
         };
         /**
          * EnvironmentalBundleRequest
@@ -1748,6 +1843,57 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RainfallAnalysisResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_demo_snapshots_endpoint_v1_demo_snapshots_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DemoSnapshotList"];
+                };
+            };
+        };
+    };
+    get_demo_snapshot_endpoint_v1_demo_snapshots__key__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DemoSnapshotFile"];
                 };
             };
             /** @description Validation Error */

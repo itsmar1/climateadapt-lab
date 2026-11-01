@@ -83,10 +83,11 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 - **Impact:** Any claim of a trend or a validated drought state would be unsupported.
 - **Resolution:** present both products and their disagreement as uncertainty; compare against station/national data only if supplied. No trend claims.
 
-### KI-14 — Everything is single-point; limited geography tested (Medium)
+### KI-14 — Everything is single-point; limited geography tested (Medium) — ✅ RESOLVED 2026-10-31 (4 real-data points; scope honestly bounded)
 - **Evidence:** All analyses take one lat/lon; all real runs used one reference point (30.43, −9.61).
 - **Impact:** "Global-first" is architectural only; coverage edge cases (high latitude, ocean, antimeridian, >60°N for CHIRPS) are tested synthetically, not on real data elsewhere.
 - **Resolution (P14):** run the real pipelines at a few contrasting locations (one outside Africa) and report results and failures honestly; do not claim validation.
+- **P14 evidence (2026-10-31; CONFIRMED):** real pipeline runs at Souss-Massa (reference), Punjab, Trøndelag (>60°N: CHIRPS `outside_coverage`, ERA5 ok), and an Atlantic masked point (ERA5 `missing_data`); results, failures, and non-claims in `docs/DEMO_RUNS.md`, snapshots in git-ignored `data/demo_snapshots/`. Four points are coverage probes, not validation.
 
 ### KI-15 — Prototype percentage anomaly endpoints can mislead (Low/Medium)
 - **Evidence:** Percentage anomaly was +0.55 % while SPI was −0.52 against a longer reference; response labels state it is not a drought index.

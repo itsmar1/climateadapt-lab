@@ -530,3 +530,37 @@ export function scenarioListFixture(
 ): ScenarioListModel {
   return { version: 1, total, limit: 20, offset, items };
 }
+
+export type DemoSnapshotSummaryModel = components['schemas']['DemoSnapshotSummary'];
+export type DemoSnapshotFileModel = components['schemas']['DemoSnapshotFile'];
+
+export function demoSummaryFixture(
+  overrides: Partial<DemoSnapshotSummaryModel> = {},
+): DemoSnapshotSummaryModel {
+  return {
+    key: 'reference-morocco',
+    label: 'Reference: Souss-Massa, Morocco',
+    captured_at_utc: '2026-10-31T12:00:00+00:00',
+    status: 'partial',
+    scenario_id: 'sc-test',
+    ...overrides,
+  };
+}
+
+export function demoListFixture(summaries: DemoSnapshotSummaryModel[]) {
+  return { version: 1, snapshots: summaries };
+}
+
+export function demoFileFixture(
+  detail: ScenarioDetailFixture,
+  overrides: Partial<DemoSnapshotFileModel> = {},
+): DemoSnapshotFileModel {
+  return {
+    snapshot_version: 1,
+    key: 'reference-morocco',
+    label: 'Reference: Souss-Massa, Morocco',
+    captured_at_utc: '2026-10-31T12:00:00+00:00',
+    detail,
+    ...overrides,
+  };
+}

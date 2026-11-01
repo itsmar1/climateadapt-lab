@@ -16,6 +16,11 @@ Two deliberate additions exist for the P11 scenario surface:
 
 * ``scenario_not_found`` (HTTP 404): unknown or deleted scenario id.
 * ``request_too_large`` (HTTP 413): the request body exceeded the configured cap.
+
+Two deliberate additions exist for the P14 demo surface:
+
+* ``demo_mode_disabled`` (HTTP 404): demo endpoints called with demo mode off.
+* ``demo_snapshot_not_found`` (HTTP 404): unknown demo snapshot key.
 """
 
 from __future__ import annotations
@@ -53,6 +58,8 @@ JOB_TIMEOUT = "timeout"
 JOB_INTERNAL = "internal"
 SCENARIO_NOT_FOUND = "scenario_not_found"
 REQUEST_TOO_LARGE = "request_too_large"
+DEMO_MODE_DISABLED = "demo_mode_disabled"
+DEMO_SNAPSHOT_NOT_FOUND = "demo_snapshot_not_found"
 
 
 def domain_error_status(exc: Exception) -> tuple[int, str] | None:

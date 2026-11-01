@@ -2,7 +2,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   createScenario,
   deleteScenario,
+  getDemoSnapshot,
   getScenario,
+  listDemoSnapshots,
 } from './client';
 import { ApiError } from './errors';
 
@@ -102,6 +104,27 @@ describe('client', () => {
       (error: unknown) => error,
     );
     expect((failure as ApiError).code).toBe('unsupported-version');
+  });
+
+  it('lists demo snapshots with the version gate', async () => {
+    const fetchMock = mockFetch([
+      { body: { version: 1, snapshots: [] }, status: 200 },
+    ]);
+    vi.stubGlobal('fetch', fetchMock);
+
+    const page = await listDemoSnapshots();
+    expect(page.snapshots).toEqual([]);
+    const [request] = fetchMock.mock.calls[0] as [Request];
+    expect(request.url).toBe('http://127.0.0.1:8000/v1/demo/snapshots');
+  });
+
+  it('fetches one demo snapshot by key', async () => {
+    const fetchMock = mockFetch([{ body: { key: 'a-b_1' }, status: 200 }]);
+    vi.stubGlobal('fetch', fetchMock);
+
+    await getDemoSnapshot('a-b_1');
+    const [request] = fetchMock.mock.calls[0] as [Request];
+    expect(request.url).toBe('http://127.0.0.1:8000/v1/demo/snapshots/a-b_1');
   });
 
   it('treats a 204 delete as success', async () => {

@@ -23,6 +23,13 @@ from climateadapt.agent.schemas import AgentConfig, AgentDeps, AgentScenario
 from climateadapt.analysis import analyze_rainfall
 from climateadapt.api.body_limit import BodyLimitMiddleware
 from climateadapt.api.bundle import run_environmental_bundle
+from climateadapt.api.demo import (
+    DemoSnapshotFile,
+    DemoSnapshotList,
+    list_demo_snapshots,
+    load_demo_snapshot,
+    snapshots_dir,
+)
 from climateadapt.api.dependencies import (
     close_shared_clients,
     get_agent_deps,
@@ -33,6 +40,8 @@ from climateadapt.api.dependencies import (
     get_scenario_store,
 )
 from climateadapt.api.errors import (
+    DEMO_MODE_DISABLED,
+    DEMO_SNAPSHOT_NOT_FOUND,
     DOMAIN_ERRORS,
     JOB_NOT_FOUND,
     SCENARIO_NOT_FOUND,
@@ -46,7 +55,7 @@ from climateadapt.api.schemas_scenarios import (
     ScenarioList,
 )
 from climateadapt.api.store import ScenarioStore
-from climateadapt.config import get_settings
+from climateadapt.config import Settings, get_settings
 from climateadapt.data.chirps import ChirpsV3Client
 from climateadapt.data.era5_land import Era5LandClient
 from climateadapt.data.periods import YearMonth
@@ -490,6 +499,54 @@ def create_app() -> FastAPI:
         if not store.delete(scenario_id):
             return _error_response(404, SCENARIO_NOT_FOUND, "Unknown scenario id.")
         return Response(status_code=204)
+
+    @app.get(
+        "/v1/demo/snapshots",
+        response_model=DemoSnapshotList,
+        tags=["demo"],
+        summary="List stored real-data demo snapshots (demo mode only)",
+        description=(
+            "Catalogue of captured scenario runs served verbatim for demos. "
+            "Needs CLIMATEADAPT_DEMO_MODE=true; otherwise 404 "
+            "(demo_mode_disabled). Snapshots live under a git-ignored "
+            "directory; see scripts/capture_demo_snapshot.py."
+        ),
+    )
+    def list_demo_snapshots_endpoint(
+        settings: Annotated[Settings, Depends(get_settings)],
+    ) -> DemoSnapshotList | JSONResponse:
+        if not settings.demo_mode:
+            return _error_response(
+                404, DEMO_MODE_DISABLED, "Demo mode is disabled on this server."
+            )
+        directory = snapshots_dir(settings.data_dir, settings.demo_snapshots_dir)
+        return DemoSnapshotList(snapshots=list_demo_snapshots(directory))
+
+    @app.get(
+        "/v1/demo/snapshots/{key}",
+        response_model=DemoSnapshotFile,
+        tags=["demo"],
+        summary="Fetch one stored demo snapshot by key (demo mode only)",
+        description=(
+            "Returns the captured detail verbatim. Clients must label it a "
+            "cached real-data snapshot with the capture timestamp, never a "
+            "live result. Unknown keys return 404 (demo_snapshot_not_found)."
+        ),
+    )
+    def get_demo_snapshot_endpoint(
+        key: str, settings: Annotated[Settings, Depends(get_settings)],
+    ) -> DemoSnapshotFile | JSONResponse:
+        if not settings.demo_mode:
+            return _error_response(
+                404, DEMO_MODE_DISABLED, "Demo mode is disabled on this server."
+            )
+        directory = snapshots_dir(settings.data_dir, settings.demo_snapshots_dir)
+        snapshot = load_demo_snapshot(directory, key)
+        if snapshot is None:
+            return _error_response(
+                404, DEMO_SNAPSHOT_NOT_FOUND, "Unknown demo snapshot key."
+            )
+        return snapshot
 
     return app
 

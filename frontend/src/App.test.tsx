@@ -2,6 +2,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 import {
+  demoListFixture,
+  demoSummaryFixture,
   mockFetch,
   scenarioCreatedFixture,
   scenarioDetailFixture,
@@ -88,5 +90,20 @@ describe('App', () => {
       expect(screen.getByText('Scenario history')).toBeInTheDocument(),
     );
     expect(screen.getByText('sc-1')).toBeInTheDocument();
+  });
+
+  it('opens the demo list from the hash', async () => {
+    window.location.hash = '#/demo';
+    vi.stubGlobal(
+      'fetch',
+      mockFetch([{ body: demoListFixture([demoSummaryFixture()]) }]),
+    );
+
+    render(<App />);
+
+    await waitFor(() =>
+      expect(screen.getByText('Demo snapshots')).toBeInTheDocument(),
+    );
+    expect(screen.getByText('Reference: Souss-Massa, Morocco')).toBeInTheDocument();
   });
 });

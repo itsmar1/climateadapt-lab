@@ -913,6 +913,105 @@
     "title": "ChirpsSpiResult",
     "type": "object"
    },
+   "DemoSnapshotFile": {
+    "additionalProperties": false,
+    "description": "One snapshot file: capture metadata plus the stored detail.",
+    "properties": {
+     "captured_at_utc": {
+      "format": "date-time",
+      "title": "Captured At Utc",
+      "type": "string"
+     },
+     "detail": {
+      "$ref": "#/components/schemas/ScenarioDetail"
+     },
+     "key": {
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "title": "Key",
+      "type": "string"
+     },
+     "label": {
+      "maxLength": 160,
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+     },
+     "snapshot_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Snapshot Version",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "key",
+     "label",
+     "captured_at_utc",
+     "detail"
+    ],
+    "title": "DemoSnapshotFile",
+    "type": "object"
+   },
+   "DemoSnapshotList": {
+    "additionalProperties": false,
+    "description": "Snapshot catalogue (versioned like the scenario contract).",
+    "properties": {
+     "snapshots": {
+      "items": {
+       "$ref": "#/components/schemas/DemoSnapshotSummary"
+      },
+      "title": "Snapshots",
+      "type": "array"
+     },
+     "version": {
+      "const": 1,
+      "default": 1,
+      "title": "Version",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "snapshots"
+    ],
+    "title": "DemoSnapshotList",
+    "type": "object"
+   },
+   "DemoSnapshotSummary": {
+    "additionalProperties": false,
+    "description": "List entry: identity and capture time, without the stored detail.",
+    "properties": {
+     "captured_at_utc": {
+      "format": "date-time",
+      "title": "Captured At Utc",
+      "type": "string"
+     },
+     "key": {
+      "title": "Key",
+      "type": "string"
+     },
+     "label": {
+      "title": "Label",
+      "type": "string"
+     },
+     "scenario_id": {
+      "title": "Scenario Id",
+      "type": "string"
+     },
+     "status": {
+      "title": "Status",
+      "type": "string"
+     }
+    },
+    "required": [
+     "key",
+     "label",
+     "captured_at_utc",
+     "status",
+     "scenario_id"
+    ],
+    "title": "DemoSnapshotSummary",
+    "type": "object"
+   },
    "EnvironmentalBundleRequest": {
     "additionalProperties": false,
     "description": "Request schema for the environmental-bundle endpoint.\n\nThe bundle always uses soil layer 1; layers 2-3 are available on the single\nsoil-moisture endpoint.",
@@ -3426,6 +3525,71 @@
     "summary": "Prototype precipitation percentage anomaly from user-supplied totals",
     "tags": [
      "analysis"
+    ]
+   }
+  },
+  "/v1/demo/snapshots": {
+   "get": {
+    "description": "Catalogue of captured scenario runs served verbatim for demos. Needs CLIMATEADAPT_DEMO_MODE=true; otherwise 404 (demo_mode_disabled). Snapshots live under a git-ignored directory; see scripts/capture_demo_snapshot.py.",
+    "operationId": "list_demo_snapshots_endpoint_v1_demo_snapshots_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DemoSnapshotList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "List stored real-data demo snapshots (demo mode only)",
+    "tags": [
+     "demo"
+    ]
+   }
+  },
+  "/v1/demo/snapshots/{key}": {
+   "get": {
+    "description": "Returns the captured detail verbatim. Clients must label it a cached real-data snapshot with the capture timestamp, never a live result. Unknown keys return 404 (demo_snapshot_not_found).",
+    "operationId": "get_demo_snapshot_endpoint_v1_demo_snapshots__key__get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "key",
+      "required": true,
+      "schema": {
+       "title": "Key",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DemoSnapshotFile"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Fetch one stored demo snapshot by key (demo mode only)",
+    "tags": [
+     "demo"
     ]
    }
   },

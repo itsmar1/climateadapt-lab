@@ -1,16 +1,28 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ScenarioDetail } from './api/client';
 import { API_BASE_URL } from './api/client';
+import DemoView from './components/DemoView';
 import HistoryView from './components/HistoryView';
 import JobProgress from './components/JobProgress';
 import ResultsView from './components/ResultsView';
 import ScenarioForm from './components/ScenarioForm';
 
-type Route = { view: 'form' } | { view: 'history' } | { view: 'scenario'; id: string };
+type Route =
+  | { view: 'form' }
+  | { view: 'history' }
+  | { view: 'demo'; key: string | null }
+  | { view: 'scenario'; id: string };
 
 function routeFromHash(): Route {
   if (window.location.hash === '#/scenarios') {
     return { view: 'history' };
+  }
+  if (window.location.hash === '#/demo') {
+    return { view: 'demo', key: null };
+  }
+  const demoMatch = /^#\/demo\/([A-Za-z0-9_-]+)$/.exec(window.location.hash);
+  if (demoMatch?.[1]) {
+    return { view: 'demo', key: demoMatch[1] };
   }
   const match = /^#\/scenarios\/([A-Za-z0-9_-]+)$/.exec(window.location.hash);
   if (match?.[1]) {
@@ -53,6 +65,11 @@ export default function App() {
     setRoute({ view: 'form' });
   }
 
+  function openDemo(key: string | null): void {
+    window.location.hash = key === null ? '#/demo' : `#/demo/${key}`;
+    setRoute({ view: 'demo', key });
+  }
+
   return (
     <div className="app">
       <header className="app-header">
@@ -61,6 +78,7 @@ export default function App() {
         <nav className="app-nav" aria-label="Sections">
           <a href="#">New analysis</a>
           <a href="#/scenarios">History</a>
+          <a href="#/demo">Demo</a>
         </nav>
       </header>
       <main>
@@ -75,6 +93,8 @@ export default function App() {
           </div>
         ) : route.view === 'history' ? (
           <HistoryView onOpen={openScenario} />
+        ) : route.view === 'demo' ? (
+          <DemoView snapshotKey={route.key} onOpen={openDemo} />
         ) : (
           <ScenarioRun id={route.id} onBack={openForm} />
         )}

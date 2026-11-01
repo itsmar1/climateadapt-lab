@@ -54,6 +54,15 @@ class Settings(BaseSettings):
         default=1048576, ge=1024, description="Largest accepted request body."
     )
 
+    # Demo mode (P14): serve stored real-data snapshots instead of live runs.
+    demo_mode: bool = Field(
+        default=False, description="Serve GET /v1/demo/* from stored snapshots."
+    )
+    demo_snapshots_dir: Path | None = Field(
+        default=None,
+        description="Snapshot directory; defaults to <data_dir>/demo_snapshots.",
+    )
+
     # Baseten Model APIs (application inference; see docs/LLM_PROVIDER_NOTES.md).
     # P03 verified the base URL + Bearer auth from docs and the -1026 slug live;
     # official examples show meta-models/muse-spark-open (fallback if -1026 ever 404s).

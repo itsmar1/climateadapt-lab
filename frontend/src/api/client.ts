@@ -42,6 +42,9 @@ export type RankedOption = components['schemas']['RankedOption'];
 export type RankingExcludedOption =
   components['schemas']['climateadapt__recommend__schema__ExcludedOption'];
 export type EvidenceReference = components['schemas']['EvidenceReference'];
+export type DemoSnapshotFile = components['schemas']['DemoSnapshotFile'];
+export type DemoSnapshotList = components['schemas']['DemoSnapshotList'];
+export type DemoSnapshotSummary = components['schemas']['DemoSnapshotSummary'];
 
 const REQUEST_TIMEOUT_MS = 30000;
 
@@ -125,5 +128,21 @@ export async function deleteScenario(scenarioId: string): Promise<void> {
 export function getJob(jobId: string): Promise<JobStatus> {
   return call((signal) =>
     raw.GET('/v1/jobs/{job_id}', { params: { path: { job_id: jobId } }, signal }),
+  );
+}
+
+export function listDemoSnapshots(): Promise<DemoSnapshotList> {
+  return call((signal) => raw.GET('/v1/demo/snapshots', { signal })).then((data) => {
+    checkVersion(data);
+    return data;
+  });
+}
+
+export function getDemoSnapshot(key: string): Promise<DemoSnapshotFile> {
+  return call((signal) =>
+    raw.GET('/v1/demo/snapshots/{key}', {
+      params: { path: { key } },
+      signal,
+    }),
   );
 }
