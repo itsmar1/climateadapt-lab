@@ -185,6 +185,7 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 ### KI-30 — Nine of eleven named MLOps tools not started (Medium; depends on rubric)
 - **Evidence:** Only Pytest and FastAPI exist. No Docker, CI, MLflow, Optuna, Airflow, PostgreSQL, Prometheus, Evidently, Grafana.
 - **Resolution (P15):** Docker + CI first; others only as thin, genuinely functioning integrations (e.g., MLflow/Optuna on retrieval evaluation, Prometheus `/metrics`, Evidently on input-data drift). Never claim an integration that does not run.
+- **P15 evidence (2026-11-01):** backend + frontend/nginx Dockerfiles, compose stack (health check, `./data` bind-mount), `.dockerignore`, `.env.docker.example`, and a CI workflow (ruff, offline pytest, compose-config check, frontend lint/test/build, uv/npm caching) are authored; `docker compose config --quiet` passes (Compose v5.6.0, CONFIRMED). Image build, container start, and CI's first GitHub execution are UNVERIFIED (no Docker daemon in the agent environment) — the owner must run `docker compose up --build` and report. Owner chose core-only: Prometheus, MLflow, Optuna, Evidently, Airflow, Grafana, PostgreSQL are explicitly NOT IMPLEMENTED.
 
 ### KI-31 — Computer-vision milestone undecided (Medium)
 - **Evidence:** Deferred by Claude's proposal (RAG first); the owner has not confirmed. CropHarvest/PyTorch work is heavy and only loosely tied to the adaptation recommendation.

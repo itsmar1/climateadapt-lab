@@ -168,6 +168,36 @@ renders snapshots with a "Cached real-data snapshot" banner and capture
 timestamp. See `docs/DEMO_RUNS.md` (real results at four locations) and
 `docs/DEMO_SCRIPT.md` (walk-through + fallback plan).
 
+## Docker demo stack
+
+P15. Backend image (Python 3.11 slim + `uv sync`; rasterio/scipy install from
+wheels, no GDAL build; the `dense` extra is excluded) and frontend image (Node
+22 build, nginx serve), orchestrated by `docker-compose.yml`. Host `./data`
+(caches, corpus text, sqlite) is bind-mounted so images stay small and warm
+caches are reused; `.dockerignore` keeps `data/`, `.env` files, and corpus
+text out of the images. No secrets in images — copy `.env.docker.example` to
+the untracked `.env.docker` for overrides (a real Baseten key belongs only
+there or in the shell environment):
+
+```powershell
+docker compose up --build
+```
+
+Backend: http://127.0.0.1:8000 (`/health`, `/docs`); frontend:
+http://localhost:5173 (matches the backend CORS default). The backend health
+check gates the frontend start. Fresh ERA5-Land downloads inside the container
+need `~/.cdsapirc` mounted read-only (commented line in the compose file);
+without it, cached ERA5 + CHIRPS runs work and new CDS requests fail loudly.
+
+Status (2026-11-01): `docker compose config --quiet` passes (Compose v5.6.0,
+CONFIRMED); image build and container start were NOT run here (no Docker
+daemon in this environment) — the owner must run the command above and report.
+CI (`.github/workflows/ci.yml`: ruff, offline pytest, compose-config check,
+frontend lint/test/build, uv + npm caching, no live APIs or secrets) is
+authored and YAML-validated but has never executed on GitHub. Prometheus,
+MLflow, Optuna, Evidently, Airflow, Grafana, and PostgreSQL are explicitly NOT
+IMPLEMENTED (owner chose core-only on 2026-11-01; see KI-30).
+
 ## Scripts
 
 ```powershell

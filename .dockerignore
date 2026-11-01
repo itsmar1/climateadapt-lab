@@ -1,0 +1,27 @@
+# Backend build context: keep it small and secret-free.
+# NOTE: corpus/ is intentionally NOT excluded -- the image needs the versioned
+# corpus/manifest.json at runtime, and it is only ~18 KB of JSON (PDFs and
+# extracted text are git-ignored and never present). data/ (caches, corpus
+# text, sqlite) stays out and is mounted as a volume instead.
+
+.env
+.env.*
+!.env.example
+data/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.git/
+.github/
+docs/
+tests/
+scripts/
+frontend/
+node-tmp/
+*.sqlite3
+*.log
+.DS_Store

@@ -198,6 +198,16 @@ Design notes: title/authors/year render inside the verbatim formatted citation (
 Gates (CONFIRMED 2026-10-31): backend integration 4/4 green; demo direct tests 6/6 green; frontend 79/79 Vitest green (14 files), tsc/eslint clean, `vite build` ✓; Playwright 3/3 green (system Chrome, file:// + route mocks, `--allow-file-access-from-files`); `ruff check .` clean. Full `pytest`: green except the pre-existing TestClient socket block (5 API files incl. the 2 new demo HTTP tests — written for the owner, failing here on WinError 10013 like all TestClient suites since P11).
 Real-data runs (CONFIRMED, $0 LLM): reference 4/4 ok; Punjab ERA5 ok via fresh CDS with CHIRPS blocked by sandbox egress; Norway CHIRPS `outside_coverage` + ERA5 ok via fresh CDS; Atlantic ERA5 `missing_data` on the masked point. All four captured as snapshots; details, failure modes, and non-claims in `docs/DEMO_RUNS.md`. KI-14 resolved within its stated scope.
 
+### 2.17 Reproducible containers + CI (P15 2026-11-01)
+| Path | Purpose | Evidence |
+|---|---|---|
+| `Dockerfile` | Backend image: python:3.11-slim, uv 0.13.5 `sync --locked` (wheels only, no GDAL build; `dense` extra excluded), uvicorn on 8000 | U (authored; build never run — no daemon here) |
+| `frontend/Dockerfile`, `frontend/nginx.conf`, `frontend/.dockerignore` | Node 22 build → nginx static serve; `VITE_API_BASE_URL` build arg | U (same) |
+| `docker-compose.yml`, `.dockerignore`, `.env.docker.example` | Demo stack: health-gated frontend, host `./data` bind-mount, optional `.cdsapirc` mount, secret-free context | T (`docker compose config --quiet` exit 0, Compose v5.6.0, CONFIRMED 2026-11-01) |
+| `.github/workflows/ci.yml` | Backend (ruff, offline pytest, compose-config check) + frontend (lint/test/build) jobs with uv/npm caching; no live APIs or secrets | U (authored + YAML-validated; never executed on GitHub) |
+
+Gates (CONFIRMED 2026-11-01): `docker compose config --quiet` exit 0. Image builds, container starts, health-check calls, and CI's first GitHub execution are all UNVERIFIED — the owner must run `docker compose up --build` and watch CI's first run. Owner chose core-only on 2026-11-01: Prometheus, MLflow, Optuna, Evidently, Airflow, Grafana, PostgreSQL explicitly NOT IMPLEMENTED (KI-30).
+
 ### 2.6 Scientific RAG (`src/climateadapt/rag/`, first batch)
 | Path | Purpose | Evidence |
 |---|---|---|
@@ -303,7 +313,7 @@ Retrieval evaluation so far: 10 of 15 queries evaluable, 5 skipped (q01, q03, q0
 - ~~Scenario persistence/history, API auth and rate limiting.~~ **Persistence delivered 2026-10-31 (P11):** scenario CRUD + SQLite history (see §2.13). API auth and rate limiting still missing (documented limitation, KI-28).
 - ~~**React + Vite frontend** (no `frontend/` directory expected).~~ **Input/analysis screens delivered 2026-10-31 (P12):** form, polling, indicator cards + chart (see §2.14). Recommendations/report UI delivered 2026-10-31 (P13, see §2.15).
 - Computer-vision baseline (CropHarvest) — deferred.
-- MLOps: Docker/Compose, GitHub Actions CI/CD, MLflow, Optuna, Airflow, PostgreSQL/PostGIS, Prometheus, Evidently, Grafana. Of the owner's eleven named tools only Pytest and FastAPI exist.
+- ~~MLOps: Docker/Compose, GitHub Actions CI/CD, MLflow, Optuna, Airflow, PostgreSQL/PostGIS, Prometheus, Evidently, Grafana. Of the owner's eleven named tools only Pytest and FastAPI exist.~~ **Partially delivered 2026-11-01 (P15):** Dockerfiles + compose stack + CI workflow authored (`docker compose config` CONFIRMED; image builds, container starts, and CI's first execution UNVERIFIED — owner must run). Prometheus, MLflow, Optuna, Evidently, Airflow, Grafana, PostgreSQL explicitly NOT IMPLEMENTED per the owner's core-only decision (see §2.17, KI-30).
 
 ## 8. Unresolved questions for the owner
 

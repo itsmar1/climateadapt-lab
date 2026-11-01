@@ -1,0 +1,59 @@
+# CI: lint, offline tests, and builds. No live APIs, no secrets, no network
+# beyond package installs — the suites are offline by convention and the live
+# tests skip without their gate variables. NOTE (P15): this workflow is
+# authored and YAML-validated but has never executed on GitHub; the owner
+# must watch its first run.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install uv (pinned)
+        run: pip install "uv==0.13.5"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-
+      - name: Sync dependencies
+        run: uv sync --locked --extra dev
+      - name: Lint
+        run: uv run ruff check .
+      - name: Test (offline)
+        run: uv run pytest -q
+      - name: Validate compose file
+        run: docker compose config --quiet
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Test
+        run: npm run test
+      - name: Build
+        run: npm run build
+      # Playwright e2e (npm run build:e2e + npm run test:e2e) intentionally
+      # runs locally only: it needs system Chrome plus file:// flags and has
+      # never been tried on a CI runner. See README.

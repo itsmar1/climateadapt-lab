@@ -1,0 +1,47 @@
+# ClimateAdapt Lab demo stack.
+#
+#   cp .env.docker.example .env.docker   # optional: customize (never commit secrets)
+#   docker compose up --build
+#
+# Backend: http://127.0.0.1:8000 (OpenAPI at /docs, health at /health).
+# Frontend: http://localhost:5173 (matches the backend CORS default origin).
+#
+# Data (caches, ingested corpus, snapshots, sqlite) is bind-mounted from the
+# host ./data directory, so the images stay small and runs reuse warm caches.
+# Fresh ERA5-Land downloads additionally need a Copernicus account file
+# mounted read-only (uncomment below); without it, cached ERA5 + CHIRPS work
+# and new CDS requests fail with a clear error.
+
+services:
+  backend:
+    build: .
+    image: climateadapt-backend:local
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env.docker
+        required: false
+    environment:
+      CLIMATEADAPT_DATA_DIR: /app/data
+    volumes:
+      - ./data:/app/data
+      # - ~/.cdsapirc:/root/.cdsapirc:ro  # enable for fresh Copernicus CDS downloads
+    healthcheck:
+      # No curl in python:slim; stdlib urllib does the same job.
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=8)\""]
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://127.0.0.1:8000}
+    image: climateadapt-frontend:local
+    ports:
+      - "5173:80"
+    depends_on:
+      backend:
+        condition: service_healthy
