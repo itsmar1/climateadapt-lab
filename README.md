@@ -248,6 +248,12 @@ $env:CLIMATEADAPT_RUN_LIVE_LLM = "1"; uv run python scripts/llm_report.py
 # Full agent run (same gate; warm caches + offline BM25 + at most one Baseten
 # call; saves trace + report under git-ignored data/agent_runs/)
 $env:CLIMATEADAPT_RUN_LIVE_LLM = "1"; uv run python scripts/run_agent.py
+
+# Vision baseline (P16; needs vision tools + ~911 MB CropHarvest download;
+# isolated from recommendations -- see docs/VISION_BASELINE.md)
+uv pip install "mlflow>=3" "h5py>=3.1" "scikit-learn>=1.9" "pandas>=3.1"
+uv run python scripts/vision_download.py
+uv run python scripts/vision_baseline.py --max-train-samples 20000
 ```
 
 ERA5-Land variables: `2m_temperature`, `total_precipitation`,

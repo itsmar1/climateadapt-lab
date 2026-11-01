@@ -61,7 +61,7 @@ so this mapping follows the handoff's implied milestones. "Complete" = implement
 | M0 (project setup/config) | **Complete** | `pyproject.toml` + `uv.lock`, `.env.example`, `config.py` (`CLIMATEADAPT_` prefix), tests layout, ruff/pytest config; exercised by the green suite. |
 | M1 (CHIRPS connector + precipitation indicators + API) | **Complete** | `data/chirps.py`, `data/chirps_remote.py`, `indicators/rainfall.py`, `indicators/spi.py`, `pipelines/rainfall_anomaly.py`, `pipelines/spi.py`, 3 CHIRPS API routes + `/health`. Real-data behavior is REPORTED (past logs; local cache files corroborate runs happened), not re-executed in the audit. |
 | M2 (ERA5-Land connector + temperature/SPI indicators) | **Complete as CLI** | `data/era5_land.py`, `data/cds_client.py`, `indicators/temperature.py`, `indicators/spi_diagnostics.py`, `indicators/units.py`, `pipelines/spi_era5.py`, `pipelines/temperature_anomaly.py`, CLI scripts. ERA5 API exposure does not exist (expected — P05 scope). |
-| M3 (computer vision) | **Not started** | No CV code, deps, or docs beyond handoff mentions; deferral decision still pending with the owner. |
+| M3 (computer vision) | **Classical baseline done 2026-11-01 (P16)** | `src/climateadapt/vision/` + scripts + 35 tests (see §2.18); logreg/rf on CropHarvest v14, MLflow-tracked, evaluated on 543k held-out rows (see `docs/VISION_BASELINE.md`). Neural model + Optuna deferred by recorded decision. |
 | M4 (scientific RAG, first batch) | **Partially complete** | Implemented + tested: manifest, fetch, ingest, page-aware chunking + provenance verification, BM25, RRF, `Bm25Retriever`/`HybridRetriever`, citations, evaluation harness. Missing within M4: dense E5 + Qdrant retriever (no code at all), RAG API routes, 4 of 8 corpus documents, page-level gold annotations, printed page labels. `HybridRetriever` is generic/inert without a second retriever. |
 
 M5 (recommendations) / M6 (agent + LLM), frontend, persistence, and Docker/CI are all
@@ -206,7 +206,16 @@ Real-data runs (CONFIRMED, $0 LLM): reference 4/4 ok; Punjab ERA5 ok via fresh C
 | `docker-compose.yml`, `.dockerignore`, `.env.docker.example` | Demo stack: health-gated frontend, host `./data` bind-mount, optional `.cdsapirc` mount, secret-free context | T (`docker compose config --quiet` exit 0, Compose v5.6.0, CONFIRMED 2026-11-01) |
 | `.github/workflows/ci.yml` | Backend (ruff, offline pytest, compose-config check) + frontend (lint/test/build) jobs with uv/npm caching; no live APIs or secrets | U (authored + YAML-validated; never executed on GitHub) |
 
-Gates (CONFIRMED 2026-11-01): `docker compose config --quiet` exit 0. Image builds, container starts, health-check calls, and CI's first GitHub execution are all UNVERIFIED — the owner must run `docker compose up --build` and watch CI's first run. Owner chose core-only on 2026-11-01: Prometheus, MLflow, Optuna, Evidently, Airflow, Grafana, PostgreSQL explicitly NOT IMPLEMENTED (KI-30).
+Gates (CONFIRMED 2026-11-01): `docker compose config --quiet` exit 0. Image builds, container starts, health-check calls, and CI's first GitHub execution are all UNVERIFIED — the owner must run `docker compose up --build` and watch CI's first run. Owner chose core-only on 2026-11-01: Prometheus, MLflow, Optuna, Evidently, Airflow, Grafana, PostgreSQL explicitly NOT IMPLEMENTED (KI-30). (P16 addendum 2026-11-01: MLflow tracking now runs for the vision baseline only, outside `uv.lock` — see §2.18.)
+
+### 2.18 CropHarvest vision baseline (P16 2026-11-01)
+| Path | Purpose | Evidence |
+|---|---|---|
+| `src/climateadapt/vision/` | Minimal CropHarvest-data loader (stdlib geojson + h5py), mean/std aggregation, logreg/RF baselines, numpy metrics + bootstrap CIs, MLflow adapter, run manifests | T (35 offline tests green; tool parts skip without vision tools), R (real v14 run) |
+| `scripts/vision_download.py`, `scripts/vision_baseline.py` | Zenodo download (size+md5 verified) + reproducible train/eval CLI (exit 0) | R (labels 113,892 rows; 87,465 train files; 6 test grids) |
+| `docs/VISION_BASELINE.md` | Protocol, sources, results, limitations | D |
+
+Results (CONFIRMED 2026-11-01, train 20,000 seeded / test 543,055 evaluable): logreg pooled acc 0.5619 / macro-F1 0.5594 (MLflow `b537f8db…`); rf 0.7972 / 0.7895 (MLflow `652be435…`); per-file + crop-general metrics with 95% CIs in the doc and in git-ignored `data/cropharvest/reports/`. The `cropharvest` PyPI package is deliberately unused (pinned 2021 deps conflict with pandas 3.x/xarray); vision tools live in the local `.venv` only, not in `pyproject.toml`/`uv.lock` (owner follow-up: add a `vision` extra + `uv lock` on a networked machine). Neural model + Optuna deferred by recorded decision. Outputs are isolated from recommendations by design.
 
 ### 2.6 Scientific RAG (`src/climateadapt/rag/`, first batch)
 | Path | Purpose | Evidence |
@@ -312,7 +321,7 @@ Retrieval evaluation so far: 10 of 15 queries evaluable, 5 skipped (q01, q03, q0
 - ~~LLM provider adapter (Baseten), report schema, agent workflow (Milestone 6).~~ **Adapter + schema + validator delivered 2026-10-31 (P09):** `src/climateadapt/llm/` with 51 offline tests and one gated live call (fallback served, see §2.11). **Agent workflow delivered 2026-10-31 (P10):** fixed pipeline in `src/climateadapt/agent/` with 22 offline tests and one gated live run (see §2.12).
 - ~~Scenario persistence/history, API auth and rate limiting.~~ **Persistence delivered 2026-10-31 (P11):** scenario CRUD + SQLite history (see §2.13). API auth and rate limiting still missing (documented limitation, KI-28).
 - ~~**React + Vite frontend** (no `frontend/` directory expected).~~ **Input/analysis screens delivered 2026-10-31 (P12):** form, polling, indicator cards + chart (see §2.14). Recommendations/report UI delivered 2026-10-31 (P13, see §2.15).
-- Computer-vision baseline (CropHarvest) — deferred.
+- ~~Computer-vision baseline (CropHarvest) — deferred.~~ **Delivered 2026-11-01 (P16, classical only):** logreg + random forest on CropHarvest v14 with MLflow tracking and 543k-row held-out eval (see §2.18, `docs/VISION_BASELINE.md`). Neural model, Optuna and the `vision` lockfile extra remain future work.
 - ~~MLOps: Docker/Compose, GitHub Actions CI/CD, MLflow, Optuna, Airflow, PostgreSQL/PostGIS, Prometheus, Evidently, Grafana. Of the owner's eleven named tools only Pytest and FastAPI exist.~~ **Partially delivered 2026-11-01 (P15):** Dockerfiles + compose stack + CI workflow authored (`docker compose config` CONFIRMED; image builds, container starts, and CI's first execution UNVERIFIED — owner must run). Prometheus, MLflow, Optuna, Evidently, Airflow, Grafana, PostgreSQL explicitly NOT IMPLEMENTED per the owner's core-only decision (see §2.17, KI-30).
 
 ## 8. Unresolved questions for the owner

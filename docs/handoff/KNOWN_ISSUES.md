@@ -186,10 +186,11 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 - **Evidence:** Only Pytest and FastAPI exist. No Docker, CI, MLflow, Optuna, Airflow, PostgreSQL, Prometheus, Evidently, Grafana.
 - **Resolution (P15):** Docker + CI first; others only as thin, genuinely functioning integrations (e.g., MLflow/Optuna on retrieval evaluation, Prometheus `/metrics`, Evidently on input-data drift). Never claim an integration that does not run.
 - **P15 evidence (2026-11-01):** backend + frontend/nginx Dockerfiles, compose stack (health check, `./data` bind-mount), `.dockerignore`, `.env.docker.example`, and a CI workflow (ruff, offline pytest, compose-config check, frontend lint/test/build, uv/npm caching) are authored; `docker compose config --quiet` passes (Compose v5.6.0, CONFIRMED). Image build, container start, and CI's first GitHub execution are UNVERIFIED (no Docker daemon in the agent environment) — the owner must run `docker compose up --build` and report. Owner chose core-only: Prometheus, MLflow, Optuna, Evidently, Airflow, Grafana, PostgreSQL are explicitly NOT IMPLEMENTED.
+- **P16 addendum (2026-11-01):** MLflow 3.17.2 tracking now runs (SQLite store, verified with two real runs) for the vision baseline only, installed into the local `.venv` outside `uv.lock`. Retrieval-eval MLflow/Optuna and all other extras remain NOT IMPLEMENTED.
 
-### KI-31 — Computer-vision milestone undecided (Medium)
-- **Evidence:** Deferred by Claude's proposal (RAG first); the owner has not confirmed. CropHarvest/PyTorch work is heavy and only loosely tied to the adaptation recommendation.
-- **Resolution:** owner decides (P16). If included, never present crop classification as proof of drought damage.
+### KI-31 — Computer-vision milestone undecided (Medium) — ✅ RESOLVED 2026-11-01 (classical baseline delivered; neural/Optuna deferred)
+- **Evidence:** Deferred by Claude's proposal (RAG first); the owner approved P16 in-session on 2026-11-01.
+- **P16 evidence (2026-11-01; CONFIRMED):** `src/climateadapt/vision/` + `scripts/vision_{download,baseline}.py` deliver a crop/non-crop baseline on CropHarvest v14 (82,654 eligible train rows, 20,000 used seeded; 543,055 evaluable test rows over 6 official grids): logreg pooled acc 0.5619 / macro-F1 0.5594, rf 0.7972 / 0.7895, bootstrap CIs, MLflow SQLite runs `b537f8db…` / `652be435…`, 35 offline tests green. The `cropharvest` PyPI package is deliberately unused (2021 pins vs modern stack); vision tools are not in `uv.lock` (sandbox) — owner follow-up documented. Neural model + Optuna deferred by recorded decision. Details: `docs/VISION_BASELINE.md`. Never presented as drought/intervention evidence (stated in code, docs and manifests).
 
 ### KI-32 — Judging rubric and deadline unknown (High for planning)
 - **Evidence:** Not in the blueprint or conversation.

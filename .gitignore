@@ -38,5 +38,8 @@ data/corpus/
 data/qdrant/
 data/demo_snapshots/
 data/capture-tmp.sqlite3*
+# P16 vision baseline: CropHarvest downloads + MLflow file store
+data/cropharvest/
+data/mlruns/
 mlruns/
 *.sqlite3
