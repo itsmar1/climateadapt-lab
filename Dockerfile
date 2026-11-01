@@ -7,6 +7,12 @@
 # Pattern: uv Docker guide (COPY --from ghcr.io/astral-sh/uv, uv sync --locked).
 FROM python:3.11-slim-bookworm AS base
 
+# Install system libraries required by rasterio / GDAL wheels
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libexpat1 \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_NO_DEV=1 \
