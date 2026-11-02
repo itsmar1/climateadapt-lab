@@ -144,3 +144,108 @@ def write_demo_snapshot(
         encoding="utf-8",
     )
     return path
+
+
+EVIDENCE_METADATA_KEYS = frozenset(
+    {
+        "chunk_id",
+        "citation",
+        "doc_id",
+        "landing_url",
+        "license",
+        "license_status",
+        "pages",
+    }
+)
+"""Evidence items are citation metadata only: no text/excerpt field may exist."""
+
+_LOCAL_PATH_RES = (
+    re.compile(r"[A-Za-z]:\\"),
+    re.compile(r"/home/"),
+    re.compile(r"/Users/"),
+    re.compile(r"data/corpus"),
+    re.compile(r"data/cache"),
+    re.compile(r"data/demo"),
+    re.compile(r"\.cdsapirc", re.IGNORECASE),
+    re.compile(r"(^|[\s\"'=])\.env(\s|$|\"|')"),
+    re.compile(r"\.sqlite3?(-wal|-shm)?", re.IGNORECASE),
+)
+
+_SECRET_RES = (
+    re.compile(r"api[_-]?key", re.IGNORECASE),
+    re.compile(r"Bearer\s+[A-Za-z0-9]", re.IGNORECASE),
+    re.compile(r"Authorization:\s*Bearer", re.IGNORECASE),
+    re.compile(r"BEGIN\s+[A-Z ]*PRIVATE\s+KEY"),
+    re.compile(r"\bsk-[A-Za-z0-9]{8,}"),
+)
+
+_ADDRESS_RES = (
+    re.compile(r"127\.0\.0\.1"),
+    re.compile(r"localhost", re.IGNORECASE),
+    re.compile(r"\b0\.0\.0\.0\b"),
+    re.compile(r"\b192\.168\.\d+\.\d+"),
+    re.compile(r"\b10\.\d+\.\d+\.\d+"),
+    re.compile(r"Failed to connect to", re.IGNORECASE),
+    re.compile(r"CURL error", re.IGNORECASE),
+)
+
+_CORPUS_KEY_RES = (
+    re.compile(r"\"passage_text\"\s*:"),
+    re.compile(r"\"chunk_text\"\s*:"),
+    re.compile(r"\"excerpt\"\s*:"),
+)
+
+
+def audit_demo_snapshot(snapshot: DemoSnapshotFile) -> list[str]:
+    """Pre-commit audit for one snapshot (P19 rules, P25 guard).
+
+    Returns human-readable problems; empty means the snapshot may be tracked.
+    Checks: evidence items carry citation metadata only (no passage text,
+    values under 600 chars); the trace keeps no raw draft/repair text; no
+    local paths, secrets, key material, or proxy/local addresses anywhere;
+    every computed indicator and evidence item carries provenance/licence
+    fields.
+    """
+    problems: list[str] = []
+    dumped = snapshot.model_dump(mode="json")
+    detail = dumped.get("detail") or {}
+    report = detail.get("report") or {}
+    for index, item in enumerate(report.get("evidence") or []):
+        if set(item) != EVIDENCE_METADATA_KEYS:
+            problems.append(
+                f"evidence[{index}] keys {sorted(item)} are not citation metadata only"
+            )
+        for field, value in item.items():
+            if len(str(value)) >= 600:
+                problems.append(f"evidence[{index}].{field} is {len(str(value))} chars")
+    trace = detail.get("trace") or {}
+    if trace.get("draft_text"):
+        problems.append("trace keeps draft_text (strip raw model output)")
+    if trace.get("repair_text"):
+        problems.append("trace keeps repair_text (strip raw model output)")
+    bundle = detail.get("bundle") or {}
+    for entry in bundle.get("entries") or []:
+        if entry.get("status") != "ok":
+            continue
+        result = entry.get("result") or {}
+        for field in ("citation", "license_note", "data_source", "doi"):
+            if not result.get(field):
+                problems.append(f"bundle {entry.get('indicator')}: missing {field}")
+    for index, item in enumerate(report.get("evidence") or []):
+        for field in ("citation", "license", "pages", "landing_url"):
+            if not item.get(field):
+                problems.append(f"evidence[{index}]: missing {field}")
+    raw = json.dumps(dumped, sort_keys=True)
+    for pattern in _LOCAL_PATH_RES:
+        if pattern.search(raw):
+            problems.append(f"local path or cache reference: {pattern.pattern}")
+    for pattern in _SECRET_RES:
+        if pattern.search(raw):
+            problems.append(f"possible secret or key material: {pattern.pattern}")
+    for pattern in _ADDRESS_RES:
+        if pattern.search(raw):
+            problems.append(f"proxy or local address: {pattern.pattern}")
+    for pattern in _CORPUS_KEY_RES:
+        if pattern.search(raw):
+            problems.append(f"corpus text key present: {pattern.pattern}")
+    return problems

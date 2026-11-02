@@ -135,9 +135,14 @@ sandbox to track it.
 | Key | Label | Captured (UTC) | Status |
 |---|---|---|---|
 | reference-morocco | Reference: Souss-Massa, Morocco (30.43, -9.61) | 2026-10-31T22:01:05Z | partial |
+| reference-morocco-ai | Reference + Muse Spark accepted (same point) | 2026-11-02 (from run-20261102T202227Z) | complete |
 | punjab-india | Punjab, India (30.90, 75.80) | 2026-10-31T22:40:05Z | partial |
 | trondelag-norway | Trøndelag, Norway (63.40, 10.40) | 2026-10-31T22:32:14Z | partial |
 | atlantic-ocean | Atlantic off Morocco (30.43, -15.50) | 2026-10-31T22:36:24Z | partial |
 
-All four are `partial` solely because no LLM key was configured (deterministic
-fallback by design); deterministic stages are complete in every snapshot.
+The four P14 captures are `partial` solely because no LLM key was configured
+(deterministic fallback by design); deterministic stages are complete in every
+snapshot. `reference-morocco-ai` (P25) is `complete`: the accepted Muse Spark
+report from run-20261102T202227Z (14/14 statements validated; first draft
+rejected `invalid-json`, repair accepted) with the deterministic bundle/ranking
+recomputed offline ($0, no new model call) — see `docs/MUSE_SPARK_EVIDENCE.md`.

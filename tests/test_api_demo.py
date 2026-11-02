@@ -18,6 +18,7 @@ from climateadapt.api.demo import (
     DEFAULT_SNAPSHOTS_DIR,
     DemoSnapshotFile,
     DemoSnapshotList,
+    audit_demo_snapshot,
     list_demo_snapshots,
     load_demo_snapshot,
     snapshots_dir,
@@ -130,7 +131,12 @@ def test_traversal_and_bad_keys_rejected(tmp_path, monkeypatch):
 ROOT = Path(__file__).resolve().parents[1]
 
 TRACKED_SNAPSHOT_KEYS = frozenset(
-    {"reference-morocco", "trondelag-norway", "atlantic-ocean"}
+    {
+        "reference-morocco",
+        "reference-morocco-ai",
+        "trondelag-norway",
+        "atlantic-ocean",
+    }
 )
 """Audited keys shipped in demo/snapshots/ (see demo/README.md)."""
 
@@ -164,10 +170,43 @@ def test_tracked_snapshots_validate_and_match_the_audit():
         snapshot = load_demo_snapshot(directory, summary.key)
         assert snapshot is not None
         assert snapshot.key == summary.key
-        assert snapshot.detail.status == "partial"
         assert snapshot.detail.report is not None
-        assert snapshot.detail.report.fallback is True
-        assert snapshot.detail.report.generator == "deterministic-fallback"
+        if summary.key == "reference-morocco-ai":
+            assert snapshot.detail.status == "complete"
+            assert snapshot.detail.report.fallback is False
+            assert snapshot.detail.report.generator == (
+                "baseten:meta-models/muse-spark-open-1026"
+            )
+            assert snapshot.detail.report.acceptance == "ai-accepted"
+            assert snapshot.detail.problems == []
+        else:
+            assert snapshot.detail.status == "partial"
+            assert snapshot.detail.report.fallback is True
+            assert snapshot.detail.report.generator == "deterministic-fallback"
+
+
+def test_tracked_ai_snapshot_carries_trace_evidence():
+    """The accepted run keeps its per-stage trace, usage, and repair verdict."""
+    snapshot = load_demo_snapshot(ROOT / DEFAULT_SNAPSHOTS_DIR, "reference-morocco-ai")
+    assert snapshot is not None
+    detail = snapshot.detail
+    assert detail.trace is not None
+    assert detail.trace.usage == {
+        "prompt_tokens": 61385,
+        "completion_tokens": 23296,
+        "llm_calls": 2,
+    }
+    assert {stage.name for stage in detail.trace.stages} == {
+        "validate_inputs", "bundle", "retrieval", "ranking", "draft",
+        "validate", "finalize",
+    }
+    assert detail.trace.validator_verdicts[0].startswith("[invalid-json]")
+    assert detail.trace.validator_verdicts[-1] == "[repair-accepted]"
+    assert detail.trace.draft_text == ""
+    assert detail.trace.repair_text == ""
+    assert detail.report is not None
+    assert len(detail.report.statement_origins) == 14
+    assert set(detail.report.statement_origins.values()) == {"model"}
 
 
 def test_tracked_snapshots_carry_no_corpus_text():
@@ -180,6 +219,15 @@ def test_tracked_snapshots_carry_no_corpus_text():
         for item in dumped["detail"]["report"]["evidence"]:
             assert set(item) == EVIDENCE_METADATA_KEYS
             assert all(len(str(value)) < 600 for value in item.values())
+
+
+def test_tracked_snapshots_pass_the_audit():
+    """P25 guard: every tracked snapshot passes the pre-commit audit."""
+    directory = ROOT / DEFAULT_SNAPSHOTS_DIR
+    for summary in list_demo_snapshots(directory):
+        snapshot = load_demo_snapshot(directory, summary.key)
+        assert snapshot is not None
+        assert audit_demo_snapshot(snapshot) == []
 
 
 # --- Route handlers called directly (run everywhere) -------------------------

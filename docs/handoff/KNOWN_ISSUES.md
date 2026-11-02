@@ -229,8 +229,33 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 
 - **P23 evidence (2026-11-02; CONFIRMED offline, live UNVERIFIED):** owner ran the P22 build live (`data/agent_runs/run-20261102T155950Z.json`, 2 calls, 91 s, 60629/24391 tokens): the ERA5 `'5'` false positive and the efficacy-claim failure did not recur. First draft: 1 problem (`invalid-json` — truncated at the 16000-token completion cap, `finish=length`); repair: 4 problems, all `undeclared-number` (`'0'`/`'7'` in "soil moisture layer 0-7 cm", `'7.8'` land-fallback km, `'0.05'` CHIRPS resolution) — none declarable (layer range, resolution, and the nested `land_fallback.distance_km = 7.842441576259394` are not registry values; model wrote the warning's rounded 7.8). Different classes: parse failure vs validation failures, so "1 vs 4" misleads — the repair (13 statements, 3 failing) is the only usable base. **Validator unchanged except the splitter fix** (`_SENTENCE_RE` no longer splits on decimals/`e.g.`; which numerals flag is untouched, test-pinned). Acceptance is now statement-level (owner-approved): new `llm/composite.py` keeps valid model statements, replaces each failing one with the fallback counterpart (drops when none is safe), and re-validates the composite with the unchanged validator — full fallback on any problem. Base = parsed attempt with fewer problems (unparsable attempts excluded, ties to first). Report carries `acceptance` (`ai-accepted`/`ai-partial`/`fallback`), per-statement `statement_origins`, `replaced/dropped_statements`; UI badge + why-section + per-statement labels; markdown export marked. Prompt: strict numeral-only-if-in-registry policy + repair instruction "replace the number with words or delete the sentence; do not add new numbers". 12 new backend tests + 6 Vitest + 1 Playwright green; ruff clean; full suite 84 failed / 820 passed (same 84 pre-existing sandbox socket failures, zero new). Stays open until an owner live run ships `ai-accepted`/`ai-partial` (budget: at most 2 runs; `uv run python scripts/run_agent.py` with the gate set). If still `fallback` after two runs, stop and report.
 
+- **P25 evidence (2026-11-02; CONFIRMED, KI-35 RESOLVED):** the owner's next live run
+  (`data/agent_runs/run-20261102T202227Z.json`, git-ignored) is the first acceptance:
+  `complete`, zero problems, `ai-accepted` with 14/14 statements model-written, 2 calls,
+  prompt 61385 / completion 23296 tokens, 101781 ms; first draft 1 problem (`invalid-json`,
+  truncated at the 16000-token cap, `finish_reason=length`), repair accepted. Captured as
+  tracked snapshot `reference-morocco-ai` via the new `--from-run` mode ($0, no new call;
+  re-validated clean, audit passed, drafts stripped). Evidence: `docs/MUSE_SPARK_EVIDENCE.md`.
+  Fallback remains the normal outcome whenever validation fails; no further live runs needed.
+
 ### KI-36 — react-leaflet is Hippocratic-2.1, not permissive (Medium; owner decision)
 - **Evidence (P20, 2026-11-02; CONFIRMED):** installed `frontend/node_modules/react-leaflet/package.json` and `@react-leaflet/core/package.json` both declare `"license": "Hippocratic-2.1"` — an ethical-source licence that is NOT OSI-approved and NOT permissive. `leaflet` itself is BSD-2-Clause and `@types/leaflet` is MIT (both CONFIRMED from installed manifests).
 - **Impact:** contradicts the "permissive-licensed dependencies" claim (README and `FINAL_VERIFICATION.md` now carry the exception + P20 addendum). Harmless for a demo in practice, but a licence-sensitive submission or institution may require OSI-approved licences only.
 - **Options for the owner:** (a) accept + keep the documented exception; (b) drop `react-leaflet` and drive Leaflet (BSD-2-Clause) directly from a small React wrapper (~150 lines + mock rewrites; GeoMap's public props could stay). Do not silently revert the README/`FINAL_VERIFICATION.md` notes.
 - **Resolution:** owner picks (a) or (b); until then this stays open.
+
+### KI-37 — `verify_fresh_clone.ps1` failed on the owner's machine (High for the judge path) — ✅ RESOLVED 2026-11-02
+- **Evidence (owner run, REPORTED):** `Start-Job -WorkingDirectory` failed with
+  `A parameter cannot be found that matches parameter name 'WorkingDirectory'` (that
+  parameter exists only in PS 7; the owner runs Windows PowerShell 5.1), the probe got a
+  `404`, and the Node check failed on system Node v16.13.1.
+- **Fix (P25; CONFIRMED offline):** jobs now set their directory with `Set-Location`
+  inside the job (`-ArgumentList` passes the path; verified pattern on PS 5.1.19041);
+  ports 8000/5173 are probed before anything starts and a busy port stops its step with a
+  message naming the port; the probe prints the raw `/v1/demo/snapshots` body plus the
+  typed error `type` (so `demo_mode_disabled` from a leftover backend is visible); Node
+  < 20.19 (or missing) prints the Node-22-LTS/Docker pointer and skips only the frontend
+  steps; job handles are now script-scoped (the old nesting silently leaked jobs past
+  cleanup — found by inspection, fixed). Script parses with 0 errors on 5.1.19041 and
+  13/13 logic micro-checks pass; the real clone→servers run is owner action
+  (`powershell -ExecutionPolicy Bypass -File scripts/verify_fresh_clone.ps1`).

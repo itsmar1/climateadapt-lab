@@ -5,11 +5,18 @@ These files are **versioned on purpose**: a fresh clone serves them with zero ke
 zero credentials, and no corpus. The API serves them verbatim; clients must label
 them "cached real-data snapshot" with the capture timestamp, never a live result.
 
-## Provenance (P19 audit 2026-11-01, CONFIRMED)
+## Provenance (P19 audit 2026-11-01, CONFIRMED; P25 addition 2026-11-02)
 
 - Captured 2026-10-31 with `scripts/capture_demo_snapshot.py` (full
   `run_scenario_job`, deterministic no-key provider: zero model calls, $0).
   Full conditions in `docs/DEMO_RUNS.md`.
+- `reference-morocco-ai` (P25): built from the saved accepted run
+  `data/agent_runs/run-20261102T202227Z.json` with
+  `capture_demo_snapshot.py --from-run` ($0, no new model call;
+  deterministic bundle/ranking recomputed offline and the saved report
+  re-validated; raw draft/repair text stripped). Same audit passed;
+  per-stage trace, token usage, and the repair verdict are preserved.
+  Evidence page: `docs/MUSE_SPARK_EVIDENCE.md`.
 - Every file passed the pre-commit audit: evidence items carry citation
   metadata only (no corpus passage text anywhere); every computed indicator
   carries CHIRPS / ERA5-Land `citation`, `license_note`, `data_source`, `doi`;

@@ -20,7 +20,7 @@ issues in `docs/handoff/KNOWN_ISSUES.md`, evidence in
 
 ## Quickstart — zero keys (~5 minutes)
 
-Prereqs: Python 3.11 + `uv`, Node 20.19+.
+Prereqs: Python 3.11 + `uv`, Node 20.19+ (or Docker instead of a local Node — see "Docker demo stack").
 
 ```powershell
 git clone <repo-url>; cd climateadapt-lab
@@ -30,10 +30,11 @@ uv run uvicorn climateadapt.api.main:app --reload   # http://127.0.0.1:8000/docs
 cd frontend; npm install; npm run dev               # http://localhost:5173
 ```
 
-Open http://localhost:5173 and click **Demo**: three audited real-data
-snapshots (Morocco 4/4 indicators ok, Norway with CHIRPS `outside_coverage`,
-Atlantic with ERA5 `missing_data` on a masked point) — zero keys, zero model
-calls, zero downloads, no `.env` needed. Live CHIRPS reads also work without
+Open http://localhost:5173 and click **Demo**: four audited real-data
+snapshots (Morocco 4/4 indicators ok, Morocco-AI with the accepted Muse Spark
+report, Norway with CHIRPS `outside_coverage`, Atlantic with ERA5
+`missing_data` on a masked point) — zero keys, zero new model calls, zero
+downloads, no `.env` needed. Live CHIRPS reads also work without
 credentials; only fresh ERA5-Land downloads need a Copernicus account file.
 
 ## With a model key — live reports
@@ -45,7 +46,10 @@ $env:CLIMATEADAPT_RUN_LIVE_LLM = "1"; uv run python scripts/llm_smoke.py   # ≈
 
 New scenarios then draft reports with `meta-models/muse-spark-open-1026`
 through Baseten; drafts that fail client-side validation fall back to the
-labelled deterministic report (no model draft has been accepted yet — KI-35).
+labelled deterministic report. One model draft has been accepted
+(run 2026-11-02, 14/14 statements validated — see
+`docs/MUSE_SPARK_EVIDENCE.md`); fallback remains the normal outcome whenever
+validation fails (KI-35).
 Full key setup: "Add your model key" below and `docs/LLM_PROVIDER_NOTES.md`.
 
 ## Implemented / Not implemented (honest list)
@@ -63,8 +67,9 @@ Not implemented: LangGraph (fixed validated pipeline chosen by recorded
 decision, `docs/AGENT_WORKFLOW.md`); Airflow, Grafana, PostgreSQL, Prometheus,
 Evidently, Optuna (core-only decision, KI-30); MLflow anywhere except the
 vision baseline; vision model deployment (trained and evaluated locally only);
-RAG API routes; any hosted deployment (local + compose only); no accepted
-model draft yet (KI-35 open).
+RAG API routes; any hosted deployment (local + compose only). One accepted
+model draft is captured as a demo snapshot (KI-35 resolved 2026-11-02 —
+see `docs/MUSE_SPARK_EVIDENCE.md`); future runs may still fall back.
 
 ## Scientific scope and limitations
 
@@ -188,7 +193,9 @@ Invoke-RestMethod http://127.0.0.1:8000/v1/scenarios/$($created.scenario_id) -Me
 
 Prereqs: Node 20.19+ (Vite 8; the system Node here is v16.13.1, so P12 was
 built and verified with a portable Node v26.13.0 + npm 11.20.0 — see
-`docs/handoff/IMPLEMENTATION_STATUS.md` §2.14). Start the API first (above),
+`docs/handoff/IMPLEMENTATION_STATUS.md` §2.14). If Node is older than 20.19,
+install Node 22 LTS or use `docker compose up --build`, which builds the
+frontend with Node 22. Start the API first (above),
 then:
 
 ```powershell
@@ -235,7 +242,7 @@ they render blank in offline sandboxes; re-capture on a networked machine with
 ## Demo mode (zero keys needed)
 
 The fastest path on a fresh clone — no Baseten key, no CDS credentials, no
-corpus, no caches. The repo ships three audited real-data snapshots in tracked
+corpus, no caches. The repo ships four audited real-data snapshots in tracked
 `demo/snapshots/` (see `demo/README.md` for the audit + licence notes):
 
 ```powershell
@@ -256,8 +263,10 @@ Invoke-RestMethod http://127.0.0.1:8000/v1/demo/snapshots/reference-morocco
 returns one verbatim. With the flag off both answer 404
 (`demo_mode_disabled`); unknown keys answer 404
 (`demo_snapshot_not_found`). Shipped keys: `reference-morocco` (all four
-indicators ok), `trondelag-norway` (CHIRPS `outside_coverage`, ERA5 ok),
-`atlantic-ocean` (ERA5 `missing_data` on a masked point). Every snapshot view
+indicators ok, fallback report), `reference-morocco-ai` (same point, accepted
+Muse Spark report — see `docs/MUSE_SPARK_EVIDENCE.md`), `trondelag-norway`
+(CHIRPS `outside_coverage`, ERA5 ok), `atlantic-ocean` (ERA5 `missing_data`
+on a masked point). Every snapshot view
 carries a "Cached real-data snapshot" banner with the capture timestamp —
 stored results are never presented as live ones. Capture your own with
 `uv run python scripts/capture_demo_snapshot.py --key <k> --label "<label>"

@@ -60,8 +60,9 @@ cd frontend; copy .env.example .env; npm install; npm run dev
 
 Offline/rate-limited path: `CLIMATEADAPT_DEMO_MODE=true` serves cached
 real-data snapshots (`GET /v1/demo/snapshots`); frontend Demo page (`#/demo`).
-Three audited snapshots ship in tracked `demo/snapshots/` (P19; zero keys on a
-fresh clone). Walk-through + fallback plan: `docs/DEMO_SCRIPT.md`; real results
+Four audited snapshots ship in tracked `demo/snapshots/` (P19 three + P25
+`reference-morocco-ai`, the accepted Muse Spark run; zero keys on a fresh
+clone). Walk-through + fallback plan: `docs/DEMO_SCRIPT.md`; real results
 at four locations: `docs/DEMO_RUNS.md`. Prove the clone path with
 `scripts/verify_fresh_clone.ps1`. Docker path (`docker compose up --build`):
 backend image + `/health` REPORTED OK by the owner (P21); frontend image,

@@ -279,6 +279,17 @@ Diagnosis (CONFIRMED offline): H1 CONFIRMED — the five `'5'` hits are the vali
 
 Diagnosis (CONFIRMED offline): P22 fixes held (no `'5'`, no efficacy-claim). Repair failures are all correct rejections of non-declarable numerals (layer range, resolution, nested fallback distance 7.842441576259394 vs written 7.8). First draft (parse failure) vs repair (validation failures) are different classes — the repair is the only usable base. **Validator changed: splitter fix only** (evidence quotes whole sentences; flagging untouched). Sentence-splitter evidence verified against the saved repair text. Gates: focused backend suites green (121 tests), ruff clean, frontend green (eslint, tsc, 102/102 Vitest, 8/8 Playwright); full suite `84 failed, 820 passed, 1 skipped` — the same 84 pre-existing sandbox socket-blocked API failures (KI-34, zero assertion failures), +18 new P23 tests all green. Live acceptance still UNVERIFIED (KI-35 stays open; owner budget at most 2 runs).
 
+### 2.24 Accepted Muse Spark run as a demo snapshot + fresh-clone fix (P25 2026-11-02)
+| Path | Purpose | Evidence |
+|---|---|---|
+| `scripts/capture_demo_snapshot.py` | New `--from-run data/agent_runs/<run>.json` mode: preserves the accepted report + verdict + per-stage trace, recomputes bundle/ranking locally ($0, no new model call), re-validates, strips raw drafts, audits before writing (fail closed) | T (4 new offline tests green) |
+| `api/demo.py` | New `audit_demo_snapshot()` (P19 rules as code: citation-metadata-only evidence, no drafts/paths/secrets/addresses, provenance present) | T (guard green) |
+| `demo/snapshots/reference-morocco-ai.json` | Tracked 4th snapshot: `complete`, `ai-accepted`, 14/14 model statements, usage 61385/23296, 2 calls, 101781 ms, `[invalid-json]` first draft → `[repair-accepted]` | T (audit clean, badge check green) |
+| `docs/MUSE_SPARK_EVIDENCE.md` | One-page honest judge evidence (real numbers, repair outcome, non-claims) | D |
+| `scripts/verify_fresh_clone.ps1` | PS 5.1+7 job starts (Set-Location in job, no `-WorkingDirectory`), port gates, typed-error probe, Node<20.19 frontend skip, job-handle leak fixed, 4-key checks | T (parse 0 errors on 5.1.19041; 13 logic micro-checks green; full run owner action) |
+
+Result (CONFIRMED, $0 spent): the owner's live run `run-20261102T202227Z` is the first accepted draft (KI-35 resolved). Capture ran offline here (`--offline`, warm caches): re-validation clean, audit `[]`, file 119750 bytes. Badge verified against the real frontend presenter (`acceptanceOf` → `ai-accepted`, 14/14, "AI report accepted"); Vitest itself could not run here (worker-spawn timeouts under box load, same as KI-34 note — pre-existing environmental). README + demo/README + DEMO_RUNS + SUBMISSION_CHECKLIST updated to four snapshots.
+
 ### 2.6 Scientific RAG (`src/climateadapt/rag/`, first batch)
 | Path | Purpose | Evidence |
 |---|---|---|
