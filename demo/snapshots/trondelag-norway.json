@@ -1,0 +1,1503 @@
+{
+ "captured_at_utc": "2026-10-31T22:32:14.048045Z",
+ "detail": {
+  "bundle": {
+   "entries": [
+    {
+     "error_message": "Point (lat=63.4, lon=10.4) is outside the nominal CHIRPS v3 coverage (latitude -60 to 60, longitude -180 to 180; south and east edges are exclusive). No value is returned.",
+     "error_type": "outside_coverage",
+     "grid_point_latitude": null,
+     "grid_point_longitude": null,
+     "indicator": "chirps_spi",
+     "requested_latitude": 63.4,
+     "requested_longitude": 10.4,
+     "result": null,
+     "status": "failed"
+    },
+    {
+     "error_message": null,
+     "error_type": null,
+     "grid_point_latitude": 63.4,
+     "grid_point_longitude": 10.4,
+     "indicator": "era5_spi",
+     "requested_latitude": 63.4,
+     "requested_longitude": 10.4,
+     "result": {
+      "citation": "Mu\u00f1oz Sabater, J. (2019): ERA5-Land monthly averaged data from 1950 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). https://doi.org/10.24381/cds.68d2bb30. See also Mu\u00f1oz-Sabater, J. et al. (2021), ERA5-Land: a state-of-the-art global reanalysis dataset for land applications, Earth System Science Data 13, 4349.",
+      "cumulative_probability": 0.016967806664907315,
+      "data_source": "ERA5-Land monthly averaged data from 1950 to present (reanalysis-era5-land-monthly-means)",
+      "doi": "https://doi.org/10.24381/cds.68d2bb30",
+      "gamma_scale_mm": 34.11969596332033,
+      "gamma_shape": 8.757937800858134,
+      "grid_point_latitude": 63.4,
+      "grid_point_longitude": 10.4,
+      "indicator": "standardized_precipitation_index",
+      "land_fallback": {
+       "distance_km": null,
+       "max_distance_km": 15.0,
+       "nearest_grid_point_latitude": 63.4,
+       "nearest_grid_point_longitude": 10.4,
+       "reason": "The nearest grid point has data in every month.",
+       "selected_grid_point_latitude": null,
+       "selected_grid_point_longitude": null,
+       "used": false,
+       "warning": null
+      },
+      "license_note": "Copernicus licence terms apply. The dataset's terms of use must be accepted in the CDS before downloading. Acknowledge 'Copernicus Climate Change Service Information' and check the dataset page for the current licence text.",
+      "limitations": [
+       "SPI expresses precipitation relative to the fitted reference-period distribution only. It does not include temperature, evapotranspiration, soil moisture, or crop impacts and is not a measure of agricultural drought damage.",
+       "Method: CHIRPS v3 Final monthly window totals; a gamma distribution is fitted per calendar month to the non-zero totals (Thom 1958 approximation of maximum likelihood); zeros are a point mass q = zeros / reference years; the cumulative probability is mapped to a standard normal quantile (McKee et al. 1993; WMO-No. 1090).",
+       "SPI depends on the chosen reference period; values are not comparable across different reference periods or precipitation products.",
+       "The gamma fit is not goodness-of-fit tested here. Values beyond about +/-2 are driven by the fitted tail and are uncertain, especially with short reference periods.",
+       "ERA5-Land is a reanalysis: land-surface model output forced by ERA5 atmospheric fields with no additional data assimilation. It is not a direct observation.",
+       "Native resolution is about 9 km; the CDS distributes it on a 0.1 degree grid. A point value is the nearest grid point and is not comparable cell-for-cell with CHIRPS (0.05 degree). No elevation or local downscaling is applied.",
+       "Precipitation is model-derived and inherits ERA5 forcing biases. It is not gauge-based. Monthly totals are converted from a mean daily accumulation: mm/month = mean(m/day) * 1000 * days in month.",
+       "Temperature is the monthly mean of hourly 2 m temperature. Minimum and maximum temperatures are not available from the monthly means product.",
+       "Recent months may come from a preliminary production stream (ERA5-Land-T) that cannot be distinguished in NetCDF output and could be revised. Prefer completed periods.",
+       "Published validation covers selected regions. This project has performed no validation of ERA5-Land at the requested location."
+      ],
+      "message": null,
+      "method": "Gamma distribution (Thom 1958 approximation of maximum likelihood) fitted per calendar month to non-zero reference window totals; zeros as a point mass q = zeros / reference years; equiprobability transform to a standard normal quantile (McKee et al. 1993; WMO-No. 1090).",
+      "min_reference_years": 30,
+      "raw_files": [
+       {
+        "dataset_id": "reanalysis-era5-land-monthly-means",
+        "delivered_as_zip": false,
+        "raw_file_sha256": "6157366e5d9328d737e44d78cc984fe1e73beeda48118cd806a6352260691dac",
+        "raw_file_size_bytes": 25680,
+        "request": {
+         "area": [
+          63.55,
+          10.25,
+          63.25,
+          10.55
+         ],
+         "data_format": "netcdf",
+         "download_format": "unarchived",
+         "month": [
+          "01",
+          "02",
+          "03"
+         ],
+         "product_type": [
+          "monthly_averaged_reanalysis"
+         ],
+         "time": [
+          "00:00"
+         ],
+         "variable": [
+          "total_precipitation"
+         ],
+         "year": [
+          "2024"
+         ]
+        },
+        "retrieved_at_utc": "2026-10-31T22:27:55.387477Z"
+       },
+       {
+        "dataset_id": "reanalysis-era5-land-monthly-means",
+        "delivered_as_zip": false,
+        "raw_file_sha256": "e5347f14beef27e43511202e6e02faac967d03210282005fc96b99cdc6537b21",
+        "raw_file_size_bytes": 29821,
+        "request": {
+         "area": [
+          63.55,
+          10.25,
+          63.25,
+          10.55
+         ],
+         "data_format": "netcdf",
+         "download_format": "unarchived",
+         "month": [
+          "01",
+          "02",
+          "03"
+         ],
+         "product_type": [
+          "monthly_averaged_reanalysis"
+         ],
+         "time": [
+          "00:00"
+         ],
+         "variable": [
+          "total_precipitation"
+         ],
+         "year": [
+          "1991",
+          "1992",
+          "1993",
+          "1994",
+          "1995",
+          "1996",
+          "1997",
+          "1998",
+          "1999",
+          "2000",
+          "2001",
+          "2002",
+          "2003",
+          "2004",
+          "2005",
+          "2006",
+          "2007",
+          "2008",
+          "2009",
+          "2010",
+          "2011",
+          "2012",
+          "2013",
+          "2014",
+          "2015",
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020"
+         ]
+        },
+        "retrieved_at_utc": "2026-10-31T22:28:36.359709Z"
+       }
+      ],
+      "reference_end_year": 2020,
+      "reference_nonzero_count": 30,
+      "reference_spi_mean": 8.161924900535628e-05,
+      "reference_spi_std": 1.017108313501997,
+      "reference_start_year": 1991,
+      "reference_years_excluded": [],
+      "reference_years_included": [
+       1991,
+       1992,
+       1993,
+       1994,
+       1995,
+       1996,
+       1997,
+       1998,
+       1999,
+       2000,
+       2001,
+       2002,
+       2003,
+       2004,
+       2005,
+       2006,
+       2007,
+       2008,
+       2009,
+       2010,
+       2011,
+       2012,
+       2013,
+       2014,
+       2015,
+       2016,
+       2017,
+       2018,
+       2019,
+       2020
+      ],
+      "reference_years_used": 30,
+      "reference_zero_count": 0,
+      "requested_latitude": 63.4,
+      "requested_longitude": 10.4,
+      "spi": -2.120835913067024,
+      "status": "ok",
+      "target_in_reference_period": false,
+      "target_window_end": "2024-03",
+      "target_window_start": "2024-01",
+      "timescale_months": 3,
+      "window_total_mm": 125.7052521687001,
+      "zero_probability": 0.0
+     },
+     "status": "ok"
+    },
+    {
+     "error_message": null,
+     "error_type": null,
+     "grid_point_latitude": 63.4,
+     "grid_point_longitude": 10.4,
+     "indicator": "era5_temperature_anomaly",
+     "requested_latitude": 63.4,
+     "requested_longitude": 10.4,
+     "result": {
+      "anomaly_c": 0.8743987521651704,
+      "citation": "Mu\u00f1oz Sabater, J. (2019): ERA5-Land monthly averaged data from 1950 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). https://doi.org/10.24381/cds.68d2bb30. See also Mu\u00f1oz-Sabater, J. et al. (2021), ERA5-Land: a state-of-the-art global reanalysis dataset for land applications, Earth System Science Data 13, 4349.",
+      "data_source": "ERA5-Land monthly averaged data from 1950 to present (reanalysis-era5-land-monthly-means)",
+      "doi": "https://doi.org/10.24381/cds.68d2bb30",
+      "grid_point_latitude": 63.4,
+      "grid_point_longitude": 10.4,
+      "indicator": "temperature_window_anomaly",
+      "land_fallback": {
+       "distance_km": null,
+       "max_distance_km": 15.0,
+       "nearest_grid_point_latitude": 63.4,
+       "nearest_grid_point_longitude": 10.4,
+       "reason": "The nearest grid point has data in every month.",
+       "selected_grid_point_latitude": null,
+       "selected_grid_point_longitude": null,
+       "used": false,
+       "warning": null
+      },
+      "license_note": "Copernicus licence terms apply. The dataset's terms of use must be accepted in the CDS before downloading. Acknowledge 'Copernicus Climate Change Service Information' and check the dataset page for the current licence text.",
+      "limitations": [
+       "Anomaly = target window mean temperature minus the mean of the same calendar window over the reference years, in degC (a difference, not a percentage). Window means are day-weighted averages of ERA5-Land monthly means of hourly 2 m temperature.",
+       "The reference mean includes any warming trend inside the reference period; the anomaly is relative to the reference-period average, not to a detrended or pre-industrial baseline.",
+       "The standardized anomaly divides by the sample standard deviation of the reference window means and is uncertain with about 30 values. The percentile rank is empirical (mid-rank).",
+       "Monthly means cannot reveal heat waves, frost, or the timing of extremes, and a temperature anomaly is not a drought indicator by itself; it is context for evaporative demand and crop heat stress.",
+       "ERA5-Land is a reanalysis: land-surface model output forced by ERA5 atmospheric fields with no additional data assimilation. It is not a direct observation.",
+       "Native resolution is about 9 km; the CDS distributes it on a 0.1 degree grid. A point value is the nearest grid point and is not comparable cell-for-cell with CHIRPS (0.05 degree). No elevation or local downscaling is applied.",
+       "Precipitation is model-derived and inherits ERA5 forcing biases. It is not gauge-based. Monthly totals are converted from a mean daily accumulation: mm/month = mean(m/day) * 1000 * days in month.",
+       "Temperature is the monthly mean of hourly 2 m temperature. Minimum and maximum temperatures are not available from the monthly means product.",
+       "Recent months may come from a preliminary production stream (ERA5-Land-T) that cannot be distinguished in NetCDF output and could be revised. Prefer completed periods.",
+       "Published validation covers selected regions. This project has performed no validation of ERA5-Land at the requested location."
+      ],
+      "message": null,
+      "min_reference_years": 30,
+      "percentile_rank": 0.5,
+      "raw_files": [
+       {
+        "dataset_id": "reanalysis-era5-land-monthly-means",
+        "delivered_as_zip": false,
+        "raw_file_sha256": "bd9393c0bb215d07b410ba8c43cb1cc0f863400cedfbbf46fd2df227c6b70420",
+        "raw_file_size_bytes": 25266,
+        "request": {
+         "area": [
+          63.55,
+          10.25,
+          63.25,
+          10.55
+         ],
+         "data_format": "netcdf",
+         "download_format": "unarchived",
+         "month": [
+          "01",
+          "02",
+          "03"
+         ],
+         "product_type": [
+          "monthly_averaged_reanalysis"
+         ],
+         "time": [
+          "00:00"
+         ],
+         "variable": [
+          "2m_temperature"
+         ],
+         "year": [
+          "2024"
+         ]
+        },
+        "retrieved_at_utc": "2026-10-31T22:29:21.741218Z"
+       },
+       {
+        "dataset_id": "reanalysis-era5-land-monthly-means",
+        "delivered_as_zip": false,
+        "raw_file_sha256": "56586c47e5ce1728c0ce46cb0e029a5a0e485b1d293a4a3be54214f02f2bba5f",
+        "raw_file_size_bytes": 28299,
+        "request": {
+         "area": [
+          63.55,
+          10.25,
+          63.25,
+          10.55
+         ],
+         "data_format": "netcdf",
+         "download_format": "unarchived",
+         "month": [
+          "01",
+          "02",
+          "03"
+         ],
+         "product_type": [
+          "monthly_averaged_reanalysis"
+         ],
+         "time": [
+          "00:00"
+         ],
+         "variable": [
+          "2m_temperature"
+         ],
+         "year": [
+          "1991",
+          "1992",
+          "1993",
+          "1994",
+          "1995",
+          "1996",
+          "1997",
+          "1998",
+          "1999",
+          "2000",
+          "2001",
+          "2002",
+          "2003",
+          "2004",
+          "2005",
+          "2006",
+          "2007",
+          "2008",
+          "2009",
+          "2010",
+          "2011",
+          "2012",
+          "2013",
+          "2014",
+          "2015",
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020"
+         ]
+        },
+        "retrieved_at_utc": "2026-10-31T22:30:15.288481Z"
+       }
+      ],
+      "reference_end_year": 2020,
+      "reference_mean_c": -2.99339591101216,
+      "reference_sd_c": 1.9006448916757321,
+      "reference_start_year": 1991,
+      "reference_years_excluded": [],
+      "reference_years_included": [
+       1991,
+       1992,
+       1993,
+       1994,
+       1995,
+       1996,
+       1997,
+       1998,
+       1999,
+       2000,
+       2001,
+       2002,
+       2003,
+       2004,
+       2005,
+       2006,
+       2007,
+       2008,
+       2009,
+       2010,
+       2011,
+       2012,
+       2013,
+       2014,
+       2015,
+       2016,
+       2017,
+       2018,
+       2019,
+       2020
+      ],
+      "reference_years_used": 30,
+      "requested_latitude": 63.4,
+      "requested_longitude": 10.4,
+      "standardized_anomaly": 0.46005371965840686,
+      "target_in_reference_period": false,
+      "target_window_end": "2024-03",
+      "target_window_start": "2024-01",
+      "timescale_months": 3,
+      "window_mean_c": -2.1189971588469896
+     },
+     "status": "ok"
+    },
+    {
+     "error_message": null,
+     "error_type": null,
+     "grid_point_latitude": 63.4,
+     "grid_point_longitude": 10.4,
+     "indicator": "era5_soil_moisture_anomaly",
+     "requested_latitude": 63.4,
+     "requested_longitude": 10.4,
+     "result": {
+      "anomaly_m3m3": 0.019091875932543634,
+      "citation": "Mu\u00f1oz Sabater, J. (2019): ERA5-Land monthly averaged data from 1950 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). https://doi.org/10.24381/cds.68d2bb30. See also Mu\u00f1oz-Sabater, J. et al. (2021), ERA5-Land: a state-of-the-art global reanalysis dataset for land applications, Earth System Science Data 13, 4349.",
+      "data_source": "ERA5-Land monthly averaged data from 1950 to present (reanalysis-era5-land-monthly-means)",
+      "doi": "https://doi.org/10.24381/cds.68d2bb30",
+      "grid_point_latitude": 63.4,
+      "grid_point_longitude": 10.4,
+      "indicator": "soil_moisture_window_anomaly",
+      "land_fallback": {
+       "distance_km": null,
+       "max_distance_km": 15.0,
+       "nearest_grid_point_latitude": 63.4,
+       "nearest_grid_point_longitude": 10.4,
+       "reason": "The nearest grid point has data in every month.",
+       "selected_grid_point_latitude": null,
+       "selected_grid_point_longitude": null,
+       "used": false,
+       "warning": null
+      },
+      "layer_depth": "0-7 cm",
+      "license_note": "Copernicus licence terms apply. The dataset's terms of use must be accepted in the CDS before downloading. Acknowledge 'Copernicus Climate Change Service Information' and check the dataset page for the current licence text.",
+      "limitations": [
+       "Anomaly = target window mean volumetric soil water minus the mean of the same calendar window over the reference years, in m3/m3 (a difference, not a percentage). Window means are day-weighted averages of ERA5-Land monthly means.",
+       "ERA5-Land is a reanalysis: land-surface model output, not direct observation. Absolute ERA5-Land soil water can be biased in at least some regions, so only the anomaly relative to the reference period is reported, never bare absolute values as truth.",
+       "Soil layers: layer 1 covers 0-7 cm, layer 2 covers 7-28 cm, layer 3 covers 28-100 cm. Layer 4 is excluded because its documented depth is contested.",
+       "The standardized anomaly divides by the sample standard deviation of the reference window means and is uncertain with about 30 values. The percentile rank is empirical (mid-rank).",
+       "Monthly means cannot show the timing of wetting or drying within the window, and a soil water anomaly is not crop-water stress by itself; it is context to be combined with precipitation, evaporative demand, crop stage, and soil properties.",
+       "ERA5-Land is a reanalysis: land-surface model output forced by ERA5 atmospheric fields with no additional data assimilation. It is not a direct observation.",
+       "Native resolution is about 9 km; the CDS distributes it on a 0.1 degree grid. A point value is the nearest grid point and is not comparable cell-for-cell with CHIRPS (0.05 degree). No elevation or local downscaling is applied.",
+       "Precipitation is model-derived and inherits ERA5 forcing biases. It is not gauge-based. Monthly totals are converted from a mean daily accumulation: mm/month = mean(m/day) * 1000 * days in month.",
+       "Temperature is the monthly mean of hourly 2 m temperature. Minimum and maximum temperatures are not available from the monthly means product.",
+       "Recent months may come from a preliminary production stream (ERA5-Land-T) that cannot be distinguished in NetCDF output and could be revised. Prefer completed periods.",
+       "Published validation covers selected regions. This project has performed no validation of ERA5-Land at the requested location."
+      ],
+      "message": null,
+      "min_reference_years": 30,
+      "percentile_rank": 0.9333333333333333,
+      "raw_files": [
+       {
+        "dataset_id": "reanalysis-era5-land-monthly-means",
+        "delivered_as_zip": false,
+        "raw_file_sha256": "e52a76d5f15f11e54fd83c9b4a92411ed6a9b7a6d5ee90c45ca51923fbbb6f47",
+        "raw_file_size_bytes": 25280,
+        "request": {
+         "area": [
+          63.55,
+          10.25,
+          63.25,
+          10.55
+         ],
+         "data_format": "netcdf",
+         "download_format": "unarchived",
+         "month": [
+          "01",
+          "02",
+          "03"
+         ],
+         "product_type": [
+          "monthly_averaged_reanalysis"
+         ],
+         "time": [
+          "00:00"
+         ],
+         "variable": [
+          "volumetric_soil_water_layer_1"
+         ],
+         "year": [
+          "2024"
+         ]
+        },
+        "retrieved_at_utc": "2026-10-31T22:30:57.080386Z"
+       },
+       {
+        "dataset_id": "reanalysis-era5-land-monthly-means",
+        "delivered_as_zip": false,
+        "raw_file_sha256": "b9e624d55db22834de0d8a2b5102894801ea5b091f1f68f4a65421c47712cd6b",
+        "raw_file_size_bytes": 26720,
+        "request": {
+         "area": [
+          63.55,
+          10.25,
+          63.25,
+          10.55
+         ],
+         "data_format": "netcdf",
+         "download_format": "unarchived",
+         "month": [
+          "01",
+          "02",
+          "03"
+         ],
+         "product_type": [
+          "monthly_averaged_reanalysis"
+         ],
+         "time": [
+          "00:00"
+         ],
+         "variable": [
+          "volumetric_soil_water_layer_1"
+         ],
+         "year": [
+          "1991",
+          "1992",
+          "1993",
+          "1994",
+          "1995",
+          "1996",
+          "1997",
+          "1998",
+          "1999",
+          "2000",
+          "2001",
+          "2002",
+          "2003",
+          "2004",
+          "2005",
+          "2006",
+          "2007",
+          "2008",
+          "2009",
+          "2010",
+          "2011",
+          "2012",
+          "2013",
+          "2014",
+          "2015",
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020"
+         ]
+        },
+        "retrieved_at_utc": "2026-10-31T22:31:54.973902Z"
+       }
+      ],
+      "reference_end_year": 2020,
+      "reference_mean_m3m3": 0.3343092243099873,
+      "reference_sd_m3m3": 0.01411625364308656,
+      "reference_start_year": 1991,
+      "reference_years_excluded": [],
+      "reference_years_included": [
+       1991,
+       1992,
+       1993,
+       1994,
+       1995,
+       1996,
+       1997,
+       1998,
+       1999,
+       2000,
+       2001,
+       2002,
+       2003,
+       2004,
+       2005,
+       2006,
+       2007,
+       2008,
+       2009,
+       2010,
+       2011,
+       2012,
+       2013,
+       2014,
+       2015,
+       2016,
+       2017,
+       2018,
+       2019,
+       2020
+      ],
+      "reference_years_used": 30,
+      "requested_latitude": 63.4,
+      "requested_longitude": 10.4,
+      "standardized_anomaly": 1.3524747015220917,
+      "target_in_reference_period": false,
+      "target_window_end": "2024-03",
+      "target_window_start": "2024-01",
+      "timescale_months": 3,
+      "variable": "volumetric_soil_water_layer_1",
+      "window_mean_m3m3": 0.3534011002425309
+     },
+     "status": "ok"
+    }
+   ],
+   "indicator": "environmental_bundle",
+   "latitude": 63.4,
+   "longitude": 10.4,
+   "reference_end_year": 2020,
+   "reference_start_year": 1991,
+   "target_end_month": "2024-03",
+   "timescale_months": 3
+  },
+  "created_at": "2026-10-31T22:26:17.511309Z",
+  "job_id": "job-capture",
+  "problems": [
+   "[provider-auth] Draft call failed: No Baseten API key configured; LLM drafting disabled."
+  ],
+  "ranking": {
+   "catalog_version": 1,
+   "excluded": [
+    {
+     "category": "irrigation",
+     "evidence_status": "needs_evidence",
+     "intervention_id": "supplemental-irrigation",
+     "name": "Supplemental irrigation of rainfed crops",
+     "reasons": [
+      {
+       "code": "needs_evidence",
+       "message": "Entry is marked needs_evidence: no ingested corpus evidence backs it."
+      },
+      {
+       "code": "production_system_mismatch",
+       "message": "Scenario production system is outside the entry's scope."
+      }
+     ]
+    }
+   ],
+   "limitations": [
+    "Ranking reflects evidence traceability and indicator availability, not measured effectiveness.",
+    "Benefit, cost and risk are unknown for every catalog entry unless a cited source states them; unknown is reported, never scored as zero.",
+    "Indicator values are not interpreted as drought severity; relevance uses computation status only.",
+    "This catalog version covers irrigation options only; other adaptation options are not ranked."
+   ],
+   "ranked": [
+    {
+     "benefit": "unknown",
+     "category": "irrigation",
+     "cost": "unknown",
+     "evidence": [
+      {
+       "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. p. 22 (PDF index; no printed label).",
+       "doc_id": "fao-iddp66-crop-yield-response-to-water",
+       "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+       "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+       "license_status": "stated_in_document",
+       "pdf_page": 22,
+       "reference": "Yield-response factors (Ky) and deficit-irrigation studies",
+       "unverified_fields": []
+      },
+      {
+       "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. p. 70 (PDF index; no printed label).",
+       "doc_id": "fao-iddp66-crop-yield-response-to-water",
+       "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+       "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+       "license_status": "stated_in_document",
+       "pdf_page": 70,
+       "reference": "Deficit-irrigation programme design example",
+       "unverified_fields": []
+      }
+     ],
+     "intervention_id": "deficit-irrigation",
+     "name": "Deficit irrigation",
+     "risk": "unknown",
+     "score_components": {
+      "constraint_fit": 1.0,
+      "evidence_strength": 0.5,
+      "indicator_relevance": 0.6666666666666666
+     },
+     "score_inputs": {
+      "evidence_doc_ids": [
+       "fao-iddp66-crop-yield-response-to-water"
+      ],
+      "evidence_level": 1,
+      "exclusion_reasons": 0,
+      "indicator_statuses": {
+       "chirps_spi": "failed",
+       "era5_soil_moisture_anomaly": "ok",
+       "era5_spi": "ok"
+      }
+     },
+     "score_total": 0.6499999999999999,
+     "score_weights": {
+      "constraint_fit": 0.2,
+      "evidence_strength": 0.5,
+      "indicator_relevance": 0.3
+     },
+     "unknowns": [
+      "catalog_crop_scope_unknown",
+      "catalog_soil_scope_unknown",
+      "catalog_climate_scope_unknown",
+      "catalog_scale_scope_unknown",
+      "benefit_unknown",
+      "cost_unknown",
+      "risk_unknown"
+     ]
+    },
+    {
+     "benefit": "unknown",
+     "category": "irrigation",
+     "cost": "unknown",
+     "evidence": [
+      {
+       "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. p. 25 (PDF index; no printed label).",
+       "doc_id": "fao-iddp66-crop-yield-response-to-water",
+       "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+       "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+       "license_status": "stated_in_document",
+       "pdf_page": 25,
+       "reference": "CROPWAT as a practical tool for irrigation scheduling",
+       "unverified_fields": []
+      },
+      {
+       "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. p. 66 (PDF index; no printed label).",
+       "doc_id": "fao-iddp66-crop-yield-response-to-water",
+       "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+       "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+       "license_status": "stated_in_document",
+       "pdf_page": 66,
+       "reference": "Seasonal irrigation scheduling programme (tactical decisions)",
+       "unverified_fields": []
+      }
+     ],
+     "intervention_id": "irrigation-scheduling",
+     "name": "Irrigation scheduling",
+     "risk": "unknown",
+     "score_components": {
+      "constraint_fit": 1.0,
+      "evidence_strength": 0.5,
+      "indicator_relevance": 0.6666666666666666
+     },
+     "score_inputs": {
+      "evidence_doc_ids": [
+       "fao-iddp66-crop-yield-response-to-water"
+      ],
+      "evidence_level": 1,
+      "exclusion_reasons": 0,
+      "indicator_statuses": {
+       "chirps_spi": "failed",
+       "era5_soil_moisture_anomaly": "ok",
+       "era5_spi": "ok"
+      }
+     },
+     "score_total": 0.6499999999999999,
+     "score_weights": {
+      "constraint_fit": 0.2,
+      "evidence_strength": 0.5,
+      "indicator_relevance": 0.3
+     },
+     "unknowns": [
+      "catalog_crop_scope_unknown",
+      "catalog_soil_scope_unknown",
+      "catalog_climate_scope_unknown",
+      "catalog_scale_scope_unknown",
+      "benefit_unknown",
+      "cost_unknown",
+      "risk_unknown"
+     ]
+    }
+   ],
+   "scenario": {
+    "crop": "wheat",
+    "has_irrigation_equipment": true,
+    "has_water_source": true,
+    "latitude": 63.4,
+    "longitude": 10.4,
+    "production_system": "irrigated",
+    "season": "2024-03"
+   },
+   "warnings": [
+    "1 of 3 catalog entries are marked needs_evidence and were excluded from ranking.",
+    "Some relevant indicators were not computed (see score_inputs); relevance reflects availability only."
+   ]
+  },
+  "report": {
+   "assumptions": [
+    "No AI interpretation was applied; all values are deterministic outputs.",
+    "Retrieved passages are cited for traceability, not quoted as advice."
+   ],
+   "data_coverage": {
+    "evidence_ids": [],
+    "numbers": [
+     {
+      "field": "latitude",
+      "tool_output_id": "bundle",
+      "unit": null,
+      "value": 63.4
+     },
+     {
+      "field": "longitude",
+      "tool_output_id": "bundle",
+      "unit": null,
+      "value": 10.4
+     },
+     {
+      "field": "timescale_months",
+      "tool_output_id": "bundle",
+      "unit": null,
+      "value": 3.0
+     },
+     {
+      "field": "reference_start_year",
+      "tool_output_id": "bundle",
+      "unit": null,
+      "value": 1991.0
+     },
+     {
+      "field": "reference_end_year",
+      "tool_output_id": "bundle",
+      "unit": null,
+      "value": 2020.0
+     }
+    ],
+    "text": "Location 63.4, 10.4; target window ending 2024-03; timescale 3 months; reference 1991 to 2020.",
+    "tool_output_ids": [
+     "bundle"
+    ]
+   },
+   "environmental_findings": [
+    {
+     "evidence_ids": [],
+     "numbers": [],
+     "text": "chirps_spi: status failed; no values computed (outside_coverage).",
+     "tool_output_ids": [
+      "chirps_spi"
+     ]
+    },
+    {
+     "evidence_ids": [],
+     "numbers": [
+      {
+       "field": "cumulative_probability",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 0.016967806664907315
+      },
+      {
+       "field": "gamma_scale_mm",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 34.11969596332033
+      },
+      {
+       "field": "gamma_shape",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 8.757937800858134
+      },
+      {
+       "field": "grid_point_latitude",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 63.4
+      },
+      {
+       "field": "grid_point_longitude",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 10.4
+      },
+      {
+       "field": "min_reference_years",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 30.0
+      },
+      {
+       "field": "reference_end_year",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 2020.0
+      },
+      {
+       "field": "reference_nonzero_count",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 30.0
+      },
+      {
+       "field": "reference_spi_mean",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 8.161924900535628e-05
+      },
+      {
+       "field": "reference_spi_std",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 1.017108313501997
+      },
+      {
+       "field": "reference_start_year",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 1991.0
+      },
+      {
+       "field": "reference_years_used",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 30.0
+      },
+      {
+       "field": "reference_zero_count",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 0.0
+      },
+      {
+       "field": "requested_latitude",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 63.4
+      },
+      {
+       "field": "requested_longitude",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 10.4
+      },
+      {
+       "field": "spi",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": -2.120835913067024
+      },
+      {
+       "field": "timescale_months",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 3.0
+      },
+      {
+       "field": "window_total_mm",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 125.7052521687001
+      },
+      {
+       "field": "zero_probability",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 0.0
+      }
+     ],
+     "text": "era5_spi (ERA5-Land monthly averaged data from 1950 to present (reanalysis-era5-land-monthly-means)): status ok. cumulative_probability 0.016967806664907315; gamma_scale_mm 34.11969596332033; gamma_shape 8.757937800858134; grid_point_latitude 63.4; grid_point_longitude 10.4; min_reference_years 30; reference_end_year 2020; reference_nonzero_count 30; reference_spi_mean 8.161924900535628e-05; reference_spi_std 1.017108313501997; reference_start_year 1991; reference_years_used 30; reference_zero_count 0; requested_latitude 63.4; requested_longitude 10.4; spi -2.120835913067024; timescale_months 3; window_total_mm 125.7052521687001; zero_probability 0.",
+     "tool_output_ids": [
+      "era5_spi"
+     ]
+    },
+    {
+     "evidence_ids": [],
+     "numbers": [
+      {
+       "field": "anomaly_c",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 0.8743987521651704
+      },
+      {
+       "field": "grid_point_latitude",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 63.4
+      },
+      {
+       "field": "grid_point_longitude",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 10.4
+      },
+      {
+       "field": "min_reference_years",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 30.0
+      },
+      {
+       "field": "percentile_rank",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 0.5
+      },
+      {
+       "field": "reference_end_year",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 2020.0
+      },
+      {
+       "field": "reference_mean_c",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": -2.99339591101216
+      },
+      {
+       "field": "reference_sd_c",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 1.9006448916757321
+      },
+      {
+       "field": "reference_start_year",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 1991.0
+      },
+      {
+       "field": "reference_years_used",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 30.0
+      },
+      {
+       "field": "requested_latitude",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 63.4
+      },
+      {
+       "field": "requested_longitude",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 10.4
+      },
+      {
+       "field": "standardized_anomaly",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 0.46005371965840686
+      },
+      {
+       "field": "timescale_months",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 3.0
+      },
+      {
+       "field": "window_mean_c",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": -2.1189971588469896
+      }
+     ],
+     "text": "era5_temperature_anomaly (ERA5-Land monthly averaged data from 1950 to present (reanalysis-era5-land-monthly-means)): status ok. anomaly_c 0.8743987521651704; grid_point_latitude 63.4; grid_point_longitude 10.4; min_reference_years 30; percentile_rank 0.5; reference_end_year 2020; reference_mean_c -2.99339591101216; reference_sd_c 1.9006448916757321; reference_start_year 1991; reference_years_used 30; requested_latitude 63.4; requested_longitude 10.4; standardized_anomaly 0.46005371965840686; timescale_months 3; window_mean_c -2.1189971588469896.",
+     "tool_output_ids": [
+      "era5_temperature_anomaly"
+     ]
+    },
+    {
+     "evidence_ids": [],
+     "numbers": [
+      {
+       "field": "anomaly_m3m3",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 0.019091875932543634
+      },
+      {
+       "field": "grid_point_latitude",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 63.4
+      },
+      {
+       "field": "grid_point_longitude",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 10.4
+      },
+      {
+       "field": "min_reference_years",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 30.0
+      },
+      {
+       "field": "percentile_rank",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 0.9333333333333333
+      },
+      {
+       "field": "reference_end_year",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 2020.0
+      },
+      {
+       "field": "reference_mean_m3m3",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 0.3343092243099873
+      },
+      {
+       "field": "reference_sd_m3m3",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 0.01411625364308656
+      },
+      {
+       "field": "reference_start_year",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 1991.0
+      },
+      {
+       "field": "reference_years_used",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 30.0
+      },
+      {
+       "field": "requested_latitude",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 63.4
+      },
+      {
+       "field": "requested_longitude",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 10.4
+      },
+      {
+       "field": "standardized_anomaly",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 1.3524747015220917
+      },
+      {
+       "field": "timescale_months",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 3.0
+      },
+      {
+       "field": "window_mean_m3m3",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 0.3534011002425309
+      }
+     ],
+     "text": "era5_soil_moisture_anomaly (ERA5-Land monthly averaged data from 1950 to present (reanalysis-era5-land-monthly-means)): status ok. anomaly_m3m3 0.019091875932543634; grid_point_latitude 63.4; grid_point_longitude 10.4; min_reference_years 30; percentile_rank 0.9333333333333333; reference_end_year 2020; reference_mean_m3m3 0.3343092243099873; reference_sd_m3m3 0.01411625364308656; reference_start_year 1991; reference_years_used 30; requested_latitude 63.4; requested_longitude 10.4; standardized_anomaly 1.3524747015220917; timescale_months 3; window_mean_m3m3 0.3534011002425309.",
+     "tool_output_ids": [
+      "era5_soil_moisture_anomaly"
+     ]
+    }
+   ],
+   "evidence": [
+    {
+     "chunk_id": "fao-iddp66-crop-yield-response-to-water:00549",
+     "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. PDF p. 285 (printed p. 270).",
+     "doc_id": "fao-iddp66-crop-yield-response-to-water",
+     "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+     "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+     "license_status": "stated_in_document",
+     "pages": "PDF p. 285 (printed p. 270)"
+    },
+    {
+     "chunk_id": "fao-iddp66-crop-yield-response-to-water:00550",
+     "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. PDF pp. 285-286 (printed p. 270-271).",
+     "doc_id": "fao-iddp66-crop-yield-response-to-water",
+     "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+     "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+     "license_status": "stated_in_document",
+     "pages": "PDF pp. 285-286 (printed p. 270-271)"
+    },
+    {
+     "chunk_id": "fao-iddp66-crop-yield-response-to-water:00632",
+     "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. PDF pp. 322-323 (printed p. 307-308).",
+     "doc_id": "fao-iddp66-crop-yield-response-to-water",
+     "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+     "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+     "license_status": "stated_in_document",
+     "pages": "PDF pp. 322-323 (printed p. 307-308)"
+    },
+    {
+     "chunk_id": "fao-iddp66-crop-yield-response-to-water:00892",
+     "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. PDF pp. 449-450 (printed p. 434-435).",
+     "doc_id": "fao-iddp66-crop-yield-response-to-water",
+     "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+     "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+     "license_status": "stated_in_document",
+     "pages": "PDF pp. 449-450 (printed p. 434-435)"
+    },
+    {
+     "chunk_id": "fao-iddp66-crop-yield-response-to-water:00551",
+     "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. PDF p. 286 (printed p. 271).",
+     "doc_id": "fao-iddp66-crop-yield-response-to-water",
+     "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+     "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+     "license_status": "stated_in_document",
+     "pages": "PDF p. 286 (printed p. 271)"
+    }
+   ],
+   "excluded_options": [
+    {
+     "intervention_id": "supplemental-irrigation",
+     "name": "Supplemental irrigation of rainfed crops",
+     "narrative": {
+      "evidence_ids": [],
+      "numbers": [],
+      "text": "Supplemental irrigation of rainfed crops (supplemental-irrigation): excluded. Reasons: needs_evidence, production_system_mismatch.",
+      "tool_output_ids": [
+       "constraints:supplemental-irrigation"
+      ]
+     },
+     "reason_codes": [
+      "needs_evidence",
+      "production_system_mismatch"
+     ]
+    }
+   ],
+   "fallback": true,
+   "fallback_note": "Model output rejected (provider-auth); deterministic values only.",
+   "generator": "deterministic-fallback",
+   "limitations": [
+    "Deterministic fallback report: values are copied from tool outputs; no AI narrative is included.",
+    "Indicator values are reported without drought categories or composite scores.",
+    "Benefit, cost and risk are unknown unless the catalog cites a source.",
+    "Reference years with incomplete data were excluded, not imputed.",
+    "Indicator chirps_spi failed (outside_coverage); its values are absent, not zero."
+   ],
+   "provenance_refs": [
+    "bundle",
+    "chirps_spi",
+    "era5_spi",
+    "era5_temperature_anomaly",
+    "era5_soil_moisture_anomaly",
+    "ranking:deficit-irrigation",
+    "ranking:irrigation-scheduling",
+    "constraints:supplemental-irrigation"
+   ],
+   "ranked_recommendations": [
+    {
+     "benefit": "unknown",
+     "cost": "unknown",
+     "intervention_id": "deficit-irrigation",
+     "name": "Deficit irrigation",
+     "narrative": {
+      "evidence_ids": [],
+      "numbers": [
+       {
+        "field": "score_total",
+        "tool_output_id": "ranking:deficit-irrigation",
+        "unit": null,
+        "value": 0.6499999999999999
+       },
+       {
+        "field": "constraint_fit",
+        "tool_output_id": "ranking:deficit-irrigation",
+        "unit": null,
+        "value": 1.0
+       },
+       {
+        "field": "evidence_strength",
+        "tool_output_id": "ranking:deficit-irrigation",
+        "unit": null,
+        "value": 0.5
+       },
+       {
+        "field": "indicator_relevance",
+        "tool_output_id": "ranking:deficit-irrigation",
+        "unit": null,
+        "value": 0.6666666666666666
+       }
+      ],
+      "text": "Deficit irrigation (deficit-irrigation): ranked with score 0.6499999999999999. Benefit, cost and risk are stated in the catalog entry.",
+      "tool_output_ids": [
+       "ranking:deficit-irrigation"
+      ]
+     },
+     "risk": "unknown"
+    },
+    {
+     "benefit": "unknown",
+     "cost": "unknown",
+     "intervention_id": "irrigation-scheduling",
+     "name": "Irrigation scheduling",
+     "narrative": {
+      "evidence_ids": [],
+      "numbers": [
+       {
+        "field": "score_total",
+        "tool_output_id": "ranking:irrigation-scheduling",
+        "unit": null,
+        "value": 0.6499999999999999
+       },
+       {
+        "field": "constraint_fit",
+        "tool_output_id": "ranking:irrigation-scheduling",
+        "unit": null,
+        "value": 1.0
+       },
+       {
+        "field": "evidence_strength",
+        "tool_output_id": "ranking:irrigation-scheduling",
+        "unit": null,
+        "value": 0.5
+       },
+       {
+        "field": "indicator_relevance",
+        "tool_output_id": "ranking:irrigation-scheduling",
+        "unit": null,
+        "value": 0.6666666666666666
+       }
+      ],
+      "text": "Irrigation scheduling (irrigation-scheduling): ranked with score 0.6499999999999999. Benefit, cost and risk are stated in the catalog entry.",
+      "tool_output_ids": [
+       "ranking:irrigation-scheduling"
+      ]
+     },
+     "risk": "unknown"
+    }
+   ],
+   "schema_version": 1,
+   "summary": {
+    "evidence_ids": [],
+    "numbers": [],
+    "text": "Deterministic fallback report: bundle and ranking results are reproduced below without AI interpretation.",
+    "tool_output_ids": [
+     "bundle"
+    ]
+   }
+  },
+  "scenario": {
+   "crop": "wheat",
+   "exclude_reference": true,
+   "has_irrigation_equipment": true,
+   "has_water_source": true,
+   "indicators": [
+    "chirps_spi",
+    "era5_spi",
+    "era5_temperature_anomaly",
+    "era5_soil_moisture_anomaly"
+   ],
+   "land_fallback_max_km": 15.0,
+   "latitude": 63.4,
+   "longitude": 10.4,
+   "min_reference_years": 30,
+   "production_system": "irrigated",
+   "query": "deficit irrigation scheduling",
+   "reference_end_year": 2020,
+   "reference_start_year": 1991,
+   "season": "2024-03",
+   "target_end_month": "2024-03",
+   "timescale_months": 3,
+   "top_k": 5
+  },
+  "scenario_id": "capture-trondelag-norway",
+  "status": "partial",
+  "trace": {
+   "agent_version": 1,
+   "component_versions": {
+    "agent": "1",
+    "catalog_version": "1",
+    "model": "unavailable",
+    "report_schema": "1"
+   },
+   "config": {
+    "llm_timeout_seconds": 180.0,
+    "max_llm_calls": 1,
+    "max_steps": 32,
+    "max_tokens": 16000,
+    "max_tool_calls": 16,
+    "seed": "unsupported-by-model; not set",
+    "temperature": null,
+    "token_budget": 100000,
+    "total_timeout_seconds": 900.0
+   },
+   "duration_ms_total": 356484.99999998603,
+   "ended_at": "2026-10-31T22:32:14.004858+00:00",
+   "outcome": "partial",
+   "problems": [
+    "[provider-auth] Draft call failed: No Baseten API key configured; LLM drafting disabled."
+   ],
+   "run_id": "49ee8282c4fe4c9c9dcdbf771aa76d6d",
+   "scenario": {
+    "crop": "wheat",
+    "exclude_reference": true,
+    "has_irrigation_equipment": true,
+    "has_water_source": true,
+    "indicators": [
+     "chirps_spi",
+     "era5_spi",
+     "era5_temperature_anomaly",
+     "era5_soil_moisture_anomaly"
+    ],
+    "land_fallback_max_km": 15.0,
+    "latitude": 63.4,
+    "longitude": 10.4,
+    "min_reference_years": 30,
+    "production_system": "irrigated",
+    "query": "deficit irrigation scheduling",
+    "reference_end_year": 2020,
+    "reference_start_year": 1991,
+    "season": "2024-03",
+    "target_end_month": "2024-03",
+    "timescale_months": 3,
+    "top_k": 5
+   },
+   "stages": [
+    {
+     "detail": "",
+     "duration_ms": 0.0,
+     "error_code": null,
+     "name": "validate_inputs",
+     "started_at": "2026-10-31T22:26:17.518309+00:00",
+     "status": "ok"
+    },
+    {
+     "detail": "statuses={'chirps_spi': 'failed', 'era5_spi': 'ok', 'era5_temperature_anomaly': 'ok', 'era5_soil_moisture_anomaly': 'ok'}",
+     "duration_ms": 351796.9999999623,
+     "error_code": null,
+     "name": "bundle",
+     "started_at": "2026-10-31T22:26:17.519310+00:00",
+     "status": "ok"
+    },
+    {
+     "detail": "5 passages via bm25",
+     "duration_ms": 4656.0000000172295,
+     "error_code": null,
+     "name": "retrieval",
+     "started_at": "2026-10-31T22:32:09.325289+00:00",
+     "status": "ok"
+    },
+    {
+     "detail": "",
+     "duration_ms": 0.0,
+     "error_code": null,
+     "name": "ranking",
+     "started_at": "2026-10-31T22:32:13.974863+00:00",
+     "status": "ok"
+    },
+    {
+     "detail": "",
+     "duration_ms": 16.00000000325963,
+     "error_code": "provider-auth",
+     "name": "draft",
+     "started_at": "2026-10-31T22:32:13.976863+00:00",
+     "status": "failed"
+    },
+    {
+     "detail": "outcome=partial",
+     "duration_ms": 0.0,
+     "error_code": null,
+     "name": "finalize",
+     "started_at": "2026-10-31T22:32:14.004858+00:00",
+     "status": "ok"
+    },
+    {
+     "detail": "",
+     "duration_ms": 0.0,
+     "error_code": null,
+     "name": "validate",
+     "started_at": "2026-10-31T22:32:14.004858+00:00",
+     "status": "skipped"
+    }
+   ],
+   "started_at": "2026-10-31T22:26:17.518309+00:00",
+   "tool_calls": [
+    {
+     "duration_ms": 351796.9999999623,
+     "error_code": null,
+     "input_summary": "{\"latitude\":63.4,\"longitude\":10.4,\"target_end_month\":\"2024-03\",\"timescale_months\":3,\"reference_start_year\":1991,\"reference_end_year\":2020,\"min_reference_years\":30,\"land_fallback_max_km\":15.0,\"indicators\":[\"chirps_spi\",\"era5_spi\",\"era5_temperature_anomaly\",\"era5_soil_moisture_anomaly\"]}",
+     "name": "get_environmental_bundle",
+     "ok": true,
+     "output_summary": "statuses={'chirps_spi': 'failed', 'era5_spi': 'ok', 'era5_temperature_anomaly': 'ok', 'era5_soil_moisture_anomaly': 'ok'} {\"indicator\":\"environmental_bundle\",\"latitude\":63.4,\"longitude\":10.4,\"target_end_month\":\"2024-03\",\"timescale_months\":3,\"reference_start_year\":1991,\"reference_end_year\":2020,\"entries\":[{\"indicator\":\"chirps_spi\",\"status\":\"failed\",\"error_type\":\"outside_coverage\",\"error_message\":\"Point (lat=63.4, lon=10.4) is outside the nominal CHIRPS v3 coverage (latitude -60 to 60, longitude -180 to 180; south and east edges are exclusive). No value is returned.\",\"result\":null,\"requested_latitude\":63.4,\"requested_longitude\":10.4,\"grid_point_latitude\":null,\"grid_point_longitude\":null},{\"indicator\":\"era5_spi\",\"status\":\"ok\",\"error_type\":null,\"error_message\":null,\"result\":{\"status\":\"ok\",\"indicator\":\"standardized_precipitation_index\",\"data_source\":\"ERA5-Land monthly averaged data from 1950 to present (reanalysis-era5-land-monthly-means)\",\"method\":\"Gamma distribution (Thom 1958 approximation of maximum likelihood) fitted per calendar month to non-zero reference window totals; zeros as a point mass q = zeros / reference years; equiprobability transform to a standard normal quantile (McKee et al. 1993; WMO-No. 1090).\",\"timescale_months\":3,\"target_window_start\":\"2024-01\",\"target_window_end\":\"2024-03\",\"window_total_mm\":125.7052521687001,\"spi\":-2.120835913067024,\"cumulative_probability\":0.016967806664907315,\"message\":null,\"requested_latitude\":63.4,\"requested_longitude\":10.4,\"grid_point_latitude\":63.4,\"grid_point_longitude\":10.4,\"land_fallback\":{\"max_distance_km\":15.0,\"used\":false,\"reason\":\"The nearest grid point has data in every month.\",\"nearest_grid_point_latitude\":63.4,\"nearest_grid_point_longitude\":10.4,\"selected_grid_point_latitude\":null,\"selected_grid_point_longitude\":null,\"distance_km\":null,\"warning\":null},\"reference_start_year\":1991,\"reference_end_year\":2020,\"min_reference_years\":30,\"reference_years_used\":30,\"reference_years_included\":[1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020],\"reference_years_excluded\":[],\"target_in_reference_period\":false,\"gamma_shape\":8.757937800858134,\"gamma_scale_mm\":34.11969596332033,\"zero_probability\":0.0,\"reference_zero_count\":0,\"reference_nonzero_count\":30,\"reference_spi_mean\":0.00008161924900535628,\"reference_spi_std\":1.017108313501997,\"raw_files\":[{\"dataset_id\":\"reanalysis-era5-land-monthly-means\",\"request\":{\"product_type\":[\"monthly_averaged_reanalysis\"],\"variable\":[\"total_precipitation\"],\"year\":[\"2024\"],\"month\":[\"01\",\"02\",\"03\"],\"time\":[\"00:00\"],\"data_format\":\"netcdf\",\"download_format\":\"unarchived\",\"area\":[63.55,10.25,63.25,10.55]},\"raw_file_sha256\":\"6157366e5d9328d737e44d78cc984fe1e73beeda48118cd806a6352260691dac\",\"raw_file_size_bytes\":25680,\"delivered_as_zip\":false,\"retrieved_at_utc\":\"2026-10-31T22:27:55.387477Z\"},{\"dataset_id\":\"reanalysis-era5-land-monthly-means\",\"request\":{\"product_type\":[\"monthly_averaged_reanalysis\"],\"variable\":[\"total_precipitation\"],\"year\":[\"1991\",\"1992\",\"1993\",\"1994\",\"1995\",\"1996\",\"1997\",\"1998\",\"1999\",\"2000\",\"2001\",\"2002\",\"2003\",\"2004\",\"2005\",\"2006\",\"2007\",\"2008\",\"2009\",\"2010\",\"2011\",\"2012\",\"2013\",\"2014\",\"2015\",\"2016\",\"2017\",\"2018\",\"2019\",\"2020\"],\"month\":[\"01\",\"02\",\"03\"],\"time\":[\"00:00\"],\"data_format\":\"netcdf\",\"download_format\":\"unarchived\",\"area\":[63.55,10.25,63.25,10.55]},\"raw_file_sha256\":\"e5347f14beef27e43511202e6e02faac967d03210282005fc96b99cdc6537b21\",\"raw_file_size_bytes\":29821,\"delivered_as_zip\":false,\"retrieved_at_utc\":\"2026-10-31T22:28:36.359709Z\"}],\"citation\":\"Mu\u00f1oz Sabater, J. (2019): ERA5-Land monthly averaged data from 1950 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). https://doi.org/10.24381/cds.68d2bb30. See also Mu\u00f1oz-Sabater, J. et al. (2021), ERA5-Land: a state-of-the-art global reanalysis dataset for land applications, Earth System Science Data 13, 4349.\",\"doi\":\"https://doi.org/10.24381/cds.68d2bb30\",\"license_note\":\"Copernicus licence terms apply. The dataset's terms of use must be accepted in the CDS before downloading. Acknowledge 'Copernicus Climate Change Service Information' and check the dataset page for the current licence text.\",\"limitations\":[\"SPI expresses precipitation relative to the fitted reference-period distribution only. It does not include temperature, evapotranspiration, soil moisture, or crop impacts and is not a measure of agricultural drought damage.\",\"Method: CHIRPS v3 Final monthly window totals; a gamma distribution is fitted per calendar month to the non-zero totals (Thom 1958 approximation of maximum likelihood); zeros are a point mass q = zeros / reference years; the cumulative probability is mapped to a standard normal quantile (McKee et al. 1993; WMO-No. 1090).\",\"SPI depends on the chosen reference period; values are not comparable across different reference periods or precipitation products.\",\"The gamma fit is not goodness-of-fit tested here. Values beyond about +/-2 are driven by the fitted tail and are uncertain, especially with short reference periods.\",\"ERA5-Land is a reanalysis: land-surface model output forced by ERA5 atmospheric fields with no additional data assimilation. It is not a direct observation.\",\"Native resolution is about 9 km; the CDS distributes it on a 0.1 degree grid. A point value is the nearest grid point and is not comparable cell-for-cell with CHIRPS (0.05 degree). No elevation or local downscaling is applied.\",\"Precipitation is model-derived and inherits ERA5 forcing biases. It is not gauge-based. Monthly totals are converted from a mean daily accumulation: mm/month = mean(m/day) * 1000 * days in month.\",\"Temperature is the monthly mean of hourly 2 m temperature. Minimum and maximum temperatures are not available from the monthly means product.\",\"Recent months may come from a preliminary production stream (ERA5-Land-T) that cannot be distinguished in NetCDF output and could be revised. Prefer completed periods.\",\"Published validation covers selected regions. This project has performed no validation of ERA5-Land at the requested location.\"]},\"requested_latitude\":63.4,\"requested_longitude\":10.4,\"grid_point_latitude\":63.4,\"grid_point_longitude\":10.4},{\"indicator\":\"era5_temperature_anomaly\",\"status\":\"ok\",\"error_type\":null,\"error_message\":null,\"result\":{\"indicator\":\"temperature_window_anomaly\",\"data_source\":\"ERA5-Land monthly averaged data from 1950 to present (reanalysis-era5-land-monthly-means)\",\"timescale_months\":3,\"target_window_start\":\"2024-01\",\"target_window_end\":\"2024-03\",\"window_mean_c\":-2.1189971588469896,\"reference_mean_c\":-2.99339591101216,\"anomaly_c\":0.8743987521651704,\"reference_sd_c\":1.9006448916757321,\"standardized_anomaly\":0.46005371965840686,\"percentile_rank\":0.5,\"message\":null,\"requested_latitude\":63.4,\"requested_longitude\":10.4,\"grid_point_latitude\":63.4,\"grid_point_longitude\":10.4,\"land_fallback\":{\"max_distance_km\":15.0,\"used\":false,\"reason\":\"The nearest grid point has data in every month.\",\"nearest_grid_point_latitude\":63.4,\"nearest_grid_point_longitude\":10.4,\"selected_grid_point_latitude\":null,\"selected_grid_point_longitude\":null,\"distance_km\":null,\"warning\":null},\"reference_start_year\":1991,\"reference_end_year\":2020,\"min_reference_years\":30,\"reference_years_used\":30,\"reference_years_included\":[1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020],\"reference_years_excluded\":[],\"target_in_reference_period\":false,\"raw_files\":[{\"dataset_id\":\"reanalysis-era5-land-monthly-means\",\"request\":{\"product_type\":[\"monthly_averaged_reanalysis\"],\"variable\":[\"2m_temperature\"],\"year\":[\"2024\"],\"month\":[\"01\",\"02\",\"03\"],\"time\":[\"00:00\"],\"data_format\":\"netcdf\",\"download_format\":\"unarchived\",\"area\":[63.55,10.25,63.25,10.55]},\"raw_file_sha256\":\"bd9393c0bb215d07b410ba8c43cb1cc0f863400cedfbbf46fd2df227c6b70420\",\"raw_file_size_bytes\":25266,\"delivered_as_zip\":false,\"retrieved_at_utc\":\"2026-10-31T22:29:21.741218Z\"},{\"dataset_id\":\"reanalysis-era5-land-monthly-means\",\"request\":{\"product_type\":[\"monthly_averaged_reanalysis\"],\"variable\":[\"2m_temperature\"],\"year\":[\"1991\",\"1992\",\"1993\",\"1994\",\"1995\",\"1996\",\"1997\",\"1998\",\"1999\",\"2000\",\"2001\",\"2002\",\"2003\",\"2004\",\"2005\",\"2006\",\"2007\",\"2008\",\"2009\",\"2010\",\"2011\",\"2012\",\"2013\",\"2014\",\"2015\",\"2016\",\"2017\",\"2018\",\"2019\",\"2020\"],\"month\":[\"01\",\"02\",\"03\"],\"time\":[\"00:00\"],\"data_format\":\"netcdf\",\"download_format\":\"unarchived\",\"area\":[63.55,10.25,63.25,10.55]},\"raw_file_sha256\":\"56586c47e5ce1728c0ce46cb0e029a5a0e485b1d293a4a3be54214f02f2bba5f\",\"raw_file_size_bytes\":28299,\"delivered_as_zip\":false,\"retrieved_at_utc\":\"2026-10-31T22:30:15.288481Z\"}],\"citation\":\"Mu\u00f1oz Sabater, J. (2019): ERA5-Land monthly averaged data from 1950 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). https://doi.org/10.24381/cds.68d2bb30. See also Mu\u00f1oz-Sabater, J. et al. (2021), ERA5-Land: a state-of-the-art global reanalysis dataset for land applications, Earth System Science Data 13, 4349.\",\"doi\":\"https://doi.org/10.24381/cds.68d2bb30\",\"license_note\":\"Copernicus licence terms apply. The dataset's terms of use must be accepted in the CDS before downloading. Acknowledge 'Copernicus Climate Change Service Information' and check the dataset page for the current licence text.\",\"limitations\":[\"Anomaly = target window mean temperature minus the mean of the same calendar window over the reference years, in degC (a difference, not a percentage). Window means are day-weighted averages of ERA5-Land monthly means of hourly 2 m temperature.\",\"The reference mean includes any warming trend inside the reference period; the anomaly is relative to the reference-period average, not to a detrended or pre-industrial baseline.\",\"The standardized anomaly divides by the sample standard deviation of the reference window means and is uncertain with about 30 values. The percentile rank is empirical (mid-rank).\",\"Monthly means cannot reveal heat waves, frost, or the timing of extremes, and a temperature anomaly is not a drought indicator by itself; it is context for evaporative demand and crop heat stress.\",\"ERA5-Land is a reanalysis: land-surface model output forced by ERA5 atmospheric fields with no additional data assimilation. It is not a direct observation.\",\"Native resolution is about 9 km; the CDS distributes it on a 0.1 degree grid. A point value is the nearest grid point and is not comparable cell-for-cell with CHIRPS (0.05 degree). No elevation or local downscaling is applied.\",\"Precipitation is model-derived and inherits ERA5 forcing biases. It is not gauge-based. Monthly totals are converted from a mean daily accumulation: mm/month = mean(m/day) * 1000 * days in month.\",\"Temperature is the monthly mean of hourly 2 m temperature. Minimum and maximum temperatures are not available from the monthly means product.\",\"Recent months may come from a preliminary production stream (ERA5-Land-T) that cannot be distinguished in NetCDF output and could be revised. Prefer completed periods.\",\"Published validation covers selected regions. This project has performed no validation of ERA5-Land at the requested location.\"]},\"requested_latitude\":63.4,\"requested_longitude\":10.4,\"grid_point_latitude\":63.4,\"grid_point_longitude\":10.4},{\"indicator\":\"era5_soil_moisture_anomaly\",\"status\":\"ok\",\"error_type\":null,\"error_message\":null,\"result\":{\"indicator\":\"soil_moisture_window_anomaly\",\"data_source\":\"ERA5-Land monthly averaged data from 1950 to present (reanalysis-era5-land-monthly-means)\",\"variable\":\"volumetric_soil_water_layer_1\",\"layer_depth\":\"0-7 cm\",\"timescale_months\":3,\"target_window_start\":\"2024-01\",\"target_window_end\":\"2024-03\",\"window_mean_m3m3\":0.3534011002425309,\"reference_mean_m3m3\":0.3343092243099873,\"anomaly_m3m3\":0.019091875932543634,\"reference_sd_m3m3\":0.01411625364308656,\"standardized_anomaly\":1.3524747015220917,\"percentile_rank\":0.9333333333333333,\"message\":null,\"requested_latitude\":63.4,\"requested_longitude\":10.4,\"grid_point_latitude\":63.4,\"grid_point_longitude\":10.4,\"land_fallback\":{\"max_distance_km\":15.0,\"used\":false,\"reason\":\"The nearest grid point has data in every month.\",\"nearest_grid_point_latitude\":63.4,\"nearest_grid_point_longitude\":10.4,\"selected_grid_point_latitude\":null,\"selected_grid_point_longitude\":null,\"distance_km\":null,\"warning\":null},\"reference_start_year\":1991,\"reference_end_year\":2020,\"min_reference_years\":30,\"reference_years_used\":30,\"reference_years_included\":[1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020],\"reference_years_excluded\":[],\"target_in_reference_period\":false,\"raw_files\":[{\"dataset_id\":\"reanalysis-era5-land-monthly-means\",\"request\":{\"product_type\":[\"monthly_averaged_reanalysis\"],\"variable\":[\"volumetric_soil_water_layer_1\"],\"year\":[\"2024\"],\"month\":[\"01\",\"02\",\"03\"],\"time\":[\"00:00\"],\"data_format\":\"netcdf\",\"download_format\":\"unarchived\",\"area\":[63.55,10.25,63.25,10.55]},\"raw_file_sha256\":\"e52a76d5f15f11e54fd83c9b4a92411ed6a9b7a6d5ee90c45ca51923fbbb6f47\",\"raw_file_size_bytes\":25280,\"delivered_as_zip\":false,\"retrieved_at_utc\":\"2026-10-31T22:30:57.080386Z\"},{\"dataset_id\":\"reanalysis-era5-land-monthly-means\",\"request\":{\"product_type\":[\"monthly_averaged_reanalysis\"],\"variable\":[\"volumetric_soil_water_layer_1\"],\"year\":[\"1991\",\"1992\",\"1993\",\"1994\",\"1995\",\"1996\",\"1997\",\"1998\",\"1999\",\"2000\",\"2001\",\"2002\",\"2003\",\"2004\",\"2005\",\"2006\",\"2007\",\"2008\",\"2009\",\"2010\",\"2011\",\"2012\",\"2013\",\"2014\",\"2015\",\"2016\",\"2017\",\"2018\",\"2019\",\"2020\"],\"month\":[\"01\",\"02\",\"03\"],\"time\":[\"00:00\"],\"data_format\":\"netcdf\",\"download_format\":\"unarchived\",\"area\":[63.55,10.25,63.25,10.55]},\"raw_file_sha256\":\"b9e624d55db22834de0d8a2b5102894801ea5b091f1f68f4a65421c47712cd6b\",\"raw_file_size_bytes\":26720,\"delivered_as_zip\":false,\"retrieved_at_utc\":\"2026-10-31T22:31:54.973902Z\"}],\"citation\":\"Mu\u00f1oz Sabater, J. (2019): ERA5-Land monthly averaged data from 1950 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). https://doi.org/10.24381/cds.68d2bb30. See also Mu\u00f1oz-Sabater, J. et al. (2021), ERA5-Land: a state-of-the-art global reanalysis dataset for land applications, Earth System Science Data 13, 4349.\",\"doi\":\"https://doi.org/10.24381/cds.68d2bb30\",\"license_note\":\"Copernicus licence terms apply. The dataset's terms of use must be accepted in the CDS before downloading. Acknowledge 'Copernicus Climate Change Service Information' and check the dataset page for the current licence text.\",\"limitations\":[\"Anomaly = target window mean volumetric soil water minus the mean of the same calendar window over the reference years, in m3/m3 (a difference, not a percentage). Window means are day-weighted averages of ERA5-Land monthly means.\",\"ERA5-Land is a reanalysis: land-surface model output, not direct observation. Absolute ERA5-Land soil water can be biased in at least some regions, so only the anomaly relative to the reference period is reported, never bare absolute values as truth.\",\"Soil layers: layer 1 covers 0-7 cm, layer 2 covers 7-28 cm, layer 3 covers 28-100 cm. Layer 4 is excluded because its documented depth is contested.\",\"The standardized anomaly divides by the sample standard deviation of the reference window means and is uncertain with about 30 values. The percentile rank is empirical (mid-rank).\",\"Monthly means cannot show the timing of wetting or drying within the window, and a soil water anomaly is not crop-water stress by itself; it is context to be combined with precipitation, evaporative demand, crop stage, and soil properties.\",\"ERA5-Land is a reanalysis: land-surface model output forced by ERA5 atmospheric fields with no additional data assimilation. It is not a direct observation.\",\"Native resolution is about 9 km; the CDS distributes it on a 0.1 degree grid. A point value is the nearest grid point and is not comparable cell-for-cell with CHIRPS (0.05 degree). No elevation or local downscaling is applied.\",\"Precipitation is model-derived and inherits ERA5 forcing biases. It is not gauge-based. Monthly totals are converted from a mean daily accumulation: mm/month = mean(m/day) * 1000 * days in month.\",\"Temperature is the monthly mean of hourly 2 m temperature. Minimum and maximum temperatures are not available from the monthly means product.\",\"Recent months may come from a preliminary production stream (ERA5-Land-T) that cannot be distinguished in NetCDF output and could be revised. Prefer completed periods.\",\"Published validation covers selected regions. This project has performed no validation of ERA5-Land at the requested location.\"]},\"requested_latitude\":63.4,\"requested_longitude\":10.4,\"grid_point_latitude\":63.4,\"grid_point_longitude\":10.4}]}"
+    },
+    {
+     "duration_ms": 4656.0000000172295,
+     "error_code": null,
+     "input_summary": "query='deficit irrigation scheduling' top_k=5",
+     "name": "retrieve_evidence",
+     "ok": true,
+     "output_summary": "retriever=bm25 hits=fao-iddp66-crop-yield-response-to-water:00549@10.903,fao-iddp66-crop-yield-response-to-water:00550@8.795,fao-iddp66-crop-yield-response-to-water:00632@8.775,fao-iddp66-crop-yield-response-to-water:00892@8.690,fao-iddp66-crop-yield-response-to-water:00551@8.521"
+    },
+    {
+     "duration_ms": 0.0,
+     "error_code": null,
+     "input_summary": "",
+     "name": "rank_adaptation_options",
+     "ok": true,
+     "output_summary": "ranked=['deficit-irrigation', 'irrigation-scheduling'] excluded=['supplemental-irrigation']"
+    }
+   ],
+   "usage": null,
+   "validator_verdicts": [],
+   "warnings": []
+  },
+  "updated_at": "2026-10-31T22:32:14.014384Z",
+  "version": 1,
+  "warnings": []
+ },
+ "key": "trondelag-norway",
+ "label": "Trondelag, Norway (63.40, 10.40)",
+ "snapshot_version": 1
+}

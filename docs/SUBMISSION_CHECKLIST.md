@@ -57,8 +57,10 @@ cd frontend; copy .env.example .env; npm install; npm run dev
 
 Offline/rate-limited path: `CLIMATEADAPT_DEMO_MODE=true` serves cached
 real-data snapshots (`GET /v1/demo/snapshots`); frontend Demo page (`#/demo`).
-Walk-through + fallback plan: `docs/DEMO_SCRIPT.md`; real results at four
-locations: `docs/DEMO_RUNS.md`. Docker path (`docker compose up --build`) is
+Three audited snapshots ship in tracked `demo/snapshots/` (P19; zero keys on a
+fresh clone). Walk-through + fallback plan: `docs/DEMO_SCRIPT.md`; real results
+at four locations: `docs/DEMO_RUNS.md`. Prove the clone path with
+`scripts/verify_fresh_clone.ps1`. Docker path (`docker compose up --build`) is
 authored but its build/run is UNVERIFIED — confirm before demoing from it.
 
 ## 5. How model access is configured

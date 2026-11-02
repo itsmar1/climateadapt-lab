@@ -508,8 +508,8 @@ def create_app() -> FastAPI:
         description=(
             "Catalogue of captured scenario runs served verbatim for demos. "
             "Needs CLIMATEADAPT_DEMO_MODE=true; otherwise 404 "
-            "(demo_mode_disabled). Snapshots live under a git-ignored "
-            "directory; see scripts/capture_demo_snapshot.py."
+            "(demo_mode_disabled). Snapshots ship in tracked demo/snapshots/ "
+            "(see demo/README.md); see scripts/capture_demo_snapshot.py."
         ),
     )
     def list_demo_snapshots_endpoint(

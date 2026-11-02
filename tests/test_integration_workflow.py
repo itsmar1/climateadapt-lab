@@ -342,6 +342,40 @@ def test_rejected_draft_yields_fallback_with_validator_problems(tmp_path, monkey
     store.close()
 
 
+def test_missing_corpus_yields_typed_warning_not_a_crash(tmp_path, monkeypatch):
+    """Fresh-clone behavior: no ingested corpus -> evidenceless but full report.
+
+    Retrieval returns zero hits (never raises on an empty chunk list); the run
+    records the typed ``[retrieval-empty]`` warning and still persists the
+    deterministic bundle, ranking, and fallback findings/limitations.
+    """
+    deps = make_deps()
+    deps.chunks = []
+    deps.pages_by_doc = {}
+    stub_bundle(monkeypatch)
+    store = SqliteScenarioStore(tmp_path / "scenarios.sqlite3")
+    scenario = make_scenario()
+    store.create("sc-int-5", "job-int-5", scenario.model_dump(mode="json"))
+
+    outcome = run_job(store, "sc-int-5", deps, UnavailableProvider(), AgentConfig())
+    assert outcome == {"scenario_id": "sc-int-5", "status": "partial"}
+
+    dumped = stored_detail(store, "sc-int-5")
+    assert dumped["warnings"] == ["[retrieval-empty] No passages retrieved."]
+    assert dumped["bundle"] is not None
+    assert dumped["ranking"] is not None
+    report = dumped["report"]
+    assert report["fallback"] is True
+    assert report["evidence"] == []
+    assert len(report["environmental_findings"]) == 2
+    assert len(report["limitations"]) == 5
+    assert dumped["ranking"]["ranked"][0]["intervention_id"] == "test-drip"
+    stages = {stage["name"]: stage for stage in dumped["trace"]["stages"]}
+    assert stages["retrieval"]["status"] == "ok"
+    assert stages["retrieval"]["detail"] == "0 passages via bm25"
+    store.close()
+
+
 def test_detail_survives_store_reopen(tmp_path, monkeypatch):
     """Persistence across restarts: close and reopen the same database file."""
     deps = make_deps()

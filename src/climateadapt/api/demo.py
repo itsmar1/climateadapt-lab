@@ -1,11 +1,14 @@
 """Demo snapshots: stored real-data runs served when demo mode is on.
 
 A snapshot is a captured ``ScenarioDetail`` plus capture metadata, stored as
-one JSON file per key under a git-ignored directory (see
-``scripts/capture_demo_snapshot.py``). The API serves them verbatim — the UI
-labels them "cached real-data snapshot" with the capture timestamp, so a demo
-works offline and under rate limits without ever presenting stored results as
-live ones.
+one JSON file per key. The default directory is the TRACKED
+``demo/snapshots/`` (audited, citation-metadata only; see ``demo/README.md``),
+so a fresh clone serves the demo with zero keys; point
+``CLIMATEADAPT_DEMO_SNAPSHOTS_DIR`` elsewhere for private captures (see
+``scripts/capture_demo_snapshot.py``). The API serves snapshots verbatim — the
+UI labels them "cached real-data snapshot" with the capture timestamp, so a
+demo works offline and under rate limits without ever presenting stored
+results as live ones.
 """
 
 from __future__ import annotations
@@ -63,9 +66,17 @@ class DemoSnapshotList(BaseModel):
     snapshots: list[DemoSnapshotSummary]
 
 
+DEFAULT_SNAPSHOTS_DIR = Path("demo/snapshots")
+"""Tracked fallback: audited snapshots shipped with the repo (P19)."""
+
+
 def snapshots_dir(data_dir: Path, override: Path | None) -> Path:
-    """Resolve the snapshot directory (explicit setting wins)."""
-    return override if override is not None else data_dir / "demo_snapshots"
+    """Resolve the snapshot directory (explicit setting wins).
+
+    ``data_dir`` is kept for call-site compatibility but no longer anchors the
+    default: fresh clones serve the tracked ``demo/snapshots/``.
+    """
+    return override if override is not None else DEFAULT_SNAPSHOTS_DIR
 
 
 def _read_snapshot(path: Path) -> DemoSnapshotFile | None:

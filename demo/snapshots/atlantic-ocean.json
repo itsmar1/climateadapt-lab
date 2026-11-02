@@ -1,0 +1,660 @@
+{
+ "captured_at_utc": "2026-10-31T22:36:24.104645Z",
+ "detail": {
+  "bundle": {
+   "entries": [
+    {
+     "error_message": "Internal indicator error.",
+     "error_type": "internal",
+     "grid_point_latitude": null,
+     "grid_point_longitude": null,
+     "indicator": "chirps_spi",
+     "requested_latitude": 30.43,
+     "requested_longitude": -15.5,
+     "result": null,
+     "status": "failed"
+    },
+    {
+     "error_message": "The target window has no value for: 2024-01, 2024-02, 2024-03. SPI cannot be computed from an incomplete window. If the nearest ERA5-Land grid point is masked (for example sea), retry with land_fallback_max_km.",
+     "error_type": "missing_data",
+     "grid_point_latitude": null,
+     "grid_point_longitude": null,
+     "indicator": "era5_spi",
+     "requested_latitude": 30.43,
+     "requested_longitude": -15.5,
+     "result": null,
+     "status": "failed"
+    },
+    {
+     "error_message": "The target window has no value for: 2024-01, 2024-02, 2024-03. The anomaly cannot be computed from an incomplete window. If the nearest ERA5-Land grid point is masked (for example sea), retry with land_fallback_max_km.",
+     "error_type": "missing_data",
+     "grid_point_latitude": null,
+     "grid_point_longitude": null,
+     "indicator": "era5_temperature_anomaly",
+     "requested_latitude": 30.43,
+     "requested_longitude": -15.5,
+     "result": null,
+     "status": "failed"
+    },
+    {
+     "error_message": "The target window has no value for: 2024-01, 2024-02, 2024-03. The anomaly cannot be computed from an incomplete window. If the nearest ERA5-Land grid point is masked (for example sea), retry with land_fallback_max_km.",
+     "error_type": "missing_data",
+     "grid_point_latitude": null,
+     "grid_point_longitude": null,
+     "indicator": "era5_soil_moisture_anomaly",
+     "requested_latitude": 30.43,
+     "requested_longitude": -15.5,
+     "result": null,
+     "status": "failed"
+    }
+   ],
+   "indicator": "environmental_bundle",
+   "latitude": 30.43,
+   "longitude": -15.5,
+   "reference_end_year": 2020,
+   "reference_start_year": 1991,
+   "target_end_month": "2024-03",
+   "timescale_months": 3
+  },
+  "created_at": "2026-10-31T22:32:43.027546Z",
+  "job_id": "job-capture",
+  "problems": [
+   "[provider-auth] Draft call failed: No Baseten API key configured; LLM drafting disabled."
+  ],
+  "ranking": {
+   "catalog_version": 1,
+   "excluded": [
+    {
+     "category": "irrigation",
+     "evidence_status": "needs_evidence",
+     "intervention_id": "supplemental-irrigation",
+     "name": "Supplemental irrigation of rainfed crops",
+     "reasons": [
+      {
+       "code": "needs_evidence",
+       "message": "Entry is marked needs_evidence: no ingested corpus evidence backs it."
+      },
+      {
+       "code": "production_system_mismatch",
+       "message": "Scenario production system is outside the entry's scope."
+      }
+     ]
+    }
+   ],
+   "limitations": [
+    "Ranking reflects evidence traceability and indicator availability, not measured effectiveness.",
+    "Benefit, cost and risk are unknown for every catalog entry unless a cited source states them; unknown is reported, never scored as zero.",
+    "Indicator values are not interpreted as drought severity; relevance uses computation status only.",
+    "This catalog version covers irrigation options only; other adaptation options are not ranked."
+   ],
+   "ranked": [
+    {
+     "benefit": "unknown",
+     "category": "irrigation",
+     "cost": "unknown",
+     "evidence": [
+      {
+       "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. p. 22 (PDF index; no printed label).",
+       "doc_id": "fao-iddp66-crop-yield-response-to-water",
+       "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+       "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+       "license_status": "stated_in_document",
+       "pdf_page": 22,
+       "reference": "Yield-response factors (Ky) and deficit-irrigation studies",
+       "unverified_fields": []
+      },
+      {
+       "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. p. 70 (PDF index; no printed label).",
+       "doc_id": "fao-iddp66-crop-yield-response-to-water",
+       "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+       "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+       "license_status": "stated_in_document",
+       "pdf_page": 70,
+       "reference": "Deficit-irrigation programme design example",
+       "unverified_fields": []
+      }
+     ],
+     "intervention_id": "deficit-irrigation",
+     "name": "Deficit irrigation",
+     "risk": "unknown",
+     "score_components": {
+      "constraint_fit": 1.0,
+      "evidence_strength": 0.5,
+      "indicator_relevance": 0.0
+     },
+     "score_inputs": {
+      "evidence_doc_ids": [
+       "fao-iddp66-crop-yield-response-to-water"
+      ],
+      "evidence_level": 1,
+      "exclusion_reasons": 0,
+      "indicator_statuses": {
+       "chirps_spi": "failed",
+       "era5_soil_moisture_anomaly": "failed",
+       "era5_spi": "failed"
+      }
+     },
+     "score_total": 0.45,
+     "score_weights": {
+      "constraint_fit": 0.2,
+      "evidence_strength": 0.5,
+      "indicator_relevance": 0.3
+     },
+     "unknowns": [
+      "catalog_crop_scope_unknown",
+      "catalog_soil_scope_unknown",
+      "catalog_climate_scope_unknown",
+      "catalog_scale_scope_unknown",
+      "benefit_unknown",
+      "cost_unknown",
+      "risk_unknown"
+     ]
+    },
+    {
+     "benefit": "unknown",
+     "category": "irrigation",
+     "cost": "unknown",
+     "evidence": [
+      {
+       "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. p. 25 (PDF index; no printed label).",
+       "doc_id": "fao-iddp66-crop-yield-response-to-water",
+       "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+       "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+       "license_status": "stated_in_document",
+       "pdf_page": 25,
+       "reference": "CROPWAT as a practical tool for irrigation scheduling",
+       "unverified_fields": []
+      },
+      {
+       "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. p. 66 (PDF index; no printed label).",
+       "doc_id": "fao-iddp66-crop-yield-response-to-water",
+       "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+       "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+       "license_status": "stated_in_document",
+       "pdf_page": 66,
+       "reference": "Seasonal irrigation scheduling programme (tactical decisions)",
+       "unverified_fields": []
+      }
+     ],
+     "intervention_id": "irrigation-scheduling",
+     "name": "Irrigation scheduling",
+     "risk": "unknown",
+     "score_components": {
+      "constraint_fit": 1.0,
+      "evidence_strength": 0.5,
+      "indicator_relevance": 0.0
+     },
+     "score_inputs": {
+      "evidence_doc_ids": [
+       "fao-iddp66-crop-yield-response-to-water"
+      ],
+      "evidence_level": 1,
+      "exclusion_reasons": 0,
+      "indicator_statuses": {
+       "chirps_spi": "failed",
+       "era5_soil_moisture_anomaly": "failed",
+       "era5_spi": "failed"
+      }
+     },
+     "score_total": 0.45,
+     "score_weights": {
+      "constraint_fit": 0.2,
+      "evidence_strength": 0.5,
+      "indicator_relevance": 0.3
+     },
+     "unknowns": [
+      "catalog_crop_scope_unknown",
+      "catalog_soil_scope_unknown",
+      "catalog_climate_scope_unknown",
+      "catalog_scale_scope_unknown",
+      "benefit_unknown",
+      "cost_unknown",
+      "risk_unknown"
+     ]
+    }
+   ],
+   "scenario": {
+    "crop": "wheat",
+    "has_irrigation_equipment": true,
+    "has_water_source": true,
+    "latitude": 30.43,
+    "longitude": -15.5,
+    "production_system": "irrigated",
+    "season": "2024-03"
+   },
+   "warnings": [
+    "1 of 3 catalog entries are marked needs_evidence and were excluded from ranking.",
+    "Some relevant indicators were not computed (see score_inputs); relevance reflects availability only."
+   ]
+  },
+  "report": {
+   "assumptions": [
+    "No AI interpretation was applied; all values are deterministic outputs.",
+    "Retrieved passages are cited for traceability, not quoted as advice."
+   ],
+   "data_coverage": {
+    "evidence_ids": [],
+    "numbers": [
+     {
+      "field": "latitude",
+      "tool_output_id": "bundle",
+      "unit": null,
+      "value": 30.43
+     },
+     {
+      "field": "longitude",
+      "tool_output_id": "bundle",
+      "unit": null,
+      "value": -15.5
+     },
+     {
+      "field": "timescale_months",
+      "tool_output_id": "bundle",
+      "unit": null,
+      "value": 3.0
+     },
+     {
+      "field": "reference_start_year",
+      "tool_output_id": "bundle",
+      "unit": null,
+      "value": 1991.0
+     },
+     {
+      "field": "reference_end_year",
+      "tool_output_id": "bundle",
+      "unit": null,
+      "value": 2020.0
+     }
+    ],
+    "text": "Location 30.43, -15.5; target window ending 2024-03; timescale 3 months; reference 1991 to 2020.",
+    "tool_output_ids": [
+     "bundle"
+    ]
+   },
+   "environmental_findings": [
+    {
+     "evidence_ids": [],
+     "numbers": [],
+     "text": "chirps_spi: status failed; no values computed (internal).",
+     "tool_output_ids": [
+      "chirps_spi"
+     ]
+    },
+    {
+     "evidence_ids": [],
+     "numbers": [],
+     "text": "era5_spi: status failed; no values computed (missing_data).",
+     "tool_output_ids": [
+      "era5_spi"
+     ]
+    },
+    {
+     "evidence_ids": [],
+     "numbers": [],
+     "text": "era5_temperature_anomaly: status failed; no values computed (missing_data).",
+     "tool_output_ids": [
+      "era5_temperature_anomaly"
+     ]
+    },
+    {
+     "evidence_ids": [],
+     "numbers": [],
+     "text": "era5_soil_moisture_anomaly: status failed; no values computed (missing_data).",
+     "tool_output_ids": [
+      "era5_soil_moisture_anomaly"
+     ]
+    }
+   ],
+   "evidence": [
+    {
+     "chunk_id": "fao-iddp66-crop-yield-response-to-water:00549",
+     "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. PDF p. 285 (printed p. 270).",
+     "doc_id": "fao-iddp66-crop-yield-response-to-water",
+     "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+     "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+     "license_status": "stated_in_document",
+     "pages": "PDF p. 285 (printed p. 270)"
+    },
+    {
+     "chunk_id": "fao-iddp66-crop-yield-response-to-water:00550",
+     "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. PDF pp. 285-286 (printed p. 270-271).",
+     "doc_id": "fao-iddp66-crop-yield-response-to-water",
+     "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+     "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+     "license_status": "stated_in_document",
+     "pages": "PDF pp. 285-286 (printed p. 270-271)"
+    },
+    {
+     "chunk_id": "fao-iddp66-crop-yield-response-to-water:00632",
+     "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. PDF pp. 322-323 (printed p. 307-308).",
+     "doc_id": "fao-iddp66-crop-yield-response-to-water",
+     "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+     "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+     "license_status": "stated_in_document",
+     "pages": "PDF pp. 322-323 (printed p. 307-308)"
+    },
+    {
+     "chunk_id": "fao-iddp66-crop-yield-response-to-water:00892",
+     "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. PDF pp. 449-450 (printed p. 434-435).",
+     "doc_id": "fao-iddp66-crop-yield-response-to-water",
+     "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+     "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+     "license_status": "stated_in_document",
+     "pages": "PDF pp. 449-450 (printed p. 434-435)"
+    },
+    {
+     "chunk_id": "fao-iddp66-crop-yield-response-to-water:00551",
+     "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. PDF p. 286 (printed p. 271).",
+     "doc_id": "fao-iddp66-crop-yield-response-to-water",
+     "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+     "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+     "license_status": "stated_in_document",
+     "pages": "PDF p. 286 (printed p. 271)"
+    }
+   ],
+   "excluded_options": [
+    {
+     "intervention_id": "supplemental-irrigation",
+     "name": "Supplemental irrigation of rainfed crops",
+     "narrative": {
+      "evidence_ids": [],
+      "numbers": [],
+      "text": "Supplemental irrigation of rainfed crops (supplemental-irrigation): excluded. Reasons: needs_evidence, production_system_mismatch.",
+      "tool_output_ids": [
+       "constraints:supplemental-irrigation"
+      ]
+     },
+     "reason_codes": [
+      "needs_evidence",
+      "production_system_mismatch"
+     ]
+    }
+   ],
+   "fallback": true,
+   "fallback_note": "Model output rejected (provider-auth); deterministic values only.",
+   "generator": "deterministic-fallback",
+   "limitations": [
+    "Deterministic fallback report: values are copied from tool outputs; no AI narrative is included.",
+    "Indicator values are reported without drought categories or composite scores.",
+    "Benefit, cost and risk are unknown unless the catalog cites a source.",
+    "Reference years with incomplete data were excluded, not imputed.",
+    "Indicator chirps_spi failed (internal); its values are absent, not zero.",
+    "Indicator era5_spi failed (missing_data); its values are absent, not zero.",
+    "Indicator era5_temperature_anomaly failed (missing_data); its values are absent, not zero.",
+    "Indicator era5_soil_moisture_anomaly failed (missing_data); its values are absent, not zero."
+   ],
+   "provenance_refs": [
+    "bundle",
+    "chirps_spi",
+    "era5_spi",
+    "era5_temperature_anomaly",
+    "era5_soil_moisture_anomaly",
+    "ranking:deficit-irrigation",
+    "ranking:irrigation-scheduling",
+    "constraints:supplemental-irrigation"
+   ],
+   "ranked_recommendations": [
+    {
+     "benefit": "unknown",
+     "cost": "unknown",
+     "intervention_id": "deficit-irrigation",
+     "name": "Deficit irrigation",
+     "narrative": {
+      "evidence_ids": [],
+      "numbers": [
+       {
+        "field": "score_total",
+        "tool_output_id": "ranking:deficit-irrigation",
+        "unit": null,
+        "value": 0.45
+       },
+       {
+        "field": "constraint_fit",
+        "tool_output_id": "ranking:deficit-irrigation",
+        "unit": null,
+        "value": 1.0
+       },
+       {
+        "field": "evidence_strength",
+        "tool_output_id": "ranking:deficit-irrigation",
+        "unit": null,
+        "value": 0.5
+       },
+       {
+        "field": "indicator_relevance",
+        "tool_output_id": "ranking:deficit-irrigation",
+        "unit": null,
+        "value": 0.0
+       }
+      ],
+      "text": "Deficit irrigation (deficit-irrigation): ranked with score 0.45. Benefit, cost and risk are stated in the catalog entry.",
+      "tool_output_ids": [
+       "ranking:deficit-irrigation"
+      ]
+     },
+     "risk": "unknown"
+    },
+    {
+     "benefit": "unknown",
+     "cost": "unknown",
+     "intervention_id": "irrigation-scheduling",
+     "name": "Irrigation scheduling",
+     "narrative": {
+      "evidence_ids": [],
+      "numbers": [
+       {
+        "field": "score_total",
+        "tool_output_id": "ranking:irrigation-scheduling",
+        "unit": null,
+        "value": 0.45
+       },
+       {
+        "field": "constraint_fit",
+        "tool_output_id": "ranking:irrigation-scheduling",
+        "unit": null,
+        "value": 1.0
+       },
+       {
+        "field": "evidence_strength",
+        "tool_output_id": "ranking:irrigation-scheduling",
+        "unit": null,
+        "value": 0.5
+       },
+       {
+        "field": "indicator_relevance",
+        "tool_output_id": "ranking:irrigation-scheduling",
+        "unit": null,
+        "value": 0.0
+       }
+      ],
+      "text": "Irrigation scheduling (irrigation-scheduling): ranked with score 0.45. Benefit, cost and risk are stated in the catalog entry.",
+      "tool_output_ids": [
+       "ranking:irrigation-scheduling"
+      ]
+     },
+     "risk": "unknown"
+    }
+   ],
+   "schema_version": 1,
+   "summary": {
+    "evidence_ids": [],
+    "numbers": [],
+    "text": "Deterministic fallback report: bundle and ranking results are reproduced below without AI interpretation.",
+    "tool_output_ids": [
+     "bundle"
+    ]
+   }
+  },
+  "scenario": {
+   "crop": "wheat",
+   "exclude_reference": true,
+   "has_irrigation_equipment": true,
+   "has_water_source": true,
+   "indicators": [
+    "chirps_spi",
+    "era5_spi",
+    "era5_temperature_anomaly",
+    "era5_soil_moisture_anomaly"
+   ],
+   "land_fallback_max_km": 15.0,
+   "latitude": 30.43,
+   "longitude": -15.5,
+   "min_reference_years": 30,
+   "production_system": "irrigated",
+   "query": "deficit irrigation scheduling",
+   "reference_end_year": 2020,
+   "reference_start_year": 1991,
+   "season": "2024-03",
+   "target_end_month": "2024-03",
+   "timescale_months": 3,
+   "top_k": 5
+  },
+  "scenario_id": "capture-atlantic-ocean",
+  "status": "partial",
+  "trace": {
+   "agent_version": 1,
+   "component_versions": {
+    "agent": "1",
+    "catalog_version": "1",
+    "model": "unavailable",
+    "report_schema": "1"
+   },
+   "config": {
+    "llm_timeout_seconds": 180.0,
+    "max_llm_calls": 1,
+    "max_steps": 32,
+    "max_tokens": 16000,
+    "max_tool_calls": 16,
+    "seed": "unsupported-by-model; not set",
+    "temperature": null,
+    "token_budget": 100000,
+    "total_timeout_seconds": 900.0
+   },
+   "duration_ms_total": 221030.99999995902,
+   "ended_at": "2026-10-31T22:36:24.069547+00:00",
+   "outcome": "partial",
+   "problems": [
+    "[provider-auth] Draft call failed: No Baseten API key configured; LLM drafting disabled."
+   ],
+   "run_id": "bf7f1dfdf54d4174908b741f991dfe27",
+   "scenario": {
+    "crop": "wheat",
+    "exclude_reference": true,
+    "has_irrigation_equipment": true,
+    "has_water_source": true,
+    "indicators": [
+     "chirps_spi",
+     "era5_spi",
+     "era5_temperature_anomaly",
+     "era5_soil_moisture_anomaly"
+    ],
+    "land_fallback_max_km": 15.0,
+    "latitude": 30.43,
+    "longitude": -15.5,
+    "min_reference_years": 30,
+    "production_system": "irrigated",
+    "query": "deficit irrigation scheduling",
+    "reference_end_year": 2020,
+    "reference_start_year": 1991,
+    "season": "2024-03",
+    "target_end_month": "2024-03",
+    "timescale_months": 3,
+    "top_k": 5
+   },
+   "stages": [
+    {
+     "detail": "",
+     "duration_ms": 0.0,
+     "error_code": null,
+     "name": "validate_inputs",
+     "started_at": "2026-10-31T22:32:43.034546+00:00",
+     "status": "ok"
+    },
+    {
+     "detail": "statuses={'chirps_spi': 'failed', 'era5_spi': 'failed', 'era5_temperature_anomaly': 'failed', 'era5_soil_moisture_anomaly': 'failed'}",
+     "duration_ms": 217468.99999998277,
+     "error_code": null,
+     "name": "bundle",
+     "started_at": "2026-10-31T22:32:43.034546+00:00",
+     "status": "ok"
+    },
+    {
+     "detail": "5 passages via bm25",
+     "duration_ms": 3545.9999999729916,
+     "error_code": null,
+     "name": "retrieval",
+     "started_at": "2026-10-31T22:36:20.506081+00:00",
+     "status": "ok"
+    },
+    {
+     "detail": "",
+     "duration_ms": 0.0,
+     "error_code": null,
+     "name": "ranking",
+     "started_at": "2026-10-31T22:36:24.054149+00:00",
+     "status": "ok"
+    },
+    {
+     "detail": "",
+     "duration_ms": 16.00000000325963,
+     "error_code": "provider-auth",
+     "name": "draft",
+     "started_at": "2026-10-31T22:36:24.056285+00:00",
+     "status": "failed"
+    },
+    {
+     "detail": "outcome=partial",
+     "duration_ms": 0.0,
+     "error_code": null,
+     "name": "finalize",
+     "started_at": "2026-10-31T22:36:24.069547+00:00",
+     "status": "ok"
+    },
+    {
+     "detail": "",
+     "duration_ms": 0.0,
+     "error_code": null,
+     "name": "validate",
+     "started_at": "2026-10-31T22:36:24.069547+00:00",
+     "status": "skipped"
+    }
+   ],
+   "started_at": "2026-10-31T22:32:43.033546+00:00",
+   "tool_calls": [
+    {
+     "duration_ms": 217468.99999998277,
+     "error_code": null,
+     "input_summary": "{\"latitude\":30.43,\"longitude\":-15.5,\"target_end_month\":\"2024-03\",\"timescale_months\":3,\"reference_start_year\":1991,\"reference_end_year\":2020,\"min_reference_years\":30,\"land_fallback_max_km\":15.0,\"indicators\":[\"chirps_spi\",\"era5_spi\",\"era5_temperature_anomaly\",\"era5_soil_moisture_anomaly\"]}",
+     "name": "get_environmental_bundle",
+     "ok": true,
+     "output_summary": "statuses={'chirps_spi': 'failed', 'era5_spi': 'failed', 'era5_temperature_anomaly': 'failed', 'era5_soil_moisture_anomaly': 'failed'} {\"indicator\":\"environmental_bundle\",\"latitude\":30.43,\"longitude\":-15.5,\"target_end_month\":\"2024-03\",\"timescale_months\":3,\"reference_start_year\":1991,\"reference_end_year\":2020,\"entries\":[{\"indicator\":\"chirps_spi\",\"status\":\"failed\",\"error_type\":\"internal\",\"error_message\":\"Internal indicator error.\",\"result\":null,\"requested_latitude\":30.43,\"requested_longitude\":-15.5,\"grid_point_latitude\":null,\"grid_point_longitude\":null},{\"indicator\":\"era5_spi\",\"status\":\"failed\",\"error_type\":\"missing_data\",\"error_message\":\"The target window has no value for: 2024-01, 2024-02, 2024-03. SPI cannot be computed from an incomplete window. If the nearest ERA5-Land grid point is masked (for example sea), retry with land_fallback_max_km.\",\"result\":null,\"requested_latitude\":30.43,\"requested_longitude\":-15.5,\"grid_point_latitude\":null,\"grid_point_longitude\":null},{\"indicator\":\"era5_temperature_anomaly\",\"status\":\"failed\",\"error_type\":\"missing_data\",\"error_message\":\"The target window has no value for: 2024-01, 2024-02, 2024-03. The anomaly cannot be computed from an incomplete window. If the nearest ERA5-Land grid point is masked (for example sea), retry with land_fallback_max_km.\",\"result\":null,\"requested_latitude\":30.43,\"requested_longitude\":-15.5,\"grid_point_latitude\":null,\"grid_point_longitude\":null},{\"indicator\":\"era5_soil_moisture_anomaly\",\"status\":\"failed\",\"error_type\":\"missing_data\",\"error_message\":\"The target window has no value for: 2024-01, 2024-02, 2024-03. The anomaly cannot be computed from an incomplete window. If the nearest ERA5-Land grid point is masked (for example sea), retry with land_fallback_max_km.\",\"result\":null,\"requested_latitude\":30.43,\"requested_longitude\":-15.5,\"grid_point_latitude\":null,\"grid_point_longitude\":null}]}"
+    },
+    {
+     "duration_ms": 3545.9999999729916,
+     "error_code": null,
+     "input_summary": "query='deficit irrigation scheduling' top_k=5",
+     "name": "retrieve_evidence",
+     "ok": true,
+     "output_summary": "retriever=bm25 hits=fao-iddp66-crop-yield-response-to-water:00549@10.903,fao-iddp66-crop-yield-response-to-water:00550@8.795,fao-iddp66-crop-yield-response-to-water:00632@8.775,fao-iddp66-crop-yield-response-to-water:00892@8.690,fao-iddp66-crop-yield-response-to-water:00551@8.521"
+    },
+    {
+     "duration_ms": 0.0,
+     "error_code": null,
+     "input_summary": "",
+     "name": "rank_adaptation_options",
+     "ok": true,
+     "output_summary": "ranked=['deficit-irrigation', 'irrigation-scheduling'] excluded=['supplemental-irrigation']"
+    }
+   ],
+   "usage": null,
+   "validator_verdicts": [],
+   "warnings": []
+  },
+  "updated_at": "2026-10-31T22:36:24.076153Z",
+  "version": 1,
+  "warnings": []
+ },
+ "key": "atlantic-ocean",
+ "label": "Atlantic off Morocco (30.43, -15.50)",
+ "snapshot_version": 1
+}

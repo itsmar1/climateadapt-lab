@@ -1,0 +1,2720 @@
+{
+ "captured_at_utc": "2026-10-31T22:01:05.290968Z",
+ "detail": {
+  "bundle": {
+   "entries": [
+    {
+     "error_message": null,
+     "error_type": null,
+     "grid_point_latitude": 30.424999559298158,
+     "grid_point_longitude": -9.624997461214662,
+     "indicator": "chirps_spi",
+     "requested_latitude": 30.43,
+     "requested_longitude": -9.61,
+     "result": {
+      "citation": "Funk, C. et al. The Climate Hazards Center Infrared Precipitation with Stations, Version 3. Scientific Data 13, 718 (2026). https://doi.org/10.1038/s41597-026-07096-4",
+      "cumulative_probability": 0.3025288112918043,
+      "data_source": "CHIRPS v3.0 Final, monthly, 0.05 degree grid",
+      "doi": "https://doi.org/10.15780/G2JQ0P",
+      "gamma_scale_mm": 40.10676384533868,
+      "gamma_shape": 2.992306132277662,
+      "grid_cell_center_latitude": 30.424999559298158,
+      "grid_cell_center_longitude": -9.624997461214662,
+      "indicator": "standardized_precipitation_index",
+      "license_note": "Public domain / CC BY 4.0 as stated by the Climate Hazards Center and the Scientific Data descriptor. Cite the dataset and record the access date.",
+      "limitations": [
+       "SPI expresses precipitation relative to the fitted reference-period distribution only. It does not include temperature, evapotranspiration, soil moisture, or crop impacts and is not a measure of agricultural drought damage.",
+       "Method: CHIRPS v3 Final monthly window totals; a gamma distribution is fitted per calendar month to the non-zero totals (Thom 1958 approximation of maximum likelihood); zeros are a point mass q = zeros / reference years; the cumulative probability is mapped to a standard normal quantile (McKee et al. 1993; WMO-No. 1090).",
+       "SPI depends on the chosen reference period; values are not comparable across different reference periods or precipitation products.",
+       "The gamma fit is not goodness-of-fit tested here. Values beyond about +/-2 are driven by the fitted tail and are uncertain, especially with short reference periods.",
+       "CHIRPS v3 is a satellite-and-station blended gridded estimate at 0.05 degrees (roughly 5 km), land only. A point value is the value of the containing grid cell, not a gauge measurement.",
+       "Published validation covers selected regions. This project has performed no validation of CHIRPS v3 at the requested location.",
+       "Station density varies strongly by region and period; sparsely gauged or gap-filled areas are more uncertain (see CHC station-density and fill-map diagnostics).",
+       "CHIRPS v3 applies gauge-undercatch correction and is systematically somewhat wetter than CHIRPS v2. Do not mix versions within one baseline or comparison.",
+       "Only the Final product is used. Recent months may be unavailable until published."
+      ],
+      "message": null,
+      "method": "Gamma distribution (Thom 1958 approximation of maximum likelihood) fitted per calendar month to non-zero reference window totals; zeros as a point mass q = zeros / reference years; equiprobability transform to a standard normal quantile (McKee et al. 1993; WMO-No. 1090).",
+      "min_reference_years": 30,
+      "point_on_cell_boundary": false,
+      "reference_end_year": 2020,
+      "reference_nonzero_count": 30,
+      "reference_spi_mean": -0.0020577673148329876,
+      "reference_spi_std": 1.0167750081691085,
+      "reference_start_year": 1991,
+      "reference_years_excluded": [],
+      "reference_years_included": [
+       1991,
+       1992,
+       1993,
+       1994,
+       1995,
+       1996,
+       1997,
+       1998,
+       1999,
+       2000,
+       2001,
+       2002,
+       2003,
+       2004,
+       2005,
+       2006,
+       2007,
+       2008,
+       2009,
+       2010,
+       2011,
+       2012,
+       2013,
+       2014,
+       2015,
+       2016,
+       2017,
+       2018,
+       2019,
+       2020
+      ],
+      "reference_years_used": 30,
+      "reference_zero_count": 0,
+      "requested_latitude": 30.43,
+      "requested_longitude": -9.61,
+      "source_files": [
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747c536-151d0a0\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:19:50 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:17.888627Z",
+        "sha256": null,
+        "size_bytes": 22139040,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1991.01.tif",
+        "year": 1991
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67482bc5-14f5a3c\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 08:37:25 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:17.958820Z",
+        "sha256": null,
+        "size_bytes": 21977660,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1991.02.tif",
+        "year": 1991
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747d395-158a792\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:21:09 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:18.048538Z",
+        "sha256": null,
+        "size_bytes": 22587282,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1991.03.tif",
+        "year": 1991
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747c5aa-14c1aee\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:21:46 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:17.988541Z",
+        "sha256": null,
+        "size_bytes": 21764846,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1992.01.tif",
+        "year": 1992
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67482c53-14c742a\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 08:39:47 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:19.619358Z",
+        "sha256": null,
+        "size_bytes": 21787690,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1992.02.tif",
+        "year": 1992
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747d41c-1652f3e\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:23:24 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:19.758868Z",
+        "sha256": null,
+        "size_bytes": 23408446,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1992.03.tif",
+        "year": 1992
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747c620-1527cba\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:23:44 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:19.721685Z",
+        "sha256": null,
+        "size_bytes": 22183098,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1993.01.tif",
+        "year": 1993
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67482cde-148fc06\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 08:42:06 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:19.816067Z",
+        "sha256": null,
+        "size_bytes": 21560326,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1993.02.tif",
+        "year": 1993
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747d4a1-1568564\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:25:37 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:21.548864Z",
+        "sha256": null,
+        "size_bytes": 22447460,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1993.03.tif",
+        "year": 1993
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747c694-14a37ae\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:25:40 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:21.438722Z",
+        "sha256": null,
+        "size_bytes": 21641134,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1994.01.tif",
+        "year": 1994
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67482d68-1413ada\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 08:44:24 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:21.448665Z",
+        "sha256": null,
+        "size_bytes": 21052122,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1994.02.tif",
+        "year": 1994
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747d522-14a0bfe\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:27:46 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:21.778626Z",
+        "sha256": null,
+        "size_bytes": 21629950,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1994.03.tif",
+        "year": 1994
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747c707-142afca\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:27:35 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:23.098691Z",
+        "sha256": null,
+        "size_bytes": 21147594,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1995.01.tif",
+        "year": 1995
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67482dfc-13f05a2\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 08:46:52 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:23.458451Z",
+        "sha256": null,
+        "size_bytes": 20907426,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1995.02.tif",
+        "year": 1995
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747d5a8-1578930\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:30:00 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:23.498534Z",
+        "sha256": null,
+        "size_bytes": 22513968,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1995.03.tif",
+        "year": 1995
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747c77b-14b4798\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:29:31 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:23.778503Z",
+        "sha256": null,
+        "size_bytes": 21710744,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1996.01.tif",
+        "year": 1996
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67482e93-14bf8b4\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 08:49:23 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:24.792177Z",
+        "sha256": null,
+        "size_bytes": 21756084,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1996.02.tif",
+        "year": 1996
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747d637-1513a2e\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:32:23 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:25.263299Z",
+        "sha256": null,
+        "size_bytes": 22100526,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1996.03.tif",
+        "year": 1996
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747c7ee-1520c3a\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:31:26 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:25.223914Z",
+        "sha256": null,
+        "size_bytes": 22154298,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1997.01.tif",
+        "year": 1997
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67482f1b-13563f4\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 08:51:39 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:25.611219Z",
+        "sha256": null,
+        "size_bytes": 20276212,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1997.02.tif",
+        "year": 1997
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747d6bb-14cbe92\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:34:35 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:26.601233Z",
+        "sha256": null,
+        "size_bytes": 21806738,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1997.03.tif",
+        "year": 1997
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747c862-15fd3f2\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:33:22 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:27.028504Z",
+        "sha256": null,
+        "size_bytes": 23057394,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1998.01.tif",
+        "year": 1998
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67482fb3-1513d06\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 08:54:11 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:27.063108Z",
+        "sha256": null,
+        "size_bytes": 22101254,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1998.02.tif",
+        "year": 1998
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747d745-15851e0\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:36:53 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:27.358553Z",
+        "sha256": null,
+        "size_bytes": 22565344,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1998.03.tif",
+        "year": 1998
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747c8d4-14fd3ce\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:35:16 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:28.240878Z",
+        "sha256": null,
+        "size_bytes": 22008782,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1999.01.tif",
+        "year": 1999
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67483042-1507206\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 08:56:34 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:28.638633Z",
+        "sha256": null,
+        "size_bytes": 22049286,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1999.02.tif",
+        "year": 1999
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747d7d5-1458c0c\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:39:17 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:28.748637Z",
+        "sha256": null,
+        "size_bytes": 21335052,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1999.03.tif",
+        "year": 1999
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747c949-14f5a0c\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:37:13 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:29.078541Z",
+        "sha256": null,
+        "size_bytes": 21977612,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2000.01.tif",
+        "year": 2000
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"674830ce-13569ea\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 08:58:54 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:29.953532Z",
+        "sha256": null,
+        "size_bytes": 20277738,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2000.02.tif",
+        "year": 2000
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747d859-14ccc70\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:41:29 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:30.181131Z",
+        "sha256": null,
+        "size_bytes": 21810288,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2000.03.tif",
+        "year": 2000
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747c9bb-154e5ae\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:39:07 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:30.428481Z",
+        "sha256": null,
+        "size_bytes": 22341038,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2001.01.tif",
+        "year": 2001
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"6748315e-15d7c32\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:01:18 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:30.788364Z",
+        "sha256": null,
+        "size_bytes": 22903858,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2001.02.tif",
+        "year": 2001
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747d8e4-15c4578\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:43:48 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:31.948716Z",
+        "sha256": null,
+        "size_bytes": 22824312,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2001.03.tif",
+        "year": 2001
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747ca2d-15a4b76\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:41:01 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:32.198498Z",
+        "sha256": null,
+        "size_bytes": 22694774,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2002.01.tif",
+        "year": 2002
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"674831e8-15d6f16\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:03:36 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:32.158668Z",
+        "sha256": null,
+        "size_bytes": 22900502,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2002.02.tif",
+        "year": 2002
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747d96c-165dff6\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:46:04 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:32.598866Z",
+        "sha256": null,
+        "size_bytes": 23453686,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2002.03.tif",
+        "year": 2002
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747caa1-154f510\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:42:57 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:33.678783Z",
+        "sha256": null,
+        "size_bytes": 22344976,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2003.01.tif",
+        "year": 2003
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67483283-15c5660\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:06:11 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:33.808575Z",
+        "sha256": null,
+        "size_bytes": 22828640,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2003.02.tif",
+        "year": 2003
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747d9f6-155a91a\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:48:22 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:33.818830Z",
+        "sha256": null,
+        "size_bytes": 22391066,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2003.03.tif",
+        "year": 2003
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747cb14-15eab9c\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:44:52 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:34.128744Z",
+        "sha256": null,
+        "size_bytes": 22981532,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2004.01.tif",
+        "year": 2004
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67483320-15bc7d2\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:08:48 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:35.458396Z",
+        "sha256": null,
+        "size_bytes": 22792146,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2004.02.tif",
+        "year": 2004
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747da80-15fcafa\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:50:40 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:35.713014Z",
+        "sha256": null,
+        "size_bytes": 23055098,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2004.03.tif",
+        "year": 2004
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747cb89-1506a6c\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:46:49 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:36.148394Z",
+        "sha256": null,
+        "size_bytes": 22047340,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2005.01.tif",
+        "year": 2005
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"674833b6-15626b2\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:11:18 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:35.958514Z",
+        "sha256": null,
+        "size_bytes": 22423218,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2005.02.tif",
+        "year": 2005
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747db07-15decf4\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:52:55 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:37.179416Z",
+        "sha256": null,
+        "size_bytes": 22932724,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2005.03.tif",
+        "year": 2005
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747cbfb-1643d16\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:48:43 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:37.368937Z",
+        "sha256": null,
+        "size_bytes": 23346454,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2006.01.tif",
+        "year": 2006
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"6748344c-1641c46\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:13:48 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:37.798967Z",
+        "sha256": null,
+        "size_bytes": 23338054,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2006.02.tif",
+        "year": 2006
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747db8c-155d942\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:55:08 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:37.678657Z",
+        "sha256": null,
+        "size_bytes": 22403394,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2006.03.tif",
+        "year": 2006
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747cc70-1556840\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:50:40 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:38.809847Z",
+        "sha256": null,
+        "size_bytes": 22374464,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2007.01.tif",
+        "year": 2007
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"674834e2-161531e\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:16:18 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:39.103593Z",
+        "sha256": null,
+        "size_bytes": 23155486,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2007.02.tif",
+        "year": 2007
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747dc0d-15a49f0\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:57:17 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:39.718516Z",
+        "sha256": null,
+        "size_bytes": 22694384,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2007.03.tif",
+        "year": 2007
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747ccec-155cde0\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:52:44 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:39.421046Z",
+        "sha256": null,
+        "size_bytes": 22400480,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2008.01.tif",
+        "year": 2008
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67483571-14788c4\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:18:41 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:40.999016Z",
+        "sha256": null,
+        "size_bytes": 21465284,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2008.02.tif",
+        "year": 2008
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747dc90-154c616\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:59:28 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:41.431391Z",
+        "sha256": null,
+        "size_bytes": 22332950,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2008.03.tif",
+        "year": 2008
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747cd6a-1679eda\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:54:50 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:41.333340Z",
+        "sha256": null,
+        "size_bytes": 23568090,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2009.01.tif",
+        "year": 2009
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"674835fe-1574b1e\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:21:02 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:41.930822Z",
+        "sha256": null,
+        "size_bytes": 22498078,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2009.02.tif",
+        "year": 2009
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747dd14-160c1a0\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 03:01:40 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:43.232451Z",
+        "sha256": null,
+        "size_bytes": 23118240,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2009.03.tif",
+        "year": 2009
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747cde9-15d347c\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:56:57 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:43.073505Z",
+        "sha256": null,
+        "size_bytes": 22885500,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2010.01.tif",
+        "year": 2010
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67483694-15344a6\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:23:32 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:43.603473Z",
+        "sha256": null,
+        "size_bytes": 22234278,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2010.02.tif",
+        "year": 2010
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747dd96-15a7b54\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 03:03:50 GMT",
+        "retrieved_at_utc": "2026-10-27T11:46:43.668691Z",
+        "sha256": null,
+        "size_bytes": 22707028,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2010.03.tif",
+        "year": 2010
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747ce65-155eb54\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 01:59:01 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:38.522680Z",
+        "sha256": null,
+        "size_bytes": 22408020,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2011.01.tif",
+        "year": 2011
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"6748372f-153d8ea\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:26:07 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:38.584036Z",
+        "sha256": null,
+        "size_bytes": 22272234,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2011.02.tif",
+        "year": 2011
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747de17-14e12b4\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 03:05:59 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:38.410437Z",
+        "sha256": null,
+        "size_bytes": 21893812,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2011.03.tif",
+        "year": 2011
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747cee1-13efde0\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:01:05 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:39.050201Z",
+        "sha256": null,
+        "size_bytes": 20905440,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2012.01.tif",
+        "year": 2012
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"674837cb-14d9004\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:28:43 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:39.949699Z",
+        "sha256": null,
+        "size_bytes": 21860356,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2012.02.tif",
+        "year": 2012
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747de9a-15c8a7c\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 03:08:10 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:40.335449Z",
+        "sha256": null,
+        "size_bytes": 22841980,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2012.03.tif",
+        "year": 2012
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747cf5c-16096b0\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:03:08 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:40.179512Z",
+        "sha256": null,
+        "size_bytes": 23107248,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2013.01.tif",
+        "year": 2013
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"6748385b-155db1e\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:31:07 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:40.543016Z",
+        "sha256": null,
+        "size_bytes": 22403870,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2013.02.tif",
+        "year": 2013
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747df1b-160dee6\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 03:10:19 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:41.528137Z",
+        "sha256": null,
+        "size_bytes": 23125734,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2013.03.tif",
+        "year": 2013
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747cfd4-157cba4\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:05:08 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:42.061684Z",
+        "sha256": null,
+        "size_bytes": 22530980,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2014.01.tif",
+        "year": 2014
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"674838ee-1508e44\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:33:34 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:42.042807Z",
+        "sha256": null,
+        "size_bytes": 22056516,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2014.02.tif",
+        "year": 2014
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"68080fe2-15bca88\"",
+        "remote_last_modified": "Tue, 22 Apr 2025 21:53:38 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:42.379400Z",
+        "sha256": null,
+        "size_bytes": 22792840,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2014.03.tif",
+        "year": 2014
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747d04c-15fa2f0\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:07:08 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:43.139268Z",
+        "sha256": null,
+        "size_bytes": 23044848,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2015.01.tif",
+        "year": 2015
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67483980-15face4\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:36:00 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:43.749775Z",
+        "sha256": null,
+        "size_bytes": 23047396,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2015.02.tif",
+        "year": 2015
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747e01f-1638262\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 03:14:39 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:43.978059Z",
+        "sha256": null,
+        "size_bytes": 23298658,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2015.03.tif",
+        "year": 2015
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747d0be-158f6c8\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:09:02 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:44.022412Z",
+        "sha256": null,
+        "size_bytes": 22607560,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2016.01.tif",
+        "year": 2016
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67483a0e-14ddc2a\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:38:22 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:44.729263Z",
+        "sha256": null,
+        "size_bytes": 21879850,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2016.02.tif",
+        "year": 2016
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747e0a3-1689cc4\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 03:16:51 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:45.389339Z",
+        "sha256": null,
+        "size_bytes": 23633092,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2016.03.tif",
+        "year": 2016
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747d133-15bcd2c\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:10:59 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:45.519517Z",
+        "sha256": null,
+        "size_bytes": 22793516,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2017.01.tif",
+        "year": 2017
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67483a9b-154c5c8\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:40:43 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:46.399432Z",
+        "sha256": null,
+        "size_bytes": 22332872,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2017.02.tif",
+        "year": 2017
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747e129-1406fba\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 03:19:05 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:46.495680Z",
+        "sha256": null,
+        "size_bytes": 21000122,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2017.03.tif",
+        "year": 2017
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747d1a5-1542efc\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:12:53 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:47.067611Z",
+        "sha256": null,
+        "size_bytes": 22294268,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2018.01.tif",
+        "year": 2018
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67483b2a-15dd95c\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:43:06 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:47.373326Z",
+        "sha256": null,
+        "size_bytes": 22927708,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2018.02.tif",
+        "year": 2018
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747e1ad-15c3314\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 03:21:17 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:47.956220Z",
+        "sha256": null,
+        "size_bytes": 22819604,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2018.03.tif",
+        "year": 2018
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747d217-15f5ab0\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:14:47 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:48.192736Z",
+        "sha256": null,
+        "size_bytes": 23026352,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2019.01.tif",
+        "year": 2019
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67483bbe-15c33f0\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:45:34 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:48.839752Z",
+        "sha256": null,
+        "size_bytes": 22819824,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2019.02.tif",
+        "year": 2019
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747e230-150ea84\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 03:23:28 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:49.359543Z",
+        "sha256": null,
+        "size_bytes": 22080132,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2019.03.tif",
+        "year": 2019
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"6747d289-14b6ad0\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 02:16:41 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:49.699710Z",
+        "sha256": null,
+        "size_bytes": 21719760,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2020.01.tif",
+        "year": 2020
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"67483c55-14b016c\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 09:48:05 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:50.149824Z",
+        "sha256": null,
+        "size_bytes": 21692780,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2020.02.tif",
+        "year": 2020
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"6747e2b5-14b6ad6\"",
+        "remote_last_modified": "Thu, 28 Nov 2024 03:25:41 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:50.519410Z",
+        "sha256": null,
+        "size_bytes": 21719766,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2020.03.tif",
+        "year": 2020
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 1,
+        "remote_etag": "\"675226b2-1536a34\"",
+        "remote_last_modified": "Thu, 05 Dec 2024 22:18:26 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:35.544351Z",
+        "sha256": null,
+        "size_bytes": 22243892,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2024.01.tif",
+        "year": 2024
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 2,
+        "remote_etag": "\"6752275d-15b9c18\"",
+        "remote_last_modified": "Thu, 05 Dec 2024 22:21:17 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:35.559787Z",
+        "sha256": null,
+        "size_bytes": 22780952,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2024.02.tif",
+        "year": 2024
+       },
+       {
+        "access_mode": "remote_range_read",
+        "month": 3,
+        "remote_etag": "\"67522807-1557b5a\"",
+        "remote_last_modified": "Thu, 05 Dec 2024 22:24:07 GMT",
+        "retrieved_at_utc": "2026-10-27T10:22:35.525991Z",
+        "sha256": null,
+        "size_bytes": 22379354,
+        "source_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2024.03.tif",
+        "year": 2024
+       }
+      ],
+      "spi": -0.517141160387881,
+      "status": "ok",
+      "target_in_reference_period": false,
+      "target_window_end": "2024-03",
+      "target_window_start": "2024-01",
+      "timescale_months": 3,
+      "window_total_mm": 76.8719367980957,
+      "zero_probability": 0.0
+     },
+     "status": "ok"
+    },
+    {
+     "error_message": null,
+     "error_type": null,
+     "grid_point_latitude": 30.5,
+     "grid_point_longitude": -9.6,
+     "indicator": "era5_spi",
+     "requested_latitude": 30.43,
+     "requested_longitude": -9.61,
+     "result": {
+      "citation": "Mu\u00f1oz Sabater, J. (2019): ERA5-Land monthly averaged data from 1950 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). https://doi.org/10.24381/cds.68d2bb30. See also Mu\u00f1oz-Sabater, J. et al. (2021), ERA5-Land: a state-of-the-art global reanalysis dataset for land applications, Earth System Science Data 13, 4349.",
+      "cumulative_probability": 0.3538753326849313,
+      "data_source": "ERA5-Land monthly averaged data from 1950 to present (reanalysis-era5-land-monthly-means)",
+      "doi": "https://doi.org/10.24381/cds.68d2bb30",
+      "gamma_scale_mm": 88.06907808432092,
+      "gamma_shape": 1.3039346932355873,
+      "grid_point_latitude": 30.5,
+      "grid_point_longitude": -9.6,
+      "indicator": "standardized_precipitation_index",
+      "land_fallback": {
+       "distance_km": 7.842441576259394,
+       "max_distance_km": 15.0,
+       "nearest_grid_point_latitude": 30.4,
+       "nearest_grid_point_longitude": -9.6,
+       "reason": "The nearest grid point is masked; the nearest valid neighbour was used.",
+       "selected_grid_point_latitude": 30.5,
+       "selected_grid_point_longitude": -9.6,
+       "used": true,
+       "warning": "The nearest ERA5-Land grid point (30.4, -9.6) has no value in any month (for example because it is masked as sea or inland water). Values are taken from the neighbouring grid point (30.5, -9.6), 7.8 km from the requested point. It may differ in elevation, coastal influence, and climate."
+      },
+      "license_note": "Copernicus licence terms apply. The dataset's terms of use must be accepted in the CDS before downloading. Acknowledge 'Copernicus Climate Change Service Information' and check the dataset page for the current licence text.",
+      "limitations": [
+       "The nearest ERA5-Land grid point (30.4, -9.6) has no value in any month (for example because it is masked as sea or inland water). Values are taken from the neighbouring grid point (30.5, -9.6), 7.8 km from the requested point. It may differ in elevation, coastal influence, and climate.",
+       "SPI expresses precipitation relative to the fitted reference-period distribution only. It does not include temperature, evapotranspiration, soil moisture, or crop impacts and is not a measure of agricultural drought damage.",
+       "Method: CHIRPS v3 Final monthly window totals; a gamma distribution is fitted per calendar month to the non-zero totals (Thom 1958 approximation of maximum likelihood); zeros are a point mass q = zeros / reference years; the cumulative probability is mapped to a standard normal quantile (McKee et al. 1993; WMO-No. 1090).",
+       "SPI depends on the chosen reference period; values are not comparable across different reference periods or precipitation products.",
+       "The gamma fit is not goodness-of-fit tested here. Values beyond about +/-2 are driven by the fitted tail and are uncertain, especially with short reference periods.",
+       "ERA5-Land is a reanalysis: land-surface model output forced by ERA5 atmospheric fields with no additional data assimilation. It is not a direct observation.",
+       "Native resolution is about 9 km; the CDS distributes it on a 0.1 degree grid. A point value is the nearest grid point and is not comparable cell-for-cell with CHIRPS (0.05 degree). No elevation or local downscaling is applied.",
+       "Precipitation is model-derived and inherits ERA5 forcing biases. It is not gauge-based. Monthly totals are converted from a mean daily accumulation: mm/month = mean(m/day) * 1000 * days in month.",
+       "Temperature is the monthly mean of hourly 2 m temperature. Minimum and maximum temperatures are not available from the monthly means product.",
+       "Recent months may come from a preliminary production stream (ERA5-Land-T) that cannot be distinguished in NetCDF output and could be revised. Prefer completed periods.",
+       "Published validation covers selected regions. This project has performed no validation of ERA5-Land at the requested location."
+      ],
+      "message": null,
+      "method": "Gamma distribution (Thom 1958 approximation of maximum likelihood) fitted per calendar month to non-zero reference window totals; zeros as a point mass q = zeros / reference years; equiprobability transform to a standard normal quantile (McKee et al. 1993; WMO-No. 1090).",
+      "min_reference_years": 30,
+      "raw_files": [
+       {
+        "dataset_id": "reanalysis-era5-land-monthly-means",
+        "delivered_as_zip": false,
+        "raw_file_sha256": "a8928b18aea912fbb9bf74998f2a787c17582b99f0165adc8d88ba5b95cc123d",
+        "raw_file_size_bytes": 25680,
+        "request": {
+         "area": [
+          30.58,
+          -9.76,
+          30.28,
+          -9.46
+         ],
+         "data_format": "netcdf",
+         "download_format": "unarchived",
+         "month": [
+          "01",
+          "02",
+          "03"
+         ],
+         "product_type": [
+          "monthly_averaged_reanalysis"
+         ],
+         "time": [
+          "00:00"
+         ],
+         "variable": [
+          "total_precipitation"
+         ],
+         "year": [
+          "2024"
+         ]
+        },
+        "retrieved_at_utc": "2026-10-27T11:12:42.877994Z"
+       },
+       {
+        "dataset_id": "reanalysis-era5-land-monthly-means",
+        "delivered_as_zip": false,
+        "raw_file_sha256": "daa08bd0ca4e86c7abd1b01c78d8d07cc43dd55de0fdb8dbbb409f0fdce4647b",
+        "raw_file_size_bytes": 29206,
+        "request": {
+         "area": [
+          30.58,
+          -9.76,
+          30.28,
+          -9.46
+         ],
+         "data_format": "netcdf",
+         "download_format": "unarchived",
+         "month": [
+          "01",
+          "02",
+          "03"
+         ],
+         "product_type": [
+          "monthly_averaged_reanalysis"
+         ],
+         "time": [
+          "00:00"
+         ],
+         "variable": [
+          "total_precipitation"
+         ],
+         "year": [
+          "1991",
+          "1992",
+          "1993",
+          "1994",
+          "1995",
+          "1996",
+          "1997",
+          "1998",
+          "1999",
+          "2000",
+          "2001",
+          "2002",
+          "2003",
+          "2004",
+          "2005",
+          "2006",
+          "2007",
+          "2008",
+          "2009",
+          "2010",
+          "2011",
+          "2012",
+          "2013",
+          "2014",
+          "2015",
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020"
+         ]
+        },
+        "retrieved_at_utc": "2026-10-27T13:17:07.111760Z"
+       }
+      ],
+      "reference_end_year": 2020,
+      "reference_nonzero_count": 30,
+      "reference_spi_mean": -0.007041940705148306,
+      "reference_spi_std": 1.0171222154662862,
+      "reference_start_year": 1991,
+      "reference_years_excluded": [],
+      "reference_years_included": [
+       1991,
+       1992,
+       1993,
+       1994,
+       1995,
+       1996,
+       1997,
+       1998,
+       1999,
+       2000,
+       2001,
+       2002,
+       2003,
+       2004,
+       2005,
+       2006,
+       2007,
+       2008,
+       2009,
+       2010,
+       2011,
+       2012,
+       2013,
+       2014,
+       2015,
+       2016,
+       2017,
+       2018,
+       2019,
+       2020
+      ],
+      "reference_years_used": 30,
+      "reference_zero_count": 0,
+      "requested_latitude": 30.43,
+      "requested_longitude": -9.61,
+      "spi": -0.37487872068189115,
+      "status": "ok",
+      "target_in_reference_period": false,
+      "target_window_end": "2024-03",
+      "target_window_start": "2024-01",
+      "timescale_months": 3,
+      "window_total_mm": 59.14615062647499,
+      "zero_probability": 0.0
+     },
+     "status": "ok"
+    },
+    {
+     "error_message": null,
+     "error_type": null,
+     "grid_point_latitude": 30.5,
+     "grid_point_longitude": -9.6,
+     "indicator": "era5_temperature_anomaly",
+     "requested_latitude": 30.43,
+     "requested_longitude": -9.61,
+     "result": {
+      "anomaly_c": 2.2178629356076875,
+      "citation": "Mu\u00f1oz Sabater, J. (2019): ERA5-Land monthly averaged data from 1950 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). https://doi.org/10.24381/cds.68d2bb30. See also Mu\u00f1oz-Sabater, J. et al. (2021), ERA5-Land: a state-of-the-art global reanalysis dataset for land applications, Earth System Science Data 13, 4349.",
+      "data_source": "ERA5-Land monthly averaged data from 1950 to present (reanalysis-era5-land-monthly-means)",
+      "doi": "https://doi.org/10.24381/cds.68d2bb30",
+      "grid_point_latitude": 30.5,
+      "grid_point_longitude": -9.6,
+      "indicator": "temperature_window_anomaly",
+      "land_fallback": {
+       "distance_km": 7.842441576259394,
+       "max_distance_km": 15.0,
+       "nearest_grid_point_latitude": 30.4,
+       "nearest_grid_point_longitude": -9.6,
+       "reason": "The nearest grid point is masked; the nearest valid neighbour was used.",
+       "selected_grid_point_latitude": 30.5,
+       "selected_grid_point_longitude": -9.6,
+       "used": true,
+       "warning": "The nearest ERA5-Land grid point (30.4, -9.6) has no value in any month (for example because it is masked as sea or inland water). Values are taken from the neighbouring grid point (30.5, -9.6), 7.8 km from the requested point. It may differ in elevation, coastal influence, and climate."
+      },
+      "license_note": "Copernicus licence terms apply. The dataset's terms of use must be accepted in the CDS before downloading. Acknowledge 'Copernicus Climate Change Service Information' and check the dataset page for the current licence text.",
+      "limitations": [
+       "The nearest ERA5-Land grid point (30.4, -9.6) has no value in any month (for example because it is masked as sea or inland water). Values are taken from the neighbouring grid point (30.5, -9.6), 7.8 km from the requested point. It may differ in elevation, coastal influence, and climate.",
+       "Anomaly = target window mean temperature minus the mean of the same calendar window over the reference years, in degC (a difference, not a percentage). Window means are day-weighted averages of ERA5-Land monthly means of hourly 2 m temperature.",
+       "The reference mean includes any warming trend inside the reference period; the anomaly is relative to the reference-period average, not to a detrended or pre-industrial baseline.",
+       "The standardized anomaly divides by the sample standard deviation of the reference window means and is uncertain with about 30 values. The percentile rank is empirical (mid-rank).",
+       "Monthly means cannot reveal heat waves, frost, or the timing of extremes, and a temperature anomaly is not a drought indicator by itself; it is context for evaporative demand and crop heat stress.",
+       "ERA5-Land is a reanalysis: land-surface model output forced by ERA5 atmospheric fields with no additional data assimilation. It is not a direct observation.",
+       "Native resolution is about 9 km; the CDS distributes it on a 0.1 degree grid. A point value is the nearest grid point and is not comparable cell-for-cell with CHIRPS (0.05 degree). No elevation or local downscaling is applied.",
+       "Precipitation is model-derived and inherits ERA5 forcing biases. It is not gauge-based. Monthly totals are converted from a mean daily accumulation: mm/month = mean(m/day) * 1000 * days in month.",
+       "Temperature is the monthly mean of hourly 2 m temperature. Minimum and maximum temperatures are not available from the monthly means product.",
+       "Recent months may come from a preliminary production stream (ERA5-Land-T) that cannot be distinguished in NetCDF output and could be revised. Prefer completed periods.",
+       "Published validation covers selected regions. This project has performed no validation of ERA5-Land at the requested location."
+      ],
+      "message": null,
+      "min_reference_years": 30,
+      "percentile_rank": 1.0,
+      "raw_files": [
+       {
+        "dataset_id": "reanalysis-era5-land-monthly-means",
+        "delivered_as_zip": false,
+        "raw_file_sha256": "9f9d56949bcc007fb7ece33e35ecc28fc5f20aa956840e2e5d327a9779ba10eb",
+        "raw_file_size_bytes": 25266,
+        "request": {
+         "area": [
+          30.58,
+          -9.76,
+          30.28,
+          -9.46
+         ],
+         "data_format": "netcdf",
+         "download_format": "unarchived",
+         "month": [
+          "01",
+          "02",
+          "03"
+         ],
+         "product_type": [
+          "monthly_averaged_reanalysis"
+         ],
+         "time": [
+          "00:00"
+         ],
+         "variable": [
+          "2m_temperature"
+         ],
+         "year": [
+          "2024"
+         ]
+        },
+        "retrieved_at_utc": "2026-10-27T15:16:26.324404Z"
+       },
+       {
+        "dataset_id": "reanalysis-era5-land-monthly-means",
+        "delivered_as_zip": false,
+        "raw_file_sha256": "72c236bcf50f40d22c13358d9baf54577bb4456099d7cb76a6701a4a9a7f63cd",
+        "raw_file_size_bytes": 28172,
+        "request": {
+         "area": [
+          30.58,
+          -9.76,
+          30.28,
+          -9.46
+         ],
+         "data_format": "netcdf",
+         "download_format": "unarchived",
+         "month": [
+          "01",
+          "02",
+          "03"
+         ],
+         "product_type": [
+          "monthly_averaged_reanalysis"
+         ],
+         "time": [
+          "00:00"
+         ],
+         "variable": [
+          "2m_temperature"
+         ],
+         "year": [
+          "1991",
+          "1992",
+          "1993",
+          "1994",
+          "1995",
+          "1996",
+          "1997",
+          "1998",
+          "1999",
+          "2000",
+          "2001",
+          "2002",
+          "2003",
+          "2004",
+          "2005",
+          "2006",
+          "2007",
+          "2008",
+          "2009",
+          "2010",
+          "2011",
+          "2012",
+          "2013",
+          "2014",
+          "2015",
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020"
+         ]
+        },
+        "retrieved_at_utc": "2026-10-27T15:17:27.199890Z"
+       }
+      ],
+      "reference_end_year": 2020,
+      "reference_mean_c": 15.216475242083785,
+      "reference_sd_c": 0.8697113121983948,
+      "reference_start_year": 1991,
+      "reference_years_excluded": [],
+      "reference_years_included": [
+       1991,
+       1992,
+       1993,
+       1994,
+       1995,
+       1996,
+       1997,
+       1998,
+       1999,
+       2000,
+       2001,
+       2002,
+       2003,
+       2004,
+       2005,
+       2006,
+       2007,
+       2008,
+       2009,
+       2010,
+       2011,
+       2012,
+       2013,
+       2014,
+       2015,
+       2016,
+       2017,
+       2018,
+       2019,
+       2020
+      ],
+      "reference_years_used": 30,
+      "requested_latitude": 30.43,
+      "requested_longitude": -9.61,
+      "standardized_anomaly": 2.5501139337851435,
+      "target_in_reference_period": false,
+      "target_window_end": "2024-03",
+      "target_window_start": "2024-01",
+      "timescale_months": 3,
+      "window_mean_c": 17.434338177691473
+     },
+     "status": "ok"
+    },
+    {
+     "error_message": null,
+     "error_type": null,
+     "grid_point_latitude": 30.5,
+     "grid_point_longitude": -9.6,
+     "indicator": "era5_soil_moisture_anomaly",
+     "requested_latitude": 30.43,
+     "requested_longitude": -9.61,
+     "result": {
+      "anomaly_m3m3": -0.05049287497148215,
+      "citation": "Mu\u00f1oz Sabater, J. (2019): ERA5-Land monthly averaged data from 1950 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). https://doi.org/10.24381/cds.68d2bb30. See also Mu\u00f1oz-Sabater, J. et al. (2021), ERA5-Land: a state-of-the-art global reanalysis dataset for land applications, Earth System Science Data 13, 4349.",
+      "data_source": "ERA5-Land monthly averaged data from 1950 to present (reanalysis-era5-land-monthly-means)",
+      "doi": "https://doi.org/10.24381/cds.68d2bb30",
+      "grid_point_latitude": 30.5,
+      "grid_point_longitude": -9.6,
+      "indicator": "soil_moisture_window_anomaly",
+      "land_fallback": {
+       "distance_km": 7.842441576259394,
+       "max_distance_km": 15.0,
+       "nearest_grid_point_latitude": 30.4,
+       "nearest_grid_point_longitude": -9.6,
+       "reason": "The nearest grid point is masked; the nearest valid neighbour was used.",
+       "selected_grid_point_latitude": 30.5,
+       "selected_grid_point_longitude": -9.6,
+       "used": true,
+       "warning": "The nearest ERA5-Land grid point (30.4, -9.6) has no value in any month (for example because it is masked as sea or inland water). Values are taken from the neighbouring grid point (30.5, -9.6), 7.8 km from the requested point. It may differ in elevation, coastal influence, and climate."
+      },
+      "layer_depth": "0-7 cm",
+      "license_note": "Copernicus licence terms apply. The dataset's terms of use must be accepted in the CDS before downloading. Acknowledge 'Copernicus Climate Change Service Information' and check the dataset page for the current licence text.",
+      "limitations": [
+       "The nearest ERA5-Land grid point (30.4, -9.6) has no value in any month (for example because it is masked as sea or inland water). Values are taken from the neighbouring grid point (30.5, -9.6), 7.8 km from the requested point. It may differ in elevation, coastal influence, and climate.",
+       "Anomaly = target window mean volumetric soil water minus the mean of the same calendar window over the reference years, in m3/m3 (a difference, not a percentage). Window means are day-weighted averages of ERA5-Land monthly means.",
+       "ERA5-Land is a reanalysis: land-surface model output, not direct observation. Absolute ERA5-Land soil water can be biased in at least some regions, so only the anomaly relative to the reference period is reported, never bare absolute values as truth.",
+       "Soil layers: layer 1 covers 0-7 cm, layer 2 covers 7-28 cm, layer 3 covers 28-100 cm. Layer 4 is excluded because its documented depth is contested.",
+       "The standardized anomaly divides by the sample standard deviation of the reference window means and is uncertain with about 30 values. The percentile rank is empirical (mid-rank).",
+       "Monthly means cannot show the timing of wetting or drying within the window, and a soil water anomaly is not crop-water stress by itself; it is context to be combined with precipitation, evaporative demand, crop stage, and soil properties.",
+       "ERA5-Land is a reanalysis: land-surface model output forced by ERA5 atmospheric fields with no additional data assimilation. It is not a direct observation.",
+       "Native resolution is about 9 km; the CDS distributes it on a 0.1 degree grid. A point value is the nearest grid point and is not comparable cell-for-cell with CHIRPS (0.05 degree). No elevation or local downscaling is applied.",
+       "Precipitation is model-derived and inherits ERA5 forcing biases. It is not gauge-based. Monthly totals are converted from a mean daily accumulation: mm/month = mean(m/day) * 1000 * days in month.",
+       "Temperature is the monthly mean of hourly 2 m temperature. Minimum and maximum temperatures are not available from the monthly means product.",
+       "Recent months may come from a preliminary production stream (ERA5-Land-T) that cannot be distinguished in NetCDF output and could be revised. Prefer completed periods.",
+       "Published validation covers selected regions. This project has performed no validation of ERA5-Land at the requested location."
+      ],
+      "message": null,
+      "min_reference_years": 30,
+      "percentile_rank": 0.2,
+      "raw_files": [
+       {
+        "dataset_id": "reanalysis-era5-land-monthly-means",
+        "delivered_as_zip": false,
+        "raw_file_sha256": "1ff2f82c1e2e019500bfa92b79d771180668ac2536d4c2ca6435ee89d0b3d52f",
+        "raw_file_size_bytes": 25280,
+        "request": {
+         "area": [
+          30.58,
+          -9.76,
+          30.28,
+          -9.46
+         ],
+         "data_format": "netcdf",
+         "download_format": "unarchived",
+         "month": [
+          "01",
+          "02",
+          "03"
+         ],
+         "product_type": [
+          "monthly_averaged_reanalysis"
+         ],
+         "time": [
+          "00:00"
+         ],
+         "variable": [
+          "volumetric_soil_water_layer_1"
+         ],
+         "year": [
+          "2024"
+         ]
+        },
+        "retrieved_at_utc": "2026-10-27T21:12:51.548153Z"
+       },
+       {
+        "dataset_id": "reanalysis-era5-land-monthly-means",
+        "delivered_as_zip": false,
+        "raw_file_sha256": "2b1dbed05537623af0ca9973c8e9b579cad046eab106159c102bbf9a47998ed5",
+        "raw_file_size_bytes": 28112,
+        "request": {
+         "area": [
+          30.58,
+          -9.76,
+          30.28,
+          -9.46
+         ],
+         "data_format": "netcdf",
+         "download_format": "unarchived",
+         "month": [
+          "01",
+          "02",
+          "03"
+         ],
+         "product_type": [
+          "monthly_averaged_reanalysis"
+         ],
+         "time": [
+          "00:00"
+         ],
+         "variable": [
+          "volumetric_soil_water_layer_1"
+         ],
+         "year": [
+          "1991",
+          "1992",
+          "1993",
+          "1994",
+          "1995",
+          "1996",
+          "1997",
+          "1998",
+          "1999",
+          "2000",
+          "2001",
+          "2002",
+          "2003",
+          "2004",
+          "2005",
+          "2006",
+          "2007",
+          "2008",
+          "2009",
+          "2010",
+          "2011",
+          "2012",
+          "2013",
+          "2014",
+          "2015",
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020"
+         ]
+        },
+        "retrieved_at_utc": "2026-10-30T14:54:13.555468Z"
+       }
+      ],
+      "reference_end_year": 2020,
+      "reference_mean_m3m3": 0.14775507931986814,
+      "reference_sd_m3m3": 0.060524112987675134,
+      "reference_start_year": 1991,
+      "reference_years_excluded": [],
+      "reference_years_included": [
+       1991,
+       1992,
+       1993,
+       1994,
+       1995,
+       1996,
+       1997,
+       1998,
+       1999,
+       2000,
+       2001,
+       2002,
+       2003,
+       2004,
+       2005,
+       2006,
+       2007,
+       2008,
+       2009,
+       2010,
+       2011,
+       2012,
+       2013,
+       2014,
+       2015,
+       2016,
+       2017,
+       2018,
+       2019,
+       2020
+      ],
+      "reference_years_used": 30,
+      "requested_latitude": 30.43,
+      "requested_longitude": -9.61,
+      "standardized_anomaly": -0.8342604703973819,
+      "target_in_reference_period": false,
+      "target_window_end": "2024-03",
+      "target_window_start": "2024-01",
+      "timescale_months": 3,
+      "variable": "volumetric_soil_water_layer_1",
+      "window_mean_m3m3": 0.09726220434838599
+     },
+     "status": "ok"
+    }
+   ],
+   "indicator": "environmental_bundle",
+   "latitude": 30.43,
+   "longitude": -9.61,
+   "reference_end_year": 2020,
+   "reference_start_year": 1991,
+   "target_end_month": "2024-03",
+   "timescale_months": 3
+  },
+  "created_at": "2026-10-31T22:00:59.891746Z",
+  "job_id": "job-capture",
+  "problems": [
+   "[provider-auth] Draft call failed: No Baseten API key configured; LLM drafting disabled."
+  ],
+  "ranking": {
+   "catalog_version": 1,
+   "excluded": [
+    {
+     "category": "irrigation",
+     "evidence_status": "needs_evidence",
+     "intervention_id": "supplemental-irrigation",
+     "name": "Supplemental irrigation of rainfed crops",
+     "reasons": [
+      {
+       "code": "needs_evidence",
+       "message": "Entry is marked needs_evidence: no ingested corpus evidence backs it."
+      },
+      {
+       "code": "production_system_mismatch",
+       "message": "Scenario production system is outside the entry's scope."
+      }
+     ]
+    }
+   ],
+   "limitations": [
+    "Ranking reflects evidence traceability and indicator availability, not measured effectiveness.",
+    "Benefit, cost and risk are unknown for every catalog entry unless a cited source states them; unknown is reported, never scored as zero.",
+    "Indicator values are not interpreted as drought severity; relevance uses computation status only.",
+    "This catalog version covers irrigation options only; other adaptation options are not ranked."
+   ],
+   "ranked": [
+    {
+     "benefit": "unknown",
+     "category": "irrigation",
+     "cost": "unknown",
+     "evidence": [
+      {
+       "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. p. 22 (PDF index; no printed label).",
+       "doc_id": "fao-iddp66-crop-yield-response-to-water",
+       "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+       "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+       "license_status": "stated_in_document",
+       "pdf_page": 22,
+       "reference": "Yield-response factors (Ky) and deficit-irrigation studies",
+       "unverified_fields": []
+      },
+      {
+       "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. p. 70 (PDF index; no printed label).",
+       "doc_id": "fao-iddp66-crop-yield-response-to-water",
+       "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+       "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+       "license_status": "stated_in_document",
+       "pdf_page": 70,
+       "reference": "Deficit-irrigation programme design example",
+       "unverified_fields": []
+      }
+     ],
+     "intervention_id": "deficit-irrigation",
+     "name": "Deficit irrigation",
+     "risk": "unknown",
+     "score_components": {
+      "constraint_fit": 1.0,
+      "evidence_strength": 0.5,
+      "indicator_relevance": 1.0
+     },
+     "score_inputs": {
+      "evidence_doc_ids": [
+       "fao-iddp66-crop-yield-response-to-water"
+      ],
+      "evidence_level": 1,
+      "exclusion_reasons": 0,
+      "indicator_statuses": {
+       "chirps_spi": "ok",
+       "era5_soil_moisture_anomaly": "ok",
+       "era5_spi": "ok"
+      }
+     },
+     "score_total": 0.75,
+     "score_weights": {
+      "constraint_fit": 0.2,
+      "evidence_strength": 0.5,
+      "indicator_relevance": 0.3
+     },
+     "unknowns": [
+      "catalog_crop_scope_unknown",
+      "catalog_soil_scope_unknown",
+      "catalog_climate_scope_unknown",
+      "catalog_scale_scope_unknown",
+      "benefit_unknown",
+      "cost_unknown",
+      "risk_unknown"
+     ]
+    },
+    {
+     "benefit": "unknown",
+     "category": "irrigation",
+     "cost": "unknown",
+     "evidence": [
+      {
+       "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. p. 25 (PDF index; no printed label).",
+       "doc_id": "fao-iddp66-crop-yield-response-to-water",
+       "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+       "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+       "license_status": "stated_in_document",
+       "pdf_page": 25,
+       "reference": "CROPWAT as a practical tool for irrigation scheduling",
+       "unverified_fields": []
+      },
+      {
+       "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. p. 66 (PDF index; no printed label).",
+       "doc_id": "fao-iddp66-crop-yield-response-to-water",
+       "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+       "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+       "license_status": "stated_in_document",
+       "pdf_page": 66,
+       "reference": "Seasonal irrigation scheduling programme (tactical decisions)",
+       "unverified_fields": []
+      }
+     ],
+     "intervention_id": "irrigation-scheduling",
+     "name": "Irrigation scheduling",
+     "risk": "unknown",
+     "score_components": {
+      "constraint_fit": 1.0,
+      "evidence_strength": 0.5,
+      "indicator_relevance": 1.0
+     },
+     "score_inputs": {
+      "evidence_doc_ids": [
+       "fao-iddp66-crop-yield-response-to-water"
+      ],
+      "evidence_level": 1,
+      "exclusion_reasons": 0,
+      "indicator_statuses": {
+       "chirps_spi": "ok",
+       "era5_soil_moisture_anomaly": "ok",
+       "era5_spi": "ok"
+      }
+     },
+     "score_total": 0.75,
+     "score_weights": {
+      "constraint_fit": 0.2,
+      "evidence_strength": 0.5,
+      "indicator_relevance": 0.3
+     },
+     "unknowns": [
+      "catalog_crop_scope_unknown",
+      "catalog_soil_scope_unknown",
+      "catalog_climate_scope_unknown",
+      "catalog_scale_scope_unknown",
+      "benefit_unknown",
+      "cost_unknown",
+      "risk_unknown"
+     ]
+    }
+   ],
+   "scenario": {
+    "crop": "wheat",
+    "has_irrigation_equipment": true,
+    "has_water_source": true,
+    "latitude": 30.43,
+    "longitude": -9.61,
+    "production_system": "irrigated",
+    "season": "2024-03"
+   },
+   "warnings": [
+    "1 of 3 catalog entries are marked needs_evidence and were excluded from ranking."
+   ]
+  },
+  "report": {
+   "assumptions": [
+    "No AI interpretation was applied; all values are deterministic outputs.",
+    "Retrieved passages are cited for traceability, not quoted as advice."
+   ],
+   "data_coverage": {
+    "evidence_ids": [],
+    "numbers": [
+     {
+      "field": "latitude",
+      "tool_output_id": "bundle",
+      "unit": null,
+      "value": 30.43
+     },
+     {
+      "field": "longitude",
+      "tool_output_id": "bundle",
+      "unit": null,
+      "value": -9.61
+     },
+     {
+      "field": "timescale_months",
+      "tool_output_id": "bundle",
+      "unit": null,
+      "value": 3.0
+     },
+     {
+      "field": "reference_start_year",
+      "tool_output_id": "bundle",
+      "unit": null,
+      "value": 1991.0
+     },
+     {
+      "field": "reference_end_year",
+      "tool_output_id": "bundle",
+      "unit": null,
+      "value": 2020.0
+     }
+    ],
+    "text": "Location 30.43, -9.61; target window ending 2024-03; timescale 3 months; reference 1991 to 2020.",
+    "tool_output_ids": [
+     "bundle"
+    ]
+   },
+   "environmental_findings": [
+    {
+     "evidence_ids": [],
+     "numbers": [
+      {
+       "field": "cumulative_probability",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": 0.3025288112918043
+      },
+      {
+       "field": "gamma_scale_mm",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": 40.10676384533868
+      },
+      {
+       "field": "gamma_shape",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": 2.992306132277662
+      },
+      {
+       "field": "grid_cell_center_latitude",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": 30.424999559298158
+      },
+      {
+       "field": "grid_cell_center_longitude",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": -9.624997461214662
+      },
+      {
+       "field": "min_reference_years",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": 30.0
+      },
+      {
+       "field": "reference_end_year",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": 2020.0
+      },
+      {
+       "field": "reference_nonzero_count",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": 30.0
+      },
+      {
+       "field": "reference_spi_mean",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": -0.0020577673148329876
+      },
+      {
+       "field": "reference_spi_std",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": 1.0167750081691085
+      },
+      {
+       "field": "reference_start_year",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": 1991.0
+      },
+      {
+       "field": "reference_years_used",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": 30.0
+      },
+      {
+       "field": "reference_zero_count",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": 0.0
+      },
+      {
+       "field": "requested_latitude",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": 30.43
+      },
+      {
+       "field": "requested_longitude",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": -9.61
+      },
+      {
+       "field": "spi",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": -0.517141160387881
+      },
+      {
+       "field": "timescale_months",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": 3.0
+      },
+      {
+       "field": "window_total_mm",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": 76.8719367980957
+      },
+      {
+       "field": "zero_probability",
+       "tool_output_id": "chirps_spi",
+       "unit": null,
+       "value": 0.0
+      }
+     ],
+     "text": "chirps_spi (CHIRPS v3.0 Final, monthly, 0.05 degree grid): status ok. cumulative_probability 0.3025288112918043; gamma_scale_mm 40.10676384533868; gamma_shape 2.992306132277662; grid_cell_center_latitude 30.424999559298158; grid_cell_center_longitude -9.624997461214662; min_reference_years 30; reference_end_year 2020; reference_nonzero_count 30; reference_spi_mean -0.0020577673148329876; reference_spi_std 1.0167750081691085; reference_start_year 1991; reference_years_used 30; reference_zero_count 0; requested_latitude 30.43; requested_longitude -9.61; spi -0.517141160387881; timescale_months 3; window_total_mm 76.8719367980957; zero_probability 0.",
+     "tool_output_ids": [
+      "chirps_spi"
+     ]
+    },
+    {
+     "evidence_ids": [],
+     "numbers": [
+      {
+       "field": "cumulative_probability",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 0.3538753326849313
+      },
+      {
+       "field": "gamma_scale_mm",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 88.06907808432092
+      },
+      {
+       "field": "gamma_shape",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 1.3039346932355873
+      },
+      {
+       "field": "grid_point_latitude",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 30.5
+      },
+      {
+       "field": "grid_point_longitude",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": -9.6
+      },
+      {
+       "field": "min_reference_years",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 30.0
+      },
+      {
+       "field": "reference_end_year",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 2020.0
+      },
+      {
+       "field": "reference_nonzero_count",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 30.0
+      },
+      {
+       "field": "reference_spi_mean",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": -0.007041940705148306
+      },
+      {
+       "field": "reference_spi_std",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 1.0171222154662862
+      },
+      {
+       "field": "reference_start_year",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 1991.0
+      },
+      {
+       "field": "reference_years_used",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 30.0
+      },
+      {
+       "field": "reference_zero_count",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 0.0
+      },
+      {
+       "field": "requested_latitude",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 30.43
+      },
+      {
+       "field": "requested_longitude",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": -9.61
+      },
+      {
+       "field": "spi",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": -0.37487872068189115
+      },
+      {
+       "field": "timescale_months",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 3.0
+      },
+      {
+       "field": "window_total_mm",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 59.14615062647499
+      },
+      {
+       "field": "zero_probability",
+       "tool_output_id": "era5_spi",
+       "unit": null,
+       "value": 0.0
+      }
+     ],
+     "text": "era5_spi (ERA5-Land monthly averaged data from 1950 to present (reanalysis-era5-land-monthly-means)): status ok. cumulative_probability 0.3538753326849313; gamma_scale_mm 88.06907808432092; gamma_shape 1.3039346932355873; grid_point_latitude 30.5; grid_point_longitude -9.6; min_reference_years 30; reference_end_year 2020; reference_nonzero_count 30; reference_spi_mean -0.007041940705148306; reference_spi_std 1.0171222154662862; reference_start_year 1991; reference_years_used 30; reference_zero_count 0; requested_latitude 30.43; requested_longitude -9.61; spi -0.37487872068189115; timescale_months 3; window_total_mm 59.14615062647499; zero_probability 0.",
+     "tool_output_ids": [
+      "era5_spi"
+     ]
+    },
+    {
+     "evidence_ids": [],
+     "numbers": [
+      {
+       "field": "anomaly_c",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 2.2178629356076875
+      },
+      {
+       "field": "grid_point_latitude",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 30.5
+      },
+      {
+       "field": "grid_point_longitude",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": -9.6
+      },
+      {
+       "field": "min_reference_years",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 30.0
+      },
+      {
+       "field": "percentile_rank",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 1.0
+      },
+      {
+       "field": "reference_end_year",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 2020.0
+      },
+      {
+       "field": "reference_mean_c",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 15.216475242083785
+      },
+      {
+       "field": "reference_sd_c",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 0.8697113121983948
+      },
+      {
+       "field": "reference_start_year",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 1991.0
+      },
+      {
+       "field": "reference_years_used",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 30.0
+      },
+      {
+       "field": "requested_latitude",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 30.43
+      },
+      {
+       "field": "requested_longitude",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": -9.61
+      },
+      {
+       "field": "standardized_anomaly",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 2.5501139337851435
+      },
+      {
+       "field": "timescale_months",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 3.0
+      },
+      {
+       "field": "window_mean_c",
+       "tool_output_id": "era5_temperature_anomaly",
+       "unit": null,
+       "value": 17.434338177691473
+      }
+     ],
+     "text": "era5_temperature_anomaly (ERA5-Land monthly averaged data from 1950 to present (reanalysis-era5-land-monthly-means)): status ok. anomaly_c 2.2178629356076875; grid_point_latitude 30.5; grid_point_longitude -9.6; min_reference_years 30; percentile_rank 1; reference_end_year 2020; reference_mean_c 15.216475242083785; reference_sd_c 0.8697113121983948; reference_start_year 1991; reference_years_used 30; requested_latitude 30.43; requested_longitude -9.61; standardized_anomaly 2.5501139337851435; timescale_months 3; window_mean_c 17.434338177691473.",
+     "tool_output_ids": [
+      "era5_temperature_anomaly"
+     ]
+    },
+    {
+     "evidence_ids": [],
+     "numbers": [
+      {
+       "field": "anomaly_m3m3",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": -0.05049287497148215
+      },
+      {
+       "field": "grid_point_latitude",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 30.5
+      },
+      {
+       "field": "grid_point_longitude",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": -9.6
+      },
+      {
+       "field": "min_reference_years",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 30.0
+      },
+      {
+       "field": "percentile_rank",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 0.2
+      },
+      {
+       "field": "reference_end_year",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 2020.0
+      },
+      {
+       "field": "reference_mean_m3m3",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 0.14775507931986814
+      },
+      {
+       "field": "reference_sd_m3m3",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 0.060524112987675134
+      },
+      {
+       "field": "reference_start_year",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 1991.0
+      },
+      {
+       "field": "reference_years_used",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 30.0
+      },
+      {
+       "field": "requested_latitude",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 30.43
+      },
+      {
+       "field": "requested_longitude",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": -9.61
+      },
+      {
+       "field": "standardized_anomaly",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": -0.8342604703973819
+      },
+      {
+       "field": "timescale_months",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 3.0
+      },
+      {
+       "field": "window_mean_m3m3",
+       "tool_output_id": "era5_soil_moisture_anomaly",
+       "unit": null,
+       "value": 0.09726220434838599
+      }
+     ],
+     "text": "era5_soil_moisture_anomaly (ERA5-Land monthly averaged data from 1950 to present (reanalysis-era5-land-monthly-means)): status ok. anomaly_m3m3 -0.05049287497148215; grid_point_latitude 30.5; grid_point_longitude -9.6; min_reference_years 30; percentile_rank 0.2; reference_end_year 2020; reference_mean_m3m3 0.14775507931986814; reference_sd_m3m3 0.060524112987675134; reference_start_year 1991; reference_years_used 30; requested_latitude 30.43; requested_longitude -9.61; standardized_anomaly -0.8342604703973819; timescale_months 3; window_mean_m3m3 0.09726220434838599.",
+     "tool_output_ids": [
+      "era5_soil_moisture_anomaly"
+     ]
+    }
+   ],
+   "evidence": [
+    {
+     "chunk_id": "fao-iddp66-crop-yield-response-to-water:00549",
+     "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. PDF p. 285 (printed p. 270).",
+     "doc_id": "fao-iddp66-crop-yield-response-to-water",
+     "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+     "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+     "license_status": "stated_in_document",
+     "pages": "PDF p. 285 (printed p. 270)"
+    },
+    {
+     "chunk_id": "fao-iddp66-crop-yield-response-to-water:00550",
+     "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. PDF pp. 285-286 (printed p. 270-271).",
+     "doc_id": "fao-iddp66-crop-yield-response-to-water",
+     "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+     "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+     "license_status": "stated_in_document",
+     "pages": "PDF pp. 285-286 (printed p. 270-271)"
+    },
+    {
+     "chunk_id": "fao-iddp66-crop-yield-response-to-water:00632",
+     "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. PDF pp. 322-323 (printed p. 307-308).",
+     "doc_id": "fao-iddp66-crop-yield-response-to-water",
+     "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+     "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+     "license_status": "stated_in_document",
+     "pages": "PDF pp. 322-323 (printed p. 307-308)"
+    },
+    {
+     "chunk_id": "fao-iddp66-crop-yield-response-to-water:00892",
+     "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. PDF pp. 449-450 (printed p. 434-435).",
+     "doc_id": "fao-iddp66-crop-yield-response-to-water",
+     "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+     "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+     "license_status": "stated_in_document",
+     "pages": "PDF pp. 449-450 (printed p. 434-435)"
+    },
+    {
+     "chunk_id": "fao-iddp66-crop-yield-response-to-water:00551",
+     "citation": "Steduto et al. (2012). Crop yield response to water. FAO Irrigation and Drainage Paper 66. FAO. PDF p. 286 (printed p. 271).",
+     "doc_id": "fao-iddp66-crop-yield-response-to-water",
+     "landing_url": "https://www.fao.org/3/i2800e/i2800e00.htm",
+     "license": "\u00a9 FAO 2012 (FAO copyright notice in the document front matter)",
+     "license_status": "stated_in_document",
+     "pages": "PDF p. 286 (printed p. 271)"
+    }
+   ],
+   "excluded_options": [
+    {
+     "intervention_id": "supplemental-irrigation",
+     "name": "Supplemental irrigation of rainfed crops",
+     "narrative": {
+      "evidence_ids": [],
+      "numbers": [],
+      "text": "Supplemental irrigation of rainfed crops (supplemental-irrigation): excluded. Reasons: needs_evidence, production_system_mismatch.",
+      "tool_output_ids": [
+       "constraints:supplemental-irrigation"
+      ]
+     },
+     "reason_codes": [
+      "needs_evidence",
+      "production_system_mismatch"
+     ]
+    }
+   ],
+   "fallback": true,
+   "fallback_note": "Model output rejected (provider-auth); deterministic values only.",
+   "generator": "deterministic-fallback",
+   "limitations": [
+    "Deterministic fallback report: values are copied from tool outputs; no AI narrative is included.",
+    "Indicator values are reported without drought categories or composite scores.",
+    "Benefit, cost and risk are unknown unless the catalog cites a source.",
+    "Reference years with incomplete data were excluded, not imputed."
+   ],
+   "provenance_refs": [
+    "bundle",
+    "chirps_spi",
+    "era5_spi",
+    "era5_temperature_anomaly",
+    "era5_soil_moisture_anomaly",
+    "ranking:deficit-irrigation",
+    "ranking:irrigation-scheduling",
+    "constraints:supplemental-irrigation"
+   ],
+   "ranked_recommendations": [
+    {
+     "benefit": "unknown",
+     "cost": "unknown",
+     "intervention_id": "deficit-irrigation",
+     "name": "Deficit irrigation",
+     "narrative": {
+      "evidence_ids": [],
+      "numbers": [
+       {
+        "field": "score_total",
+        "tool_output_id": "ranking:deficit-irrigation",
+        "unit": null,
+        "value": 0.75
+       },
+       {
+        "field": "constraint_fit",
+        "tool_output_id": "ranking:deficit-irrigation",
+        "unit": null,
+        "value": 1.0
+       },
+       {
+        "field": "evidence_strength",
+        "tool_output_id": "ranking:deficit-irrigation",
+        "unit": null,
+        "value": 0.5
+       },
+       {
+        "field": "indicator_relevance",
+        "tool_output_id": "ranking:deficit-irrigation",
+        "unit": null,
+        "value": 1.0
+       }
+      ],
+      "text": "Deficit irrigation (deficit-irrigation): ranked with score 0.75. Benefit, cost and risk are stated in the catalog entry.",
+      "tool_output_ids": [
+       "ranking:deficit-irrigation"
+      ]
+     },
+     "risk": "unknown"
+    },
+    {
+     "benefit": "unknown",
+     "cost": "unknown",
+     "intervention_id": "irrigation-scheduling",
+     "name": "Irrigation scheduling",
+     "narrative": {
+      "evidence_ids": [],
+      "numbers": [
+       {
+        "field": "score_total",
+        "tool_output_id": "ranking:irrigation-scheduling",
+        "unit": null,
+        "value": 0.75
+       },
+       {
+        "field": "constraint_fit",
+        "tool_output_id": "ranking:irrigation-scheduling",
+        "unit": null,
+        "value": 1.0
+       },
+       {
+        "field": "evidence_strength",
+        "tool_output_id": "ranking:irrigation-scheduling",
+        "unit": null,
+        "value": 0.5
+       },
+       {
+        "field": "indicator_relevance",
+        "tool_output_id": "ranking:irrigation-scheduling",
+        "unit": null,
+        "value": 1.0
+       }
+      ],
+      "text": "Irrigation scheduling (irrigation-scheduling): ranked with score 0.75. Benefit, cost and risk are stated in the catalog entry.",
+      "tool_output_ids": [
+       "ranking:irrigation-scheduling"
+      ]
+     },
+     "risk": "unknown"
+    }
+   ],
+   "schema_version": 1,
+   "summary": {
+    "evidence_ids": [],
+    "numbers": [],
+    "text": "Deterministic fallback report: bundle and ranking results are reproduced below without AI interpretation.",
+    "tool_output_ids": [
+     "bundle"
+    ]
+   }
+  },
+  "scenario": {
+   "crop": "wheat",
+   "exclude_reference": true,
+   "has_irrigation_equipment": true,
+   "has_water_source": true,
+   "indicators": [
+    "chirps_spi",
+    "era5_spi",
+    "era5_temperature_anomaly",
+    "era5_soil_moisture_anomaly"
+   ],
+   "land_fallback_max_km": 15.0,
+   "latitude": 30.43,
+   "longitude": -9.61,
+   "min_reference_years": 30,
+   "production_system": "irrigated",
+   "query": "deficit irrigation scheduling",
+   "reference_end_year": 2020,
+   "reference_start_year": 1991,
+   "season": "2024-03",
+   "target_end_month": "2024-03",
+   "timescale_months": 3,
+   "top_k": 5
+  },
+  "scenario_id": "capture-reference-morocco",
+  "status": "partial",
+  "trace": {
+   "agent_version": 1,
+   "component_versions": {
+    "agent": "1",
+    "catalog_version": "1",
+    "model": "unavailable",
+    "report_schema": "1"
+   },
+   "config": {
+    "llm_timeout_seconds": 180.0,
+    "max_llm_calls": 1,
+    "max_steps": 32,
+    "max_tokens": 16000,
+    "max_tool_calls": 16,
+    "seed": "unsupported-by-model; not set",
+    "temperature": null,
+    "token_budget": 100000,
+    "total_timeout_seconds": 900.0
+   },
+   "duration_ms_total": 5343.9999999827705,
+   "ended_at": "2026-10-31T22:01:05.239967+00:00",
+   "outcome": "partial",
+   "problems": [
+    "[provider-auth] Draft call failed: No Baseten API key configured; LLM drafting disabled."
+   ],
+   "run_id": "0c7136f5dfb241abbc73412f696a617a",
+   "scenario": {
+    "crop": "wheat",
+    "exclude_reference": true,
+    "has_irrigation_equipment": true,
+    "has_water_source": true,
+    "indicators": [
+     "chirps_spi",
+     "era5_spi",
+     "era5_temperature_anomaly",
+     "era5_soil_moisture_anomaly"
+    ],
+    "land_fallback_max_km": 15.0,
+    "latitude": 30.43,
+    "longitude": -9.61,
+    "min_reference_years": 30,
+    "production_system": "irrigated",
+    "query": "deficit irrigation scheduling",
+    "reference_end_year": 2020,
+    "reference_start_year": 1991,
+    "season": "2024-03",
+    "target_end_month": "2024-03",
+    "timescale_months": 3,
+    "top_k": 5
+   },
+   "stages": [
+    {
+     "detail": "",
+     "duration_ms": 0.0,
+     "error_code": null,
+     "name": "validate_inputs",
+     "started_at": "2026-10-31T22:00:59.900923+00:00",
+     "status": "ok"
+    },
+    {
+     "detail": "statuses={'chirps_spi': 'ok', 'era5_spi': 'ok', 'era5_temperature_anomaly': 'ok', 'era5_soil_moisture_anomaly': 'ok'}",
+     "duration_ms": 2625.0,
+     "error_code": null,
+     "name": "bundle",
+     "started_at": "2026-10-31T22:00:59.900923+00:00",
+     "status": "ok"
+    },
+    {
+     "detail": "5 passages via bm25",
+     "duration_ms": 2687.999999965541,
+     "error_code": null,
+     "name": "retrieval",
+     "started_at": "2026-10-31T22:01:02.521378+00:00",
+     "status": "ok"
+    },
+    {
+     "detail": "",
+     "duration_ms": 0.0,
+     "error_code": null,
+     "name": "ranking",
+     "started_at": "2026-10-31T22:01:05.213964+00:00",
+     "status": "ok"
+    },
+    {
+     "detail": "",
+     "duration_ms": 15.000000013969839,
+     "error_code": "provider-auth",
+     "name": "draft",
+     "started_at": "2026-10-31T22:01:05.215968+00:00",
+     "status": "failed"
+    },
+    {
+     "detail": "outcome=partial",
+     "duration_ms": 0.0,
+     "error_code": null,
+     "name": "finalize",
+     "started_at": "2026-10-31T22:01:05.238966+00:00",
+     "status": "ok"
+    },
+    {
+     "detail": "",
+     "duration_ms": 0.0,
+     "error_code": null,
+     "name": "validate",
+     "started_at": "2026-10-31T22:01:05.238966+00:00",
+     "status": "skipped"
+    }
+   ],
+   "started_at": "2026-10-31T22:00:59.900923+00:00",
+   "tool_calls": [
+    {
+     "duration_ms": 2609.99999998603,
+     "error_code": null,
+     "input_summary": "{\"latitude\":30.43,\"longitude\":-9.61,\"target_end_month\":\"2024-03\",\"timescale_months\":3,\"reference_start_year\":1991,\"reference_end_year\":2020,\"min_reference_years\":30,\"land_fallback_max_km\":15.0,\"indicators\":[\"chirps_spi\",\"era5_spi\",\"era5_temperature_anomaly\",\"era5_soil_moisture_anomaly\"]}",
+     "name": "get_environmental_bundle",
+     "ok": true,
+     "output_summary": "statuses={'chirps_spi': 'ok', 'era5_spi': 'ok', 'era5_temperature_anomaly': 'ok', 'era5_soil_moisture_anomaly': 'ok'} {\"indicator\":\"environmental_bundle\",\"latitude\":30.43,\"longitude\":-9.61,\"target_end_month\":\"2024-03\",\"timescale_months\":3,\"reference_start_year\":1991,\"reference_end_year\":2020,\"entries\":[{\"indicator\":\"chirps_spi\",\"status\":\"ok\",\"error_type\":null,\"error_message\":null,\"result\":{\"status\":\"ok\",\"indicator\":\"standardized_precipitation_index\",\"data_source\":\"CHIRPS v3.0 Final, monthly, 0.05 degree grid\",\"method\":\"Gamma distribution (Thom 1958 approximation of maximum likelihood) fitted per calendar month to non-zero reference window totals; zeros as a point mass q = zeros / reference years; equiprobability transform to a standard normal quantile (McKee et al. 1993; WMO-No. 1090).\",\"timescale_months\":3,\"target_window_start\":\"2024-01\",\"target_window_end\":\"2024-03\",\"window_total_mm\":76.8719367980957,\"spi\":-0.517141160387881,\"cumulative_probability\":0.3025288112918043,\"message\":null,\"requested_latitude\":30.43,\"requested_longitude\":-9.61,\"grid_cell_center_latitude\":30.424999559298158,\"grid_cell_center_longitude\":-9.624997461214662,\"point_on_cell_boundary\":false,\"reference_start_year\":1991,\"reference_end_year\":2020,\"min_reference_years\":30,\"reference_years_used\":30,\"reference_years_included\":[1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020],\"reference_years_excluded\":[],\"target_in_reference_period\":false,\"gamma_shape\":2.992306132277662,\"gamma_scale_mm\":40.10676384533868,\"zero_probability\":0.0,\"reference_zero_count\":0,\"reference_nonzero_count\":30,\"reference_spi_mean\":-0.0020577673148329876,\"reference_spi_std\":1.0167750081691085,\"source_files\":[{\"year\":1991,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1991.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22139040,\"remote_etag\":\"\\\"6747c536-151d0a0\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:19:50 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:17.888627Z\"},{\"year\":1991,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1991.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":21977660,\"remote_etag\":\"\\\"67482bc5-14f5a3c\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 08:37:25 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:17.958820Z\"},{\"year\":1991,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1991.03.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22587282,\"remote_etag\":\"\\\"6747d395-158a792\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 02:21:09 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:18.048538Z\"},{\"year\":1992,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1992.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":21764846,\"remote_etag\":\"\\\"6747c5aa-14c1aee\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:21:46 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:17.988541Z\"},{\"year\":1992,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1992.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":21787690,\"remote_etag\":\"\\\"67482c53-14c742a\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 08:39:47 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:19.619358Z\"},{\"year\":1992,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1992.03.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":23408446,\"remote_etag\":\"\\\"6747d41c-1652f3e\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 02:23:24 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:19.758868Z\"},{\"year\":1993,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1993.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22183098,\"remote_etag\":\"\\\"6747c620-1527cba\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:23:44 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:19.721685Z\"},{\"year\":1993,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1993.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":21560326,\"remote_etag\":\"\\\"67482cde-148fc06\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 08:42:06 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:19.816067Z\"},{\"year\":1993,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1993.03.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22447460,\"remote_etag\":\"\\\"6747d4a1-1568564\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 02:25:37 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:21.548864Z\"},{\"year\":1994,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1994.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":21641134,\"remote_etag\":\"\\\"6747c694-14a37ae\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:25:40 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:21.438722Z\"},{\"year\":1994,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1994.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":21052122,\"remote_etag\":\"\\\"67482d68-1413ada\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 08:44:24 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:21.448665Z\"},{\"year\":1994,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1994.03.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":21629950,\"remote_etag\":\"\\\"6747d522-14a0bfe\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 02:27:46 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:21.778626Z\"},{\"year\":1995,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1995.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":21147594,\"remote_etag\":\"\\\"6747c707-142afca\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:27:35 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:23.098691Z\"},{\"year\":1995,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1995.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":20907426,\"remote_etag\":\"\\\"67482dfc-13f05a2\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 08:46:52 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:23.458451Z\"},{\"year\":1995,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1995.03.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22513968,\"remote_etag\":\"\\\"6747d5a8-1578930\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 02:30:00 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:23.498534Z\"},{\"year\":1996,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1996.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":21710744,\"remote_etag\":\"\\\"6747c77b-14b4798\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:29:31 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:23.778503Z\"},{\"year\":1996,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1996.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":21756084,\"remote_etag\":\"\\\"67482e93-14bf8b4\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 08:49:23 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:24.792177Z\"},{\"year\":1996,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1996.03.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22100526,\"remote_etag\":\"\\\"6747d637-1513a2e\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 02:32:23 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:25.263299Z\"},{\"year\":1997,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1997.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22154298,\"remote_etag\":\"\\\"6747c7ee-1520c3a\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:31:26 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:25.223914Z\"},{\"year\":1997,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1997.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":20276212,\"remote_etag\":\"\\\"67482f1b-13563f4\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 08:51:39 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:25.611219Z\"},{\"year\":1997,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1997.03.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":21806738,\"remote_etag\":\"\\\"6747d6bb-14cbe92\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 02:34:35 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:26.601233Z\"},{\"year\":1998,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1998.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":23057394,\"remote_etag\":\"\\\"6747c862-15fd3f2\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:33:22 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:27.028504Z\"},{\"year\":1998,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1998.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22101254,\"remote_etag\":\"\\\"67482fb3-1513d06\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 08:54:11 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:27.063108Z\"},{\"year\":1998,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1998.03.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22565344,\"remote_etag\":\"\\\"6747d745-15851e0\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 02:36:53 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:27.358553Z\"},{\"year\":1999,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1999.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22008782,\"remote_etag\":\"\\\"6747c8d4-14fd3ce\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:35:16 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:28.240878Z\"},{\"year\":1999,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1999.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22049286,\"remote_etag\":\"\\\"67483042-1507206\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 08:56:34 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:28.638633Z\"},{\"year\":1999,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.1999.03.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":21335052,\"remote_etag\":\"\\\"6747d7d5-1458c0c\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 02:39:17 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:28.748637Z\"},{\"year\":2000,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2000.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":21977612,\"remote_etag\":\"\\\"6747c949-14f5a0c\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:37:13 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:29.078541Z\"},{\"year\":2000,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2000.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":20277738,\"remote_etag\":\"\\\"674830ce-13569ea\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 08:58:54 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:29.953532Z\"},{\"year\":2000,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2000.03.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":21810288,\"remote_etag\":\"\\\"6747d859-14ccc70\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 02:41:29 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:30.181131Z\"},{\"year\":2001,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2001.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22341038,\"remote_etag\":\"\\\"6747c9bb-154e5ae\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:39:07 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:30.428481Z\"},{\"year\":2001,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2001.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22903858,\"remote_etag\":\"\\\"6748315e-15d7c32\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 09:01:18 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:30.788364Z\"},{\"year\":2001,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2001.03.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22824312,\"remote_etag\":\"\\\"6747d8e4-15c4578\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 02:43:48 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:31.948716Z\"},{\"year\":2002,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2002.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22694774,\"remote_etag\":\"\\\"6747ca2d-15a4b76\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:41:01 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:32.198498Z\"},{\"year\":2002,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2002.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22900502,\"remote_etag\":\"\\\"674831e8-15d6f16\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 09:03:36 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:32.158668Z\"},{\"year\":2002,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2002.03.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":23453686,\"remote_etag\":\"\\\"6747d96c-165dff6\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 02:46:04 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:32.598866Z\"},{\"year\":2003,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2003.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22344976,\"remote_etag\":\"\\\"6747caa1-154f510\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:42:57 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:33.678783Z\"},{\"year\":2003,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2003.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22828640,\"remote_etag\":\"\\\"67483283-15c5660\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 09:06:11 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:33.808575Z\"},{\"year\":2003,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2003.03.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22391066,\"remote_etag\":\"\\\"6747d9f6-155a91a\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 02:48:22 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:33.818830Z\"},{\"year\":2004,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2004.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22981532,\"remote_etag\":\"\\\"6747cb14-15eab9c\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:44:52 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:34.128744Z\"},{\"year\":2004,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2004.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22792146,\"remote_etag\":\"\\\"67483320-15bc7d2\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 09:08:48 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:35.458396Z\"},{\"year\":2004,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2004.03.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":23055098,\"remote_etag\":\"\\\"6747da80-15fcafa\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 02:50:40 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:35.713014Z\"},{\"year\":2005,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2005.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22047340,\"remote_etag\":\"\\\"6747cb89-1506a6c\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:46:49 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:36.148394Z\"},{\"year\":2005,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2005.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22423218,\"remote_etag\":\"\\\"674833b6-15626b2\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 09:11:18 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:35.958514Z\"},{\"year\":2005,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2005.03.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22932724,\"remote_etag\":\"\\\"6747db07-15decf4\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 02:52:55 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:37.179416Z\"},{\"year\":2006,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2006.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":23346454,\"remote_etag\":\"\\\"6747cbfb-1643d16\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:48:43 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:37.368937Z\"},{\"year\":2006,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2006.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":23338054,\"remote_etag\":\"\\\"6748344c-1641c46\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 09:13:48 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:37.798967Z\"},{\"year\":2006,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2006.03.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22403394,\"remote_etag\":\"\\\"6747db8c-155d942\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 02:55:08 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:37.678657Z\"},{\"year\":2007,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2007.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22374464,\"remote_etag\":\"\\\"6747cc70-1556840\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:50:40 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:38.809847Z\"},{\"year\":2007,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2007.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":23155486,\"remote_etag\":\"\\\"674834e2-161531e\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 09:16:18 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:39.103593Z\"},{\"year\":2007,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2007.03.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22694384,\"remote_etag\":\"\\\"6747dc0d-15a49f0\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 02:57:17 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:39.718516Z\"},{\"year\":2008,\"month\":1,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2008.01.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":22400480,\"remote_etag\":\"\\\"6747ccec-155cde0\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 01:52:44 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:39.421046Z\"},{\"year\":2008,\"month\":2,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2008.02.tif\",\"access_mode\":\"remote_range_read\",\"sha256\":null,\"size_bytes\":21465284,\"remote_etag\":\"\\\"67483571-14788c4\\\"\",\"remote_last_modified\":\"Thu, 28 Nov 2024 09:18:41 GMT\",\"retrieved_at_utc\":\"2026-10-27T11:46:40.999016Z\"},{\"year\":2008,\"month\":3,\"source_url\":\"https://data.chc.ucsb.edu/products/CHIRPS/v3.0/monthly/global/tifs/chirps-v3.0.2008.03.tif\",\"access_mode\":\"remote_ran... [truncated, 53493 chars total]"
+    },
+    {
+     "duration_ms": 2687.999999965541,
+     "error_code": null,
+     "input_summary": "query='deficit irrigation scheduling' top_k=5",
+     "name": "retrieve_evidence",
+     "ok": true,
+     "output_summary": "retriever=bm25 hits=fao-iddp66-crop-yield-response-to-water:00549@10.903,fao-iddp66-crop-yield-response-to-water:00550@8.795,fao-iddp66-crop-yield-response-to-water:00632@8.775,fao-iddp66-crop-yield-response-to-water:00892@8.690,fao-iddp66-crop-yield-response-to-water:00551@8.521"
+    },
+    {
+     "duration_ms": 0.0,
+     "error_code": null,
+     "input_summary": "",
+     "name": "rank_adaptation_options",
+     "ok": true,
+     "output_summary": "ranked=['deficit-irrigation', 'irrigation-scheduling'] excluded=['supplemental-irrigation']"
+    }
+   ],
+   "usage": null,
+   "validator_verdicts": [],
+   "warnings": []
+  },
+  "updated_at": "2026-10-31T22:01:05.256966Z",
+  "version": 1,
+  "warnings": []
+ },
+ "key": "reference-morocco",
+ "label": "Reference: Souss-Massa, Morocco (30.43, -9.61)",
+ "snapshot_version": 1
+}

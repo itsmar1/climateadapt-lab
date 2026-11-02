@@ -6,8 +6,10 @@
 # Backend: http://127.0.0.1:8000 (OpenAPI at /docs, health at /health).
 # Frontend: http://localhost:5173 (matches the backend CORS default origin).
 #
-# Data (caches, ingested corpus, snapshots, sqlite) is bind-mounted from the
+# Data (caches, ingested corpus, sqlite) is bind-mounted from the
 # host ./data directory, so the images stay small and runs reuse warm caches.
+# Demo snapshots ship inside the backend image (tracked demo/snapshots/);
+# override CLIMATEADAPT_DEMO_SNAPSHOTS_DIR to serve private captures instead.
 # Fresh ERA5-Land downloads additionally need a Copernicus account file
 # mounted read-only (uncomment below); without it, cached ERA5 + CHIRPS work
 # and new CDS requests fail with a clear error.

@@ -9,7 +9,8 @@ nothing about locations not listed here. See KI-14.
 
 - Date: 2026-10-31. Runner: `scripts/capture_demo_snapshot.py` (full
   `run_scenario_job`: bundle → retrieval → ranking → draft → validate →
-  finalize), snapshots stored under git-ignored `data/demo_snapshots/`.
+  finalize). Captures landed in git-ignored `data/demo_snapshots/`; since P19
+  the three audited ones also ship in tracked `demo/snapshots/`.
 - LLM: the deterministic no-key provider, always. **Zero model calls, $0.**
   Every report below is the labelled deterministic fallback, never model prose.
 - Identical scenario except lat/lon (isolates geography): target 2024-03,
@@ -124,7 +125,12 @@ model-written drafts (no live LLM call was made in P14).
 ## Snapshot catalogue
 
 Regenerate any entry with the command in `scripts/capture_demo_snapshot.py`
-(changing `--key`/`--label`/coords). Files are git-ignored.
+(changing `--key`/`--label`/coords). Since P19, `reference-morocco`,
+`trondelag-norway`, and `atlantic-ocean` ship in tracked `demo/snapshots/`
+(see `demo/README.md` for the audit); `punjab-india` stays git-ignored under
+`data/demo_snapshots/` because its CHIRPS entry failed on sandbox-blocked
+egress (proxy address in the stored error text) — recapture outside the
+sandbox to track it.
 
 | Key | Label | Captured (UTC) | Status |
 |---|---|---|---|

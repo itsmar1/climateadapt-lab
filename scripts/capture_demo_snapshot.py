@@ -5,6 +5,9 @@ CHIRPS range reads / CDS downloads unless --offline) and the deterministic
 no-LLM provider, then stores the full scenario detail as a demo snapshot.
 Snapshots are always deterministic-fallback reports (zero model calls, zero
 cost); the UI labels them "cached real-data snapshot" with the timestamp.
+Default output is the TRACKED demo/snapshots/ (audit before committing: no
+passage text, no secrets, no local paths — see demo/README.md); use --out-dir
+for private captures under git-ignored data/ instead.
 
 PowerShell (reference point):
 

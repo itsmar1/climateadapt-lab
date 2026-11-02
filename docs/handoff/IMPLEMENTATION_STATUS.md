@@ -229,6 +229,18 @@ Results (CONFIRMED 2026-11-01, train 20,000 seeded / test 543,055 evaluable): lo
 
 Result: acceptance path (b) — honest negative. No live call was made (gate off), so no draft has been accepted yet (KI-35 stays open). Timing: saved warm trace shows the ~2 min run is LLM-dominated (draft 92.1 s of 97.4 s, 94.6%); per-stage wall-clock times already ship in `trace.stages`, so the job progress payload was deliberately left unchanged (no breaking API change).
 
+### 2.20 Fresh-clone judge path (P19 2026-11-01)
+| Path | Purpose | Evidence |
+|---|---|---|
+| `demo/snapshots/` + `demo/README.md` | 3 audited real-data snapshots tracked (reference-morocco, trondelag-norway, atlantic-ocean); punjab-india excluded (sandbox proxy address in its CHIRPS error text) | T (new validation + no-corpus-text tests green) |
+| `api/demo.py`, `config.py`, `api/main.py` | Default snapshot dir is now tracked `demo/snapshots/`; override still wins; route description + contract regenerated | T |
+| `Dockerfile`, `docker-compose.yml` | `COPY demo ./demo` so the image serves snapshots; compose comment updated | U (no daemon here; owner runs `docker compose up --build`) |
+| `scripts/verify_fresh_clone.ps1` | Clone → sync → demo-mode servers → probe `/health` + `/v1/demo/*`; `-SkipServers` for restricted sandboxes | Partially run: parses + executes; clone fails here only on sandbox git ownership, sync on blocked PyPI — owner runs full |
+| `tests/test_integration_workflow.py` | `test_missing_corpus_yields_typed_warning_not_a_crash`: evidenceless partial with `[retrieval-empty]`, findings/ranking intact | T, green |
+| README, DEMO_RUNS, DEMO_SCRIPT, SUBMISSION_CHECKLIST | "Add your model key" (§6 facts only + Meta-API owner hook), corpus/CDS zero-key notes, tracked paths | D |
+
+Fresh-clone audit (CONFIRMED): git-ignored demo needs are corpus PDFs/text, `data/` caches, CDS + Baseten credentials; without them a clone serves `/health`, live CHIRPS reads, typed ERA5 `download_error`s, evidenceless partials — and, since P19, the full zero-key demo from tracked snapshots. Remaining owner-run: full `verify_fresh_clone.ps1`, TestClient suites, docker build, CI.
+
 ### 2.6 Scientific RAG (`src/climateadapt/rag/`, first batch)
 | Path | Purpose | Evidence |
 |---|---|---|

@@ -29,6 +29,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 COPY src ./src
 COPY corpus ./corpus
+COPY demo ./demo
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked
 

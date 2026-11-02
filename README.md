@@ -11,7 +11,7 @@ catalog, deterministic constraints/ranking, `scripts/validate_catalog.py`; see
 workflow, `docs/AGENT_WORKFLOW.md`; scenario API + SQLite persistence in P11).
 React input/analysis UI delivered 2026-10-31 (P12: `frontend/`, 42 Vitest tests
 green; recommendations/report UI delivered 2026-10-31 (P13: cited report, ranking panel, history, Markdown export; 79 Vitest tests green). Demo mode + e2e delivered (P14), Docker + CI authored but UNVERIFIED (P15), classical CropHarvest vision baseline delivered (P16, MLflow-tracked; see `docs/VISION_BASELINE.md`).
-Verified 2026-11-01: backend 773 passed + 84 sandbox-blocked socket tests (WinError 10013, zero assertion failures) in 18 min 33 s, vision 35/35, frontend 79/79, `ruff check .` clean;
+Verified 2026-11-01 (P19): backend 792 passed + 84 sandbox-blocked socket tests (WinError 10013, zero assertion failures) in 19 min 01 s, vision 35/35, frontend 79/79, `ruff check .` clean;
 details in `docs/handoff/IMPLEMENTATION_STATUS.md`, issues in `docs/handoff/KNOWN_ISSUES.md`.
 Full evidence: `docs/FINAL_VERIFICATION.md`; submission checklist: `docs/SUBMISSION_CHECKLIST.md`.
 
@@ -160,23 +160,39 @@ chart. No composite scores or severity labels are rendered anywhere; every API
 error `type` code maps to one specific message. P13 delivered the cited report (every claim with evidence links and platform-value chips, AI-vs-platform labels, fallback banner, always-visible limitations), the deterministic ranking panel (score breakdowns, unknowns, excluded reasons), scenario history with open/delete, and one-click Markdown export.
 Out of scope: authentication, mobile polish.
 
-## Demo mode
+## Demo mode (zero keys needed)
 
-For offline or rate-limited demos, the API can serve stored real-data runs:
+The fastest path on a fresh clone — no Baseten key, no CDS credentials, no
+corpus, no caches. The repo ships three audited real-data snapshots in tracked
+`demo/snapshots/` (see `demo/README.md` for the audit + licence notes):
 
 ```powershell
+uv sync --extra dev
 $env:CLIMATEADAPT_DEMO_MODE = 'true'
 uv run uvicorn climateadapt.api.main:app --reload
 ```
 
+Then open the frontend Demo page (`#/demo`, see "Run the frontend" below) or
+call the API directly:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/v1/demo/snapshots
+Invoke-RestMethod http://127.0.0.1:8000/v1/demo/snapshots/reference-morocco
+```
+
 `GET /v1/demo/snapshots` lists captures; `GET /v1/demo/snapshots/{key}`
-returns one. With the flag off both answer 404 (`demo_mode_disabled`).
-Capture with `uv run python scripts/capture_demo_snapshot.py --key <k>
---label "<label>" --lat <lat> --lon <lon>` (deterministic, zero model calls)
-into git-ignored `data/demo_snapshots/`. The frontend Demo page (`#/demo`)
-renders snapshots with a "Cached real-data snapshot" banner and capture
-timestamp. See `docs/DEMO_RUNS.md` (real results at four locations) and
-`docs/DEMO_SCRIPT.md` (walk-through + fallback plan).
+returns one verbatim. With the flag off both answer 404
+(`demo_mode_disabled`); unknown keys answer 404
+(`demo_snapshot_not_found`). Shipped keys: `reference-morocco` (all four
+indicators ok), `trondelag-norway` (CHIRPS `outside_coverage`, ERA5 ok),
+`atlantic-ocean` (ERA5 `missing_data` on a masked point). Every snapshot view
+carries a "Cached real-data snapshot" banner with the capture timestamp —
+stored results are never presented as live ones. Capture your own with
+`uv run python scripts/capture_demo_snapshot.py --key <k> --label "<label>"
+--lat <lat> --lon <lon>` (deterministic, zero model calls; writes to tracked
+`demo/snapshots/` by default — audit before committing — or `--out-dir` for
+private captures). See `docs/DEMO_RUNS.md` (real results at four locations)
+and `docs/DEMO_SCRIPT.md` (walk-through + fallback plan).
 
 ## Docker demo stack
 
@@ -298,18 +314,74 @@ Never commit your token. Tests never need credentials or network access.
 `CLIMATEADAPT_CDS_TIMEOUT_SECONDS` bound cdsapi's retries (applied only if your installed
 cdsapi exposes those options; otherwise a warning is logged).
 
-## Model access (Baseten inference)
+Expected cold timings (first run at a new location): CDS requests queue for
+≈20–60 s each plus download time, so a 30-year × 3-month bundle takes minutes;
+the agent default budget is 900 s per scenario and cold CDS legs have exceeded
+it on slow links (see `docs/DEMO_RUNS.md` failure modes — warm the caches or
+raise the timeout for live demos). Warm-cache reruns take seconds. **Demo mode
+needs no CDS credentials at all**: it serves stored snapshots, never requests.
+
+## Evidence corpus (fetch once, or run without it)
+
+The RAG corpus is built locally — PDFs and extracted text stay in git-ignored
+`data/corpus/` and are never committed:
+
+```powershell
+uv run python scripts/corpus_fetch.py    # automatic downloads (5 of 8 docs)
+# then place the 3 manual PDFs as data/corpus/raw/<doc_id>.pdf
+# (exact names in corpus/manifest.json: fao-wr22-*, icarda-*-2018, icarda-*-practice)
+uv run python scripts/corpus_ingest.py   # extract + chunk into data/corpus/processed/
+uv run python scripts/rag_search.py "supplemental irrigation rainfed wheat" --top-k 5
+```
+
+Without an ingested corpus the app still runs: retrieval yields zero passages,
+the scenario records the typed `[retrieval-empty] No passages retrieved.`
+warning, and the report is served evidenceless (findings, ranking, and
+limitations intact — verified by `test_missing_corpus_yields_typed_warning_not_a_crash`).
+What degrades: no cited evidence items; recommendation evidence-strength drops
+for entries whose sources are not ingested; `scripts/validate_catalog.py` and
+`scripts/capture_demo_snapshot.py` refuse without ingested text. Corpus
+licences are mixed (some NC/ND) — check `corpus/manifest.json` before any
+redistribution (KI-23).
+
+## Add your model key
 
 Reports are drafted by `meta-models/muse-spark-open-1026` through Baseten Model APIs (OpenAI-compatible `POST https://inference.baseten.co/v1/chat/completions`, `Authorization: Bearer` key). Full verification record: `docs/LLM_PROVIDER_NOTES.md` (docs read 2026-10-30; 5-call smoke test ≈$0.002; one report call ≈$0.051; one agent run ≈$0.098). Structured output is NOT enforced server-side for this model, so every draft is validated client-side against the report schema; rejected drafts fall back to a labelled deterministic report.
 
-Setup (no secrets in the repo — the key lives only in your shell or untracked `.env`):
+Setup (all facts below are from `docs/LLM_PROVIDER_NOTES.md` §6):
 
 ```powershell
-copy .env.example .env   # then set CLIMATEADAPT_BASETEN_API_KEY (or BASETEN_API_KEY)
-$env:CLIMATEADAPT_RUN_LIVE_LLM = "1"; uv run python scripts/llm_smoke.py   # tiny gated check
+copy .env.example .env   # .env lives at the REPO ROOT, next to this README
 ```
 
-Without a key (or without the flag) the app serves the deterministic fallback and spends nothing. Numeric rate/context limits and the credit balance are UNVERIFIED — confirm with the owner before any live run beyond the smoke test (KI-25).
+Then edit the untracked `.env` and set **one** of (first name preferred):
+
+- `CLIMATEADAPT_BASETEN_API_KEY=<your key>`
+- `BASETEN_API_KEY=<your key>` (Baseten's own documented name; also accepted)
+
+To point at a different endpoint or model (rarely needed), set
+`CLIMATEADAPT_BASETEN_BASE_URL` (default `https://inference.baseten.co/v1`)
+and/or `CLIMATEADAPT_BASETEN_MODEL_ID` (default
+`meta-models/muse-spark-open-1026`). No other provider is supported — the
+adapter implements only the verified Baseten Chat Completions call. Verify
+with the tiny gated check (one process, key never printed):
+
+```powershell
+$env:CLIMATEADAPT_RUN_LIVE_LLM = "1"; uv run python scripts/llm_smoke.py
+```
+
+**Never commit your key.** `.env` is git-ignored; the app key and any coding-agent
+login are separate things. Without a key the app serves deterministic outputs
+plus the labelled fallback (`[provider-auth]`) and spends nothing. Numeric
+rate/context limits and the credit balance are UNVERIFIED — confirm with the
+owner before any live run beyond the smoke test (KI-25).
+
+> If the hackathon materials call this credential a "Meta Model API key":
+> **[OWNER: fill in the real wording here.]** Could not verify from this repo:
+> whether "Meta Model API key" means the Baseten API key above, a different
+> credential, or a different endpoint; the blueprint (`technical_blueprint.txt`)
+> was never committed and the rubric was never provided (KI-32). Until
+> confirmed, only the Baseten route above is documented and supported.
 
 ## Error behaviour
 

@@ -52,15 +52,16 @@ Open http://localhost:5173 in a browser.
 
 ## Track B — cached snapshots (offline-proof)
 
-1. Click **Demo** (or open `#/demo`). Four stored real-data runs are listed
-   with capture timestamps: Morocco (4/4 ok), Punjab (ERA5 ok),
+1. Click **Demo** (or open `#/demo`). Three stored real-data runs are listed
+   with capture timestamps: Morocco (4/4 ok),
    Norway (CHIRPS `outside_coverage`, ERA5 ok), Atlantic (ERA5 `missing_data`
-   — the masked-point path).
+   — the masked-point path). (A fourth, Punjab, exists only in the local
+   git-ignored cache — its CHIRPS entry failed on sandbox-blocked egress.)
 2. Open each. **Expected:** the identical results UI plus the amber
    **Cached real-data snapshot** banner ("Stored results, not a live run").
 3. If the list shows "Demo mode is disabled", the server was started without
-   `CLIMATEADAPT_DEMO_MODE=true` — restart it with the flag. Snapshots live
-   in git-ignored `data/demo_snapshots/`; regenerate with
+   `CLIMATEADAPT_DEMO_MODE=true` — restart it with the flag. Snapshots ship
+   in tracked `demo/snapshots/`; regenerate with
    `scripts/capture_demo_snapshot.py` (see its `--help`).
 
 ## Fallback plan (say what is happening, then switch tracks)
@@ -68,9 +69,9 @@ Open http://localhost:5173 in a browser.
 | Failure | What the audience sees | Presenter action |
 |---|---|---|
 | No Baseten key / model error | Fallback banner + `[provider-auth]` problem | Expected: "deterministic mode, no AI narrative" |
-| Cold CDS location, minutes pass | Progress polls, possible `[total-timeout]` partial | Switch to Track B; the Punjab/Norway snapshots already show fresh-CDS values |
+| Cold CDS location, minutes pass | Progress polls, possible `[total-timeout]` partial | Switch to Track B; the Norway snapshot already shows fresh-CDS values |
 | CHIRPS remote reads fail | `download_error` entry, ERA5 cards still render | "CHIRPS needs its tile host; ERA5-Land carries the demo" |
-| Backend down entirely | "Backend could not be reached" | Restart `uvicorn`; if it stays down, narrate the snapshot JSONs in `data/demo_snapshots/` directly |
+| Backend down entirely | "Backend could not be reached" | Restart `uvicorn`; if it stays down, narrate the snapshot JSONs in `demo/snapshots/` directly |
 
 ## Do not claim
 

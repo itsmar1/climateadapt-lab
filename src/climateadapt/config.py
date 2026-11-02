@@ -60,7 +60,7 @@ class Settings(BaseSettings):
     )
     demo_snapshots_dir: Path | None = Field(
         default=None,
-        description="Snapshot directory; defaults to <data_dir>/demo_snapshots.",
+        description="Snapshot directory; defaults to tracked demo/snapshots/.",
     )
 
     # Baseten Model APIs (application inference; see docs/LLM_PROVIDER_NOTES.md).

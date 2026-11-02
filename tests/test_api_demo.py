@@ -9,15 +9,18 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
 from climateadapt.api.demo import (
+    DEFAULT_SNAPSHOTS_DIR,
     DemoSnapshotFile,
     DemoSnapshotList,
     list_demo_snapshots,
     load_demo_snapshot,
+    snapshots_dir,
     write_demo_snapshot,
 )
 from climateadapt.api.main import create_app
@@ -119,6 +122,64 @@ def test_traversal_and_bad_keys_rejected(tmp_path, monkeypatch):
             load_demo_snapshot(directory, "good").detail,
         )
     assert not (tmp_path / "escape.json").exists()
+
+
+# --- Tracked fallback directory (P19; run everywhere) ------------------------
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+TRACKED_SNAPSHOT_KEYS = frozenset(
+    {"reference-morocco", "trondelag-norway", "atlantic-ocean"}
+)
+"""Audited keys shipped in demo/snapshots/ (see demo/README.md)."""
+
+EVIDENCE_METADATA_KEYS = frozenset(
+    {
+        "chunk_id",
+        "citation",
+        "doc_id",
+        "landing_url",
+        "license",
+        "license_status",
+        "pages",
+    }
+)
+"""Evidence items are citation metadata only: no text/excerpt field may exist."""
+
+
+def test_default_snapshots_dir_is_the_tracked_fallback(tmp_path):
+    assert snapshots_dir(tmp_path / "data", None) == DEFAULT_SNAPSHOTS_DIR
+    assert DEFAULT_SNAPSHOTS_DIR == Path("demo/snapshots")
+    override = tmp_path / "private"
+    assert snapshots_dir(tmp_path / "data", override) == override
+
+
+def test_tracked_snapshots_validate_and_match_the_audit():
+    directory = ROOT / DEFAULT_SNAPSHOTS_DIR
+    assert directory.is_dir(), "fresh clones must ship demo/snapshots/"
+    summaries = list_demo_snapshots(directory)
+    assert {s.key for s in summaries} == TRACKED_SNAPSHOT_KEYS
+    for summary in summaries:
+        snapshot = load_demo_snapshot(directory, summary.key)
+        assert snapshot is not None
+        assert snapshot.key == summary.key
+        assert snapshot.detail.status == "partial"
+        assert snapshot.detail.report is not None
+        assert snapshot.detail.report.fallback is True
+        assert snapshot.detail.report.generator == "deterministic-fallback"
+
+
+def test_tracked_snapshots_carry_no_corpus_text():
+    """Structural guard: evidence entries hold metadata fields only."""
+    directory = ROOT / DEFAULT_SNAPSHOTS_DIR
+    for summary in list_demo_snapshots(directory):
+        snapshot = load_demo_snapshot(directory, summary.key)
+        assert snapshot is not None
+        dumped = snapshot.model_dump(mode="json")
+        for item in dumped["detail"]["report"]["evidence"]:
+            assert set(item) == EVIDENCE_METADATA_KEYS
+            assert all(len(str(value)) < 600 for value in item.values())
 
 
 # --- Route handlers called directly (run everywhere) -------------------------
