@@ -3,6 +3,14 @@ import type { FormEvent, ReactNode } from 'react';
 import type { AgentScenario } from '../api/client';
 import { createScenario } from '../api/client';
 import { ApiError, messageForCode, parseValidationErrors } from '../api/errors';
+import type { LocationPreset } from '../api/geo';
+import {
+  LOCATION_PRESETS,
+  formatCoord,
+  isInChirpsBand,
+  parseLatLon,
+} from '../api/geo';
+import GeoMap from './GeoMap';
 
 const INDICATORS = [
   { id: 'chirps_spi', label: 'CHIRPS rainfall (SPI)' },
@@ -226,6 +234,26 @@ export default function ScenarioForm({ onCreated }: { onCreated: (id: string) =>
     return <p className="field-error">{message}</p>;
   }
 
+  function applyPreset(preset: LocationPreset): void {
+    setState((prev) => ({
+      ...prev,
+      latitude: String(preset.lat),
+      longitude: String(preset.lon),
+    }));
+  }
+
+  function applyPicked(lat: number, lon: number): void {
+    setState((prev) => ({
+      ...prev,
+      latitude: formatCoord(lat),
+      longitude: formatCoord(lon),
+    }));
+  }
+
+  const picked = parseLatLon(state.latitude, state.longitude);
+  const mapPoint = picked ?? { lat: 30.43, lon: -9.61 };
+  const outsideBand = picked !== null && !isInChirpsBand(picked.lat);
+
   return (
     <form onSubmit={handleSubmit} noValidate aria-label="Scenario form">
       {submitError && (
@@ -234,6 +262,51 @@ export default function ScenarioForm({ onCreated }: { onCreated: (id: string) =>
           {submitError}
         </div>
       )}
+      <div className="field field-full">
+        <span id="location-picker-label">Location picker</span>
+        <div className="preset-row" role="group" aria-label="Demo locations">
+          {LOCATION_PRESETS.map((preset) => (
+            <button
+              key={preset.key}
+              type="button"
+              className="ghost preset"
+              onClick={() => applyPreset(preset)}
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+        <GeoMap
+          mapLabel="Analysis location map"
+          center={[mapPoint.lat, mapPoint.lon]}
+          zoom={3}
+          markers={[
+            {
+              id: 'picker',
+              position: [mapPoint.lat, mapPoint.lon],
+              popupTitle: 'Analysis location',
+              popupLines: [`${formatCoord(mapPoint.lat)}°, ${formatCoord(mapPoint.lon)}°`],
+              tone: 'request',
+              draggable: true,
+            },
+          ]}
+          showChirpsBand
+          onPick={applyPicked}
+          onMarkerMove={(_id, lat, lon) => applyPicked(lat, lon)}
+        />
+        <p className="hint">
+          Click the map or drag the marker — or type coordinates below. Shaded
+          bands lie outside 60°S–60°N: there, CHIRPS does not apply and
+          ERA5-Land indicators still run.
+        </p>
+        {outsideBand && (
+          <p className="band-note" role="note">
+            Current latitude is outside the CHIRPS band: the CHIRPS indicator
+            will report <code className="inline">outside_coverage</code>;
+            ERA5-Land still runs.
+          </p>
+        )}
+      </div>
       <div className="form-grid">
         <div className="field">
           <label htmlFor="latitude">Latitude</label>

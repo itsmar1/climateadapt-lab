@@ -100,8 +100,26 @@ export default function JobProgress({
       <div className="status-line">
         {phase === 'polling' && <span className="spinner" aria-hidden="true" />}
         <StatusBadge status={status} />
-        <span className="subtle">elapsed {elapsed}s · cold runs can take minutes</span>
+        <span className="subtle">elapsed {elapsed}s</span>
       </div>
+      <ol className="pipeline">
+        <li>Inputs checked</li>
+        <li>Indicators computed</li>
+        <li>Evidence retrieved</li>
+        <li>Options ranked</li>
+        <li>Report drafted and validated</li>
+      </ol>
+      <p className="hint">
+        The backend runs these stages as one fixed pipeline; it reports overall
+        status only, not per-stage progress, so this page cannot show which
+        stage is active.
+      </p>
+      <p className="hint">
+        Cached runs finish in seconds; a first run at a new location can take
+        several minutes because each satellite archive request queues
+        separately. In a hurry?{' '}
+        <a href="#/demo">Use a captured demo</a> instead.
+      </p>
       {phase === 'fetch-error' && (
         <div className="banner error" role="alert">
           <strong>Polling failed</strong>

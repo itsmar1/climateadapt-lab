@@ -1,7 +1,38 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { GeoMapProps } from './GeoMap';
 import ScenarioForm from './ScenarioForm';
 import { mockFetch, scenarioCreatedFixture } from '../test/fixtures';
+
+vi.mock('./GeoMap', () => ({
+  default: ({ center, markers, onPick, onMarkerMove, mapLabel }: GeoMapProps) => (
+    <div data-testid="geomap-stub" data-center={center.join(',')} aria-label={mapLabel}>
+      {markers.map((marker) => (
+        <span key={marker.id} data-testid={`geomap-marker-${marker.id}`}>
+          {marker.position.join(',')}
+        </span>
+      ))}
+      {onPick && (
+        <button
+          type="button"
+          data-testid="geomap-pick"
+          onClick={() => onPick(63.4, 10.4)}
+        >
+          pick
+        </button>
+      )}
+      {onMarkerMove && (
+        <button
+          type="button"
+          data-testid="geomap-drag"
+          onClick={() => onMarkerMove('picker', 1.5, 2.5)}
+        >
+          drag
+        </button>
+      )}
+    </div>
+  ),
+}));
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -12,6 +43,40 @@ describe('ScenarioForm', () => {
     render(<ScenarioForm onCreated={() => undefined} />);
     expect(screen.getByText(/CHIRPS covers 60°S–60°N/)).toBeInTheDocument();
     expect(screen.getByText(/falls back to the nearest land grid point/)).toBeInTheDocument();
+  });
+
+  it('syncs the map marker both ways with the coordinate inputs', () => {
+    render(<ScenarioForm onCreated={() => undefined} />);
+    expect(screen.getByTestId('geomap-stub')).toHaveAttribute(
+      'data-center',
+      '30.43,-9.61',
+    );
+
+    fireEvent.change(screen.getByLabelText('Latitude'), { target: { value: '51.5' } });
+    fireEvent.change(screen.getByLabelText('Longitude'), { target: { value: '0.12' } });
+    expect(screen.getByTestId('geomap-stub')).toHaveAttribute('data-center', '51.5,0.12');
+    expect(screen.getByTestId('geomap-marker-picker')).toHaveTextContent('51.5,0.12');
+
+    fireEvent.click(screen.getByTestId('geomap-pick'));
+    expect(screen.getByLabelText('Latitude')).toHaveValue('63.40');
+    expect(screen.getByLabelText('Longitude')).toHaveValue('10.40');
+
+    fireEvent.click(screen.getByTestId('geomap-drag'));
+    expect(screen.getByLabelText('Latitude')).toHaveValue('1.50');
+    expect(screen.getByLabelText('Longitude')).toHaveValue('2.50');
+  });
+
+  it('offers one-click presets matching the captured snapshots', () => {
+    render(<ScenarioForm onCreated={() => undefined} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Trøndelag, Norway' }));
+    expect(screen.getByLabelText('Latitude')).toHaveValue('63.4');
+    expect(screen.getByLabelText('Longitude')).toHaveValue('10.4');
+    expect(screen.getByText(/outside the CHIRPS band/)).toBeInTheDocument();
+    expect(screen.getByText('outside_coverage')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Morocco (reference)' }));
+    expect(screen.getByLabelText('Latitude')).toHaveValue('30.43');
+    expect(screen.queryByText(/outside the CHIRPS band/)).not.toBeInTheDocument();
   });
 
   it('blocks invalid coordinates without calling the backend', () => {

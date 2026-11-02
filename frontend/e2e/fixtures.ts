@@ -168,6 +168,70 @@ export const completeDetail = {
   },
 };
 
+const tempEntryWithFallback = {
+  indicator: 'era5_temperature_anomaly',
+  status: 'ok',
+  error_type: null,
+  error_message: null,
+  requested_latitude: 30.43,
+  requested_longitude: -9.61,
+  grid_point_latitude: 30.4,
+  grid_point_longitude: -9.6,
+  result: {
+    data_source: 'ERA5-Land',
+    timescale_months: 3,
+    target_window_start: '2024-01',
+    target_window_end: '2024-03',
+    window_mean_c: 18.5,
+    reference_mean_c: 16.282,
+    anomaly_c: 2.218,
+    reference_sd_c: 0.9,
+    standardized_anomaly: 2.464,
+    percentile_rank: 0.967,
+    reference_years_used: 30,
+    reference_years_included: [1991, 1992],
+    reference_years_excluded: [],
+    reference_start_year: 1991,
+    reference_end_year: 2020,
+    land_fallback: {
+      max_distance_km: 15,
+      used: true,
+      reason: 'masked',
+      nearest_grid_point_latitude: 30.4,
+      nearest_grid_point_longitude: -9.6,
+      selected_grid_point_latitude: 30.5,
+      selected_grid_point_longitude: -9.6,
+      distance_km: 7.8,
+    },
+    citation: 'Muñoz-Sabater et al. (2021).',
+    doi: '10.5194/essd-13-4349-2021',
+    license_note: 'Copernicus licence.',
+    limitations: ['Reanalysis, not station data.'],
+  },
+};
+
+/** Partial run: fallback report, grouped problems, one used land fallback. */
+export const partialDetail = {
+  ...baseDetail('partial'),
+  bundle: {
+    ...completeDetail.bundle,
+    entries: [...completeDetail.bundle.entries, tempEntryWithFallback],
+  },
+  ranking: completeDetail.ranking,
+  report: {
+    ...completeDetail.report,
+    generator: 'deterministic-fallback',
+    fallback: true,
+    fallback_note: 'E2E fallback note.',
+  },
+  problems: [
+    '[provider-auth] No model key configured; serving deterministic fallback.',
+    '[provider-auth] Draft call skipped (no key).',
+    '[retrieval-empty] No passages retrieved.',
+  ],
+  warnings: [],
+};
+
 export const demoList = {
   version: 1,
   snapshots: [

@@ -11,7 +11,8 @@ catalog, deterministic constraints/ranking, `scripts/validate_catalog.py`; see
 workflow, `docs/AGENT_WORKFLOW.md`; scenario API + SQLite persistence in P11).
 React input/analysis UI delivered 2026-10-31 (P12: `frontend/`, 42 Vitest tests
 green; recommendations/report UI delivered 2026-10-31 (P13: cited report, ranking panel, history, Markdown export; 79 Vitest tests green). Demo mode + e2e delivered (P14), Docker + CI authored but UNVERIFIED (P15), classical CropHarvest vision baseline delivered (P16, MLflow-tracked; see `docs/VISION_BASELINE.md`).
-Verified 2026-11-01 (P19): backend 792 passed + 84 sandbox-blocked socket tests (WinError 10013, zero assertion failures) in 19 min 01 s, vision 35/35, frontend 79/79, `ruff check .` clean;
+Interactive map + results restyle delivered 2026-11-02 (P20: Leaflet picker with CHIRPS-band shading and snapshot presets, results map with fallback grid points, summary strip, video-ready layout; screenshots in `docs/screenshots/`).
+Verified 2026-11-02 (P20): frontend 96/96 Vitest + 7/7 Playwright, tsc/eslint/build clean. Backend unchanged since the P19 run (792 passed + 84 sandbox-blocked socket tests, WinError 10013, zero assertion failures, in 19 min 01 s; `ruff check .` clean — suite not re-run, no backend files touched);
 details in `docs/handoff/IMPLEMENTATION_STATUS.md`, issues in `docs/handoff/KNOWN_ISSUES.md`.
 Full evidence: `docs/FINAL_VERIFICATION.md`; submission checklist: `docs/SUBMISSION_CHECKLIST.md`.
 
@@ -46,7 +47,8 @@ Full evidence: `docs/FINAL_VERIFICATION.md`; submission checklist: `docs/SUBMISS
 - ERA5-Land monthly means (Copernicus Climate Change Service, CDS; 0.1 degree reanalysis, 1950-present). Copernicus licence terms apply; the dataset's terms of use must be accepted in the CDS before downloading; acknowledge "Copernicus Climate Change Service Information" and check the dataset page for the current licence text (served as `LICENSE_NOTE` in `src/climateadapt/data/era5_land.py`).
 - CropHarvest v14 (vision baseline only; Zenodo record 10251170): CC-BY-SA-4.0. Never used as drought or intervention evidence — see `docs/VISION_BASELINE.md` §1.
 - Evidence corpus: 8 curated sources (FAO, WMO, journals, ICARDA) with mixed licences, some NC/ND — see `corpus/manifest.json` (`license`, `license_status`, `unverified_fields` per document). Only the manifest + `corpus/eval/` are versioned; PDFs and extracted text are never committed (KI-23).
-- Dependencies are permissive-licensed (MIT / BSD / Apache-2.0 family; full table in `docs/FINAL_VERIFICATION.md` §4). No GPL/AGPL dependency: the closest cases are tqdm (MPL-2.0 AND MIT dual) and matplotlib's bundled FreeType (FTL-or-GPL at the user's choice).
+- Dependencies are permissive-licensed (MIT / BSD / Apache-2.0 family; full table in `docs/FINAL_VERIFICATION.md` §4) with one exception: `react-leaflet` 5.0.0 + `@react-leaflet/core` 3.0.0 are **Hippocratic-2.1** (ethical-source licence, not OSI-approved — see KI-36; Leaflet itself is BSD-2-Clause). No GPL/AGPL dependency: the closest cases are tqdm (MPL-2.0 AND MIT dual) and matplotlib's bundled FreeType (FTL-or-GPL at the user's choice).
+- Map tiles (frontend only, no key needed): OpenStreetMap standard tiles (`https://tile.openstreetmap.org/{z}/{x}/{y}.png`), © OpenStreetMap contributors (ODbL), attributed on every map per the [Tile Usage Policy](https://operations.osmfoundation.org/policies/tiles/) (read 2026-11-02; demo-scale viewing complies — no scraping, browser User-Agent/Referer, no restrictive Referrer-Policy). No geocoding service is used. Library sources: [react-leaflet v5 installation](https://react-leaflet.js.org/docs/start-installation/) (React 19 peers confirmed in the installed `package.json`: `react`/`react-dom` ^19, `leaflet` ^1.9.0), [Leaflet](https://leafletjs.com/) (BSD-2-Clause). No CSP exists in `index.html` or `nginx.conf`, so none needed updating for tiles.
 
 ## Setup (repo root, PowerShell)
 
@@ -146,10 +148,12 @@ npm install
 npm run dev              # strict port 5173, matching the API CORS default
 ```
 
-`npm run lint`, `npm run test` (Vitest, 79 tests), `npm run build` (`tsc` +
-`vite build`). After any backend route change, regenerate the typed client
-with `npm run gen:api` (openapi-typescript from `docs/openapi.json`); a
-contract test fails on drift.
+`npm run lint`, `npm run test` (Vitest, 96 tests), `npm run build` (`tsc` +
+`vite build`). End-to-end (local only, needs system Chrome; CI does not run
+it): `npm run build:e2e`, then `npm run test:e2e` (Playwright, 7 tests incl.
+map interaction + screenshot capture). After any backend route change,
+regenerate the typed client with `npm run gen:api` (openapi-typescript from
+`docs/openapi.json`); a contract test fails on drift.
 
 What the app does (P12): a validated scenario form (lat/lon with coverage
 hints, window, reference period, crop, water flags, ERA5 land-fallback toggle),
@@ -158,7 +162,25 @@ indicator (value, units, reference period, source + coverage, status,
 limitations, provenance, fallback/cell-edge warnings) with a reference-summary
 chart. No composite scores or severity labels are rendered anywhere; every API
 error `type` code maps to one specific message. P13 delivered the cited report (every claim with evidence links and platform-value chips, AI-vs-platform labels, fallback banner, always-visible limitations), the deterministic ranking panel (score breakdowns, unknowns, excluded reasons), scenario history with open/delete, and one-click Markdown export.
+P20 added an interactive Leaflet map: click/drag picking two-way synced with
+the coordinate inputs, CHIRPS 60°S–60°N band shading with an outside-band note,
+and one-click presets matching the four captured snapshots (Morocco, Punjab,
+Norway, Atlantic). The results page opens with a summary strip (location,
+window, reference period, status, "AI report accepted" vs "Platform fallback
+report" badge) and anchored sections; per-card limitations/provenance and the
+grouped validator problems sit in collapsed expandables with counts, while
+report limitations stay always visible. Map markers distinguish the requested
+point (teal) from ERA5-Land grid points actually used via land fallback
+(ochre, with the backend-reported distance).
 Out of scope: authentication, mobile polish.
+
+Screenshots (P20 Playwright run, mocked backend — map tiles need network, so
+they render blank in offline sandboxes; re-capture on a networked machine with
+`npm run build:e2e`, `npm run test:e2e`, then copy
+`frontend/test-results/screenshots/*.png` to `docs/screenshots/`):
+
+![Scenario form with the Leaflet location picker](docs/screenshots/01-form-map.png)
+![Results summary strip with the platform-fallback badge](docs/screenshots/04-results.png)
 
 ## Demo mode (zero keys needed)
 

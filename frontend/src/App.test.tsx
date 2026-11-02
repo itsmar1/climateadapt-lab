@@ -1,6 +1,13 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { GeoMapProps } from './components/GeoMap';
 import App from './App';
+
+vi.mock('./components/GeoMap', () => ({
+  default: ({ mapLabel }: GeoMapProps) => (
+    <div data-testid="geomap-stub" aria-label={mapLabel} />
+  ),
+}));
 import {
   demoListFixture,
   demoSummaryFixture,

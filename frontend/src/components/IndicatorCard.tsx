@@ -3,6 +3,9 @@ import ReferenceChart from './ReferenceChart';
 import StatusBadge from './StatusBadge';
 
 export default function IndicatorCard({ model }: { model: IndicatorCardModel }) {
+  const provenanceCount =
+    (model.citation ? 1 : 0) + (model.doi ? 1 : 0) + (model.license ? 1 : 0);
+  const detailCount = model.limitations.length + provenanceCount;
   return (
     <div className="card" data-testid={`indicator-${model.key}`}>
       <div className="card-head">
@@ -60,35 +63,41 @@ export default function IndicatorCard({ model }: { model: IndicatorCardModel }) 
         ) : null}
       </p>
 
-      {model.limitations.length > 0 && (
-        <>
-          <h3>Limitations</h3>
-          <ul className="tight">
-            {model.limitations.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </>
-      )}
-
-      {(model.citation ?? model.doi ?? model.license) && (
-        <>
-          <h3>Provenance</h3>
-          {model.citation && <p className="meta">{model.citation}</p>}
-          {model.doi && (
-            <p className="meta">
-              DOI:{' '}
-              <a
-                href={`https://doi.org/${model.doi}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {model.doi}
-              </a>
-            </p>
+      {detailCount > 0 && (
+        <details className="card-details">
+          <summary>
+            Limitations &amp; provenance ({detailCount})
+          </summary>
+          {model.limitations.length > 0 && (
+            <>
+              <h3>Limitations</h3>
+              <ul className="tight">
+                {model.limitations.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </>
           )}
-          {model.license && <p className="meta">Licence: {model.license}</p>}
-        </>
+          {provenanceCount > 0 && (
+            <>
+              <h3>Provenance</h3>
+              {model.citation && <p className="meta">{model.citation}</p>}
+              {model.doi && (
+                <p className="meta">
+                  DOI:{' '}
+                  <a
+                    href={`https://doi.org/${model.doi}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {model.doi}
+                  </a>
+                </p>
+              )}
+              {model.license && <p className="meta">Licence: {model.license}</p>}
+            </>
+          )}
+        </details>
       )}
     </div>
   );

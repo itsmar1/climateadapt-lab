@@ -16,10 +16,12 @@
 - LLM + agent: Baseten provider adapter, versioned report schema, client-side
   validator, deterministic fallback, fixed 7-stage pipeline, gated live scripts
   (endpoint/auth/tool-calling verified live 2026-10-30).
-- React + Vite frontend: scenario form, job progress, indicator cards, cited
-  report, ranking panel, history, Markdown export, demo page (79/79 Vitest).
-- Reproducibility: demo snapshots, Playwright e2e, Dockerfiles + compose stack,
-  CI workflow (build/run UNVERIFIED — see §4).
+- React + Vite frontend: scenario form with interactive Leaflet map (pick,
+  presets, CHIRPS-band note), job progress, summary strip + results map,
+  indicator cards, cited report, ranking panel, history, Markdown export,
+  demo page (96/96 Vitest).
+- Reproducibility: demo snapshots, Playwright e2e (7/7), Dockerfiles + compose
+  stack, CI workflow (build/run UNVERIFIED — see §4).
 - Vision baseline (isolated from recommendations): classical crop/non-crop
   models on CropHarvest v14, MLflow-tracked, evaluated on 543k held-out rows
   (`docs/VISION_BASELINE.md`).

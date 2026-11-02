@@ -35,14 +35,17 @@ Open http://localhost:5173 in a browser.
 
 1. The form opens with the reference scenario prefilled: 30.43, −9.61,
    target 2024-03, 3-month window, reference 1991–2020, wheat, irrigated.
-   Press **Run analysis**.
+   Point at the map: click/drag the marker (or a preset — Norway shows the
+   outside-CHIRPS-band note live), then back to Morocco. Press **Run analysis**.
 2. **Expected:** "Analysis running" for ~6 s (warm) with 2 s polling, then
-   the Results page: four indicator cards (CHIRPS SPI −0.517, ERA5 SPI −0.375,
-   temperature +2.22 °C, soil −0.0505 m³/m³), the deterministic ranking
-   (Deficit irrigation + Irrigation scheduling at 0.750, one exclusion with
-   reasons, Unknown badges everywhere benefit/cost/risk is unstated), and the
-   cited report with evidence links, platform-value chips, and the
-   always-visible limitations.
+   the Results page: the summary strip (location, window, reference, status,
+   "Platform fallback report" badge), the Location map (teal requested point,
+   ochre ERA5-Land grid point actually used), four indicator cards (CHIRPS SPI
+   −0.517, ERA5 SPI −0.375, temperature +2.22 °C, soil −0.0505 m³/m³), the
+   deterministic ranking (Deficit irrigation + Irrigation scheduling at 0.750,
+   one exclusion with reasons, Unknown badges everywhere benefit/cost/risk is
+   unstated), and the cited report with evidence links, platform-value chips,
+   and the always-visible limitations. Section chips jump down the page.
 3. Without a Baseten key (the expected demo configuration) the report shows
    the **Deterministic fallback** banner and a `[provider-auth]` problem.
    Say so out loud: no model ran; every number is computed.

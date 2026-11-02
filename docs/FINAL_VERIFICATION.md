@@ -198,3 +198,25 @@ history (KI-27).
    (KI-18); RAG label review (KI-19).
 7. Full-data (82k-row) vision training — the evaluated run used a seeded 20k
    subset; the same command reproduces it (see `docs/VISION_BASELINE.md`).
+
+## 10. P20 addendum (2026-11-02; §1–§9 above are frozen P-final evidence)
+
+Frontend-only change; backend untouched (§1 counts stand). New frontend
+dependencies (installed-manifest `license` fields, CONFIRMED):
+
+| Package | Licence |
+|---|---|
+| leaflet 1.9.4 | BSD-2-Clause |
+| react-leaflet 5.0.0, @react-leaflet/core 3.0.0 | **Hippocratic-2.1** (ethical-source, not OSI-approved — see KI-36) |
+| @types/leaflet 1.9.22 | MIT |
+
+§4's "No GPL/AGPL dependency" still holds; its implied
+permissive-everywhere claim no longer does (README carries the exception).
+Bundle impact: `vite build` JS 440.58 kB (gzip 132.44 kB) vs P-final
+`dist/` 283,480 bytes total. Gates: `eslint .` exit 0, 96/96 Vitest
+(16 files, 77.65 s), `tsc` clean, 7/7 Playwright (1.4 min, system
+Chrome). Map tiles are key-free OSM standard tiles with on-map attribution
+per the Tile Usage Policy (read 2026-11-02); no geocoding; no CSP exists to
+update. Screenshots in `docs/screenshots/` show blank tile backgrounds
+because `tile.openstreetmap.org` times out in the sandbox — re-capture on a
+networked machine (command in README).

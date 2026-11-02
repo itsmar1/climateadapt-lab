@@ -241,6 +241,20 @@ Result: acceptance path (b) — honest negative. No live call was made (gate off
 
 Fresh-clone audit (CONFIRMED): git-ignored demo needs are corpus PDFs/text, `data/` caches, CDS + Baseten credentials; without them a clone serves `/health`, live CHIRPS reads, typed ERA5 `download_error`s, evidenceless partials — and, since P19, the full zero-key demo from tracked snapshots. Remaining owner-run: full `verify_fresh_clone.ps1`, TestClient suites, docker build, CI.
 
+### 2.21 Interactive map + video-ready results UI (P20 2026-11-02)
+| Path | Purpose | Evidence |
+|---|---|---|
+| `api/geo.ts`, `components/GeoMap.tsx` | Pure geo helpers (CHIRPS band, presets, `fallbackPoints` from entry `land_fallback`) + Leaflet map (click/drag pick, band shading, request/used markers, reduced-motion, screen-reader list) | T (11 new unit tests green) + real-Chrome e2e |
+| `components/ScenarioForm.tsx` | Map picker two-way synced with inputs, 4 snapshot presets, outside-band note | T |
+| `components/ResultsView.tsx`, `IndicatorCard.tsx` | Summary strip + section anchors, results map with used grid points + backend distances, collapsed problem groups, per-card details with counts; report limitations stay open | T |
+| `components/JobProgress.tsx` | Stage list with honest overall-status-only note, cached-vs-cold durations, "Use a captured demo" link | T |
+| `index.css` | Earth/water restyle (teal accent, clay markers, serif display + system-ui), responsive, focus-visible, `prefers-reduced-motion` | T (rendered in e2e shots) |
+| `e2e/map.spec.ts`, `e2e/screenshots.spec.ts`, `e2e/fixtures.ts` | Real-Leaflet click/preset/band tests, results-map + collapsed-problem + severity-guard test, 5 README/video screenshots | T, green |
+| `docs/screenshots/*.png` | 5 committed screenshots (form, outside-band, progress, results, report) | D |
+
+Gates (CONFIRMED 2026-11-02, portable Node v26.13.0): `eslint .` exit 0; **96/96 Vitest green** (16 files, 77.65 s); `tsc` exit 0 via `vite build` ✓ in 16.43 s (JS 440.58 kB / gzip 132.44 kB — Leaflet accounts for ~180 kB raw over the P-final 283 kB bundle); **7/7 Playwright green** (1.4 min, system Chrome, file:// + route mocks). No backend changes (suite not re-run). One Vitest attempt failed first on worker-spawn timeouts (box load, not assertions; clean re-run green) and Playwright needed `TEMP`/`TMP` redirected to `node-tmp/pw-tmp` (sandbox blocks the system temp; see KI-34).
+Library record (CONFIRMED from installed manifests + official docs read 2026-11-02): `leaflet` 1.9.4 (BSD-2-Clause), `react-leaflet` 5.0.0 + `@react-leaflet/core` 3.0.0 (**Hippocratic-2.1** — not permissive; see KI-36), `@types/leaflet` 1.9.22 (MIT); React 19 peers (`react`/`react-dom` ^19, `leaflet` ^1.9.0) satisfied by the tree (React 19.3.1). Tiles are key-free OSM standard tiles with on-map attribution per the Tile Usage Policy; no geocoding; no CSP exists (`index.html`, `nginx.conf`), so none was updated. Screenshots show blank tile backgrounds because `tile.openstreetmap.org` times out in this sandbox (CONFIRMED by direct fetch); markers, shading, controls, and attribution render — the owner can re-capture on a networked machine (command in README).
+
 ### 2.6 Scientific RAG (`src/climateadapt/rag/`, first batch)
 | Path | Purpose | Evidence |
 |---|---|---|

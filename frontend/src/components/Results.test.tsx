@@ -1,9 +1,10 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import type { GeoMapProps } from './GeoMap';
 import { toCardModel } from '../api/presenters';
 import IndicatorCard from './IndicatorCard';
 import ReferenceChart from './ReferenceChart';
-import ResultsView from './ResultsView';
+import ResultsView, { groupProblems } from './ResultsView';
 import {
   failedEntry,
   fullDetailFixture,
@@ -13,6 +14,18 @@ import {
   spiEntryOk,
   tempEntryOkWithFallback,
 } from '../test/fixtures';
+
+vi.mock('./GeoMap', () => ({
+  default: ({ center, markers, mapLabel }: GeoMapProps) => (
+    <div data-testid="geomap-stub" data-center={center.join(',')} aria-label={mapLabel}>
+      {markers.map((marker) => (
+        <span key={marker.id} data-testid={`geomap-marker-${marker.id}`}>
+          {marker.popupTitle}: {marker.position.join(',')}
+        </span>
+      ))}
+    </div>
+  ),
+}));
 
 describe('IndicatorCard', () => {
   it('renders values, reference, source, limitations, and provenance', () => {
@@ -141,6 +154,81 @@ describe('ResultsView', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('Deficit irrigation')).toBeInTheDocument();
     expect(screen.getAllByText('Computed by the platform')).toHaveLength(2);
+  });
+
+  it('badges AI-accepted versus platform-fallback reports in the strip', () => {
+    const accepted = scenarioDetailFixture({ status: 'complete' });
+    const { unmount } = render(<ResultsView detail={accepted} onNew={() => undefined} />);
+    expect(screen.getByText('AI report accepted')).toBeInTheDocument();
+    const meta = screen.getByTestId('result-strip-meta');
+    expect(meta).toHaveTextContent('30.43°, -9.61°');
+    expect(meta).toHaveTextContent('2024-03');
+    expect(meta).toHaveTextContent('3-month window');
+    expect(meta).toHaveTextContent('1991–2020');
+    unmount();
+
+    const fallback = scenarioDetailFixture({
+      status: 'partial',
+      report: { ...scenarioDetailFixture().report!, fallback: true },
+    });
+    render(<ResultsView detail={fallback} onNew={() => undefined} />);
+    expect(screen.getByText('Platform fallback report')).toBeInTheDocument();
+    expect(screen.queryByText('AI report accepted')).not.toBeInTheDocument();
+  });
+
+  it('groups problems by code with counts under a collapsed summary', () => {
+    expect(
+      groupProblems(['[b-code] second', '[a-code] first', '[b-code] third', 'plain note']),
+    ).toEqual([
+      { code: 'a-code', items: ['first'] },
+      { code: 'b-code', items: ['second', 'third'] },
+      { code: 'note', items: ['plain note'] },
+    ]);
+    const detail = scenarioDetailFixture({
+      status: 'partial',
+      report: { ...scenarioDetailFixture().report!, fallback: true },
+      problems: ['[b-code] second', '[a-code] first', '[b-code] third'],
+    });
+    render(<ResultsView detail={detail} onNew={() => undefined} />);
+    expect(
+      screen.getByText(/Why this is the platform fallback · 3 problems in 2 groups/),
+    ).toBeInTheDocument();
+    expect(screen.getByText('a-code')).toBeInTheDocument();
+    expect(screen.getByText('b-code')).toBeInTheDocument();
+  });
+
+  it('maps the requested point and the grid point actually used', () => {
+    const entry = {
+      ...tempEntryOkWithFallback(),
+      result: {
+        ...(tempEntryOkWithFallback().result as Record<string, unknown>),
+        land_fallback: {
+          ...((tempEntryOkWithFallback().result as Record<string, unknown>)
+            .land_fallback as Record<string, unknown>),
+          distance_km: 11.1,
+        },
+      },
+    };
+    const detail = scenarioDetailFixture({
+      bundle: {
+        indicator: 'environmental_bundle',
+        latitude: 30.43,
+        longitude: -9.61,
+        target_end_month: '2024-03',
+        timescale_months: 3,
+        reference_start_year: 1991,
+        reference_end_year: 2020,
+        entries: [entry],
+      },
+    });
+    render(<ResultsView detail={detail} onNew={() => undefined} />);
+    expect(screen.getByTestId('geomap-marker-requested')).toHaveTextContent(
+      'Requested point: 30.43,-9.61',
+    );
+    expect(
+      screen.getByTestId('geomap-marker-used-era5_temperature_anomaly'),
+    ).toHaveTextContent('Grid point used (era5_temperature_anomaly): 30.5,-9.6');
+    expect(screen.getByText(/11\.1 km from requested/)).toBeInTheDocument();
   });
 
   it('is honest when ranking and report are missing', () => {

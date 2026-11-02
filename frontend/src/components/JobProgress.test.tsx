@@ -8,6 +8,28 @@ afterEach(() => {
 });
 
 describe('JobProgress', () => {
+  it('explains the pipeline, the wait, and the demo shortcut', async () => {
+    const running = scenarioDetailFixture({ status: 'running' });
+    vi.stubGlobal('fetch', mockFetch([{ body: running }]));
+    render(
+      <JobProgress
+        scenarioId="sc-1"
+        pollIntervalMs={50}
+        timeoutMs={5000}
+        onDone={() => undefined}
+        onStop={() => undefined}
+      />,
+    );
+    await waitFor(() => expect(screen.getByText('Analysis running')).toBeInTheDocument());
+    expect(screen.getByText('Indicators computed')).toBeInTheDocument();
+    expect(screen.getByText(/overall status only/)).toBeInTheDocument();
+    expect(screen.getByText(/Cached runs finish in seconds/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Use a captured demo' })).toHaveAttribute(
+      'href',
+      '#/demo',
+    );
+  });
+
   it('polls until the run is terminal, then hands over the detail', async () => {
     const running = scenarioDetailFixture({ status: 'running' });
     const done = scenarioDetailFixture({ status: 'complete' });
