@@ -274,7 +274,54 @@ $env:CLIMATEADAPT_RUN_LIVE_LLM = "1"
 .venv/Scripts/python.exe scripts/run_agent.py
 ```
 
-## 6. Using your own key (judges and reviewers)
+## 6. 2026-11-02 live agent run + P22 validator/prompt fix — RAN (owner), fix UNVERIFIED live
+
+Owner ran the P18 prompt + one repair live (reference scenario):
+
+```powershell
+$env:CLIMATEADAPT_RUN_LIVE_LLM = "1"
+.venv/Scripts/python.exe scripts/run_agent.py
+```
+
+```text
+status: partial (all 7 stages ok; draft produced, repair also rejected)
+tool_calls: 5; llm_calls: 2; total: 91.1 s
+tokens: prompt=61698 completion=24625
+problems: 7 (undeclared-number x5, efficacy-claim x1, draft-rejected x1)
+saved: data\agent_runs\run-20261102T141454Z.json + -trace.json (git-ignored)
+```
+
+Problems fell 44 → 7. All five `undeclared-number` hits are the numeral `'5'`
+in `data_coverage`, `environmental_findings[1..3]`, `limitations[2]`; the
+`efficacy-claim` is the repair's `ranked_recommendations[0]` (the first draft
+had no efficacy problem — the repair introduced one). Cost: confirm from the
+Baseten dashboard, not from an estimate (list rates §1: $1.25/$4.25 per 1M
+in/out tokens).
+
+P22 diagnosis (offline, CONFIRMED): H1 CONFIRMED — the validator's numeral scan
+(`NUMBER_RE`) matches the `5` inside `ERA5`/`ERA5-Land`, and `_strip_known`
+only strips full `data_source` echoes, so a bare dataset name always fails;
+only the three ERA5 findings were flagged (CHIRPS finding never), and the
+exact problem string was reproduced on a synthetic draft. H2 CONFIRMED as
+mechanism — `efficacy-claim` fires only on an `EFFICACY_RE` match in a ranked
+narrative — but the exact phrase is unrecoverable: neither the draft nor the
+repair output was saved in the trace.
+
+P22 changes (all offline-tested, live acceptance still UNVERIFIED): **yes, the
+validator was changed — one narrow bug fix.** Digits inside known
+dataset/product identifiers (`ERA5`, `ERA5-Land`, `CHIRPS v3`/`v3.0`, one
+`DATASET_IDENTIFIER_RE` constant) no longer count as numeric claims; every
+other rule is untouched (bare `3`/`5`, resolutions, years outside a full echo,
+invented ids, altered citations, and real effect claims are still rejected —
+pinned by tests). The system prompt now restricts ranked narratives to
+restating the platform score, catalog echoes, and cited evidence (effect verbs
+banned, one compliant example), the two problem strings carry the offending
+sentence + matched phrase into the repair turn, and the trace keeps
+`draft_text`/`repair_text` verbatim for debugging. Owner retry budget: at most
+2 runs × 2 calls with the gate set (same command as above); if still rejected
+after the second run, stop and report.
+
+## 7. Using your own key (judges and reviewers)
 
 Base URL, model ID, and key are all plain environment configuration — no code
 change is needed to point the app at your own Baseten account. Never commit a

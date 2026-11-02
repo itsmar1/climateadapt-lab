@@ -34,6 +34,8 @@ MAX_PASSAGE_CHARS = 1500
 TRUNCATION_MARKER = " [...] (truncated)"
 MAX_REPAIR_PROBLEMS = 20
 MAX_REPAIR_DRAFT_CHARS = 8000
+MAX_REPAIR_PROBLEM_CHARS = 500
+"""Per-problem budget: keeps the offending sentence + matched phrase (P22)."""
 
 
 def _template(name: str) -> str:
@@ -198,10 +200,16 @@ def build_repair_request(
     max_problems: int = MAX_REPAIR_PROBLEMS,
     max_draft_chars: int = MAX_REPAIR_DRAFT_CHARS,
 ) -> LLMRequest:
-    """Build the single repair attempt: original prompt + rejection feedback."""
+    """Build the single repair attempt: original prompt + rejection feedback.
+
+    Problem lines keep their offending sentence and matched phrase (P22) so the
+    model can locate each failure; the draft excerpt shows the full context.
+    """
     shown = list(problems[:max_problems])
     omitted = len(problems) - len(shown)
-    problem_lines = "\n".join(f"- {problem[:300]}" for problem in shown)
+    problem_lines = "\n".join(
+        f"- {problem[:MAX_REPAIR_PROBLEM_CHARS]}" for problem in shown
+    )
     if omitted > 0:
         problem_lines += f"\n- (... and {omitted} more problems, same rules)"
     excerpt = (draft_text or "(no draft text returned)")[:max_draft_chars]

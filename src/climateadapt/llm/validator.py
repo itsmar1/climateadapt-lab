@@ -3,13 +3,16 @@
 ``validate_report`` enforces the traceability contract structurally: schema
 conformance, known evidence ids, citations rebuilt and compared verbatim plus
 ``rag.citations.verify_citation``, every prose numeral traced through a declared
-number to a registry value, mandatory limitations and provenance, and bans on
+number to a registry value (digits inside known dataset/product identifiers
+such as ``ERA5-Land`` are names, not claims), mandatory limitations and
+provenance, and bans on
 severity labels, efficacy/cost claims, and currency/percent tokens. Any failure
 means the draft is rejected and the caller must serve the deterministic
 fallback instead (see :mod:`climateadapt.llm.fallback`).
 
-Problem strings carry stable ``[code]`` prefixes so the fallback note and logs
-can quote codes without repeating model text.
+Problem strings carry stable ``[code]`` prefixes so the fallback note can quote
+codes; ``undeclared-number`` and ``efficacy-claim`` additionally quote the
+offending sentence (and the matched phrase) so the repair turn can fix them.
 """
 
 from __future__ import annotations
@@ -81,6 +84,36 @@ EFFICACY_RE = re.compile(
 )
 """Efficacy/cost-quantity stems, banned in ranked narratives (benefits are unknown)."""
 
+DATASET_IDENTIFIER_RE = re.compile(
+    r"\bERA5(?:-Land)?\b|\bCHIRPS\s+v?3(?:\.0)?\b",
+    re.IGNORECASE,
+)
+"""Dataset/product names whose digits are identifiers, not measurements (P22).
+
+``ERA5``/``ERA5-Land`` (also lowercase inside
+``reanalysis-era5-land-monthly-means``) and ``CHIRPS v3``/``CHIRPS v3.0`` name
+this project's data products (see ``data/era5_land.py`` DATASET_NAME/DATASET_ID
+and the CHIRPS DATA_SOURCE strings). Version digits count only attached to the
+product name: a bare "3" or "5", a resolution, or a year quoted outside the
+full data_source echo stays a numeric claim and must be declared.
+"""
+
+MAX_EVIDENCE_CHARS = 200
+"""Cap for offending sentences quoted in problem strings (repair evidence)."""
+
+_SENTENCE_RE = re.compile(r"[^.!?;]+(?:[.!?;]|$)")
+
+
+def _sentence_around(text: str, start: int) -> str:
+    """The sentence of ``text`` containing offset ``start``, capped."""
+    for match in _SENTENCE_RE.finditer(text):
+        if match.start() <= start < match.end():
+            sentence = " ".join(match.group(0).split())
+            if len(sentence) > MAX_EVIDENCE_CHARS:
+                sentence = sentence[:MAX_EVIDENCE_CHARS] + " [...]"
+            return sentence
+    return ""
+
 REL_TOL = 1e-9
 ABS_TOL = 1e-9
 """Number equality: JSON round-trips floats exactly, so copies must match."""
@@ -112,29 +145,39 @@ def _close(value: float, candidates: Sequence[float]) -> bool:
 
 
 def _strip_known(text: str, ctx: ValidationContext) -> str:
-    """Remove tokens whose digits are identifiers, not measurements."""
-    scrubbed = text
+    """Remove tokens whose digits are identifiers, not measurements.
+
+    Replacements keep the original length (spaces), so numeral positions in the
+    scrubbed text map back to the offending sentence in the original text.
+    """
+    scrubbed = DATASET_IDENTIFIER_RE.sub(
+        lambda match: " " * len(match.group(0)), text
+    )
     for token in list(ctx.chunks) + list(ctx.registry.outputs):
         if token:
-            scrubbed = scrubbed.replace(token, " ")
+            scrubbed = scrubbed.replace(token, " " * len(token))
     for output in ctx.registry.outputs.values():
         for known in output.texts.values():
             if known:
-                scrubbed = scrubbed.replace(known, " ")
+                scrubbed = scrubbed.replace(known, " " * len(known))
     for date in ctx.registry.dates:
         if date:
-            scrubbed = scrubbed.replace(date, " ")
-    return PAGE_REF_RE.sub(" ", scrubbed)
+            scrubbed = scrubbed.replace(date, " " * len(date))
+    return PAGE_REF_RE.sub(lambda match: " " * len(match.group(0)), scrubbed)
 
 
-def _literals(text: str) -> list[tuple[str, float]]:
-    found: list[tuple[str, float]] = []
+def _literals(text: str) -> list[tuple[str, float, int, int]]:
+    """Numeral literals with values and spans (spans map to the source text)."""
+    found: list[tuple[str, float, int, int]] = []
     for match in NUMBER_RE.finditer(text):
-        literal = match.group(0).lstrip("+")
+        raw = match.group(0)
+        literal = raw.lstrip("+")
         try:
-            found.append((literal, float(literal.replace(",", ""))))
+            value = float(literal.replace(",", ""))
         except ValueError:
             continue
+        start = match.start() + (len(raw) - len(literal))
+        found.append((literal, value, start, match.end()))
     return found
 
 
@@ -145,12 +188,15 @@ def _check_numbers_in_text(
     path: str,
     problems: list[str],
 ) -> None:
-    for literal, value in _literals(_strip_known(text, ctx)):
+    scrubbed = _strip_known(text, ctx)
+    for literal, value, start, _end in _literals(scrubbed):
         if not _close(value, declared):
+            sentence = _sentence_around(text, start)
             problems.append(
                 _problem(
                     "undeclared-number",
-                    f"{path}: numeral {literal!r} is not a declared tool-output value.",
+                    f"{path}: numeral {literal!r} is not a declared tool-output "
+                    f"value. Offending sentence: {sentence!r}.",
                 )
             )
 
@@ -278,9 +324,16 @@ def _check_ranked(
             problems.append(
                 _problem("echo-mismatch", f"{path}: {field_name} differs from the catalog.")
             )
-    if EFFICACY_RE.search(rec.narrative.text):
+    match = EFFICACY_RE.search(rec.narrative.text)
+    if match is not None:
+        sentence = _sentence_around(rec.narrative.text, match.start())
         problems.append(
-            _problem("efficacy-claim", f"{path}: narrative states efficacy/cost effects.")
+            _problem(
+                "efficacy-claim",
+                f"{path}: narrative states efficacy/cost effects. "
+                f"Matched phrase: {match.group(0)!r}. "
+                f"Offending sentence: {sentence!r}.",
+            )
         )
 
 

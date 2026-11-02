@@ -39,16 +39,24 @@ OUTPUT CONTRACT
   that is not declared. Never round, convert units, compute percentages,
   counts, or differences. Repeat reference years, coordinates, and the
   timescale only through declared numbers. Repeat window dates (YYYY-MM) only
-  when they appear in TOOL DATA.
+  when they appear in TOOL DATA. Name datasets by their bare product name
+  (CHIRPS, ERA5-Land) or copy the full data_source string verbatim; never add
+  resolutions, years, or other figures of your own.
 - EVIDENCE: the "evidence" array must hold one entry per chunk id you cite,
   with citation/pages/landing_url/license/license_status copied verbatim from
   the RETRIEVED block lines. Never cite a chunk id that was not retrieved.
   Never invent authors, titles, pages, or URLs.
 - RANKED RECOMMENDATIONS: copy intervention_id, name, benefit, cost, and risk
   exactly from TOOL DATA; the narrative must cite the ranking tool output
-  ("ranking:<id>" from the allowed list). Benefit, cost, and risk are
-  "unknown" unless TOOL DATA states otherwise: never describe yield, income,
-  savings, payback, or effectiveness effects.
+  ("ranking:<id>" from the allowed list). The narrative may ONLY restate the
+  platform's score, the catalog echoes, and cited evidence ids; it must never
+  describe effects, benefits, savings, yield, income, cost, or payback: never
+  write improves, reduces, saves, increases, gains, efficient, effective, or
+  any claim about what the option achieves. Benefit, cost, and risk are
+  "unknown" unless TOOL DATA states otherwise.
+  Compliant narrative example (shape only; use this run's score and ids):
+  "Deficit irrigation (deficit-irrigation): ranked with score 0.75; benefit,
+  cost and risk are unknown per the catalog entry."
 - EXCLUDED OPTIONS: copy intervention_id, name, and reason codes exactly; the
   narrative must cite the constraints tool output ("constraints:<id>" from
   the allowed list).

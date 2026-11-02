@@ -434,6 +434,7 @@ def run_agent(
             result.problems.append(f"[{code}] Draft call failed: {exc}")
             raise _Abort(code) from exc
         result.llm_calls += 1
+        trace.draft_text = response.content or ""
         if response.usage is not None:
             result.prompt_tokens += response.usage.prompt_tokens or 0
             result.completion_tokens += response.usage.completion_tokens or 0
@@ -548,6 +549,7 @@ def run_agent(
                 result.problems.append(f"[{code}] Repair call failed: {exc}")
                 raise _Abort(code) from exc
             result.llm_calls += 1
+            trace.repair_text = repair_response.content or ""
             if repair_response.usage is not None:
                 result.prompt_tokens += repair_response.usage.prompt_tokens or 0
                 result.completion_tokens += repair_response.usage.completion_tokens or 0

@@ -24,7 +24,7 @@ from report_helpers import (
     make_llm_ranking,
     valid_report_dict,
 )
-from test_agent_workflow import make_deps, make_scenario, stub_tools
+from test_agent_workflow import draft_provider, make_deps, make_scenario, stub_tools
 
 
 def codes(problems: list[str]) -> list[str]:
@@ -316,3 +316,100 @@ def test_fallback_reporter_still_self_validates_after_prompt_change():
     check = validate_report(report, ctx, allow_fallback=True)
     assert check.valid, check.problems
     assert evidence_entry(list(ctx.chunks.values())[0], ctx.manifest)["chunk_id"]
+
+
+# --- P22: efficacy rules, repair evidence, trace keeps drafts ------------------
+
+
+def test_system_prompt_forbids_effect_wording_with_a_compliant_example():
+    from climateadapt.llm.prompts import load_system_prompt
+
+    system = load_system_prompt()
+
+    assert "improves" in system
+    assert "reduces" in system
+    assert "saves" in system
+    assert "Compliant narrative example" in system
+
+
+def test_repair_request_includes_offending_text_and_matched_phrase():
+    ctx = make_llm_context()
+    draft = valid_report_dict(ctx)
+    narrative = draft["ranked_recommendations"][0]["narrative"]
+    narrative["text"] = (
+        "Test drip (test-drip): ranked with score 0.85. "
+        "It reduces water use."
+    )
+    problems = validate_report(draft, ctx).problems
+    assert "efficacy-claim" in codes(problems)
+    first = build_report_request(
+        bundle_json="{}",
+        ranking_json="{}",
+        evidence_block="()",
+        generator_label="fake:test-model",
+    )
+
+    repair = build_repair_request(first, json.dumps(draft), problems)
+
+    user_text = repair.messages[1].content
+    problem_lines = [
+        line for line in user_text.splitlines() if line.startswith("- [efficacy-claim]")
+    ]
+    assert len(problem_lines) == 1
+    assert "reduces" in problem_lines[0]
+    assert "It reduces water use." in problem_lines[0]
+
+
+def test_era5_mentioning_draft_is_accepted_end_to_end(monkeypatch):
+    deps, retrieved = make_deps()
+    stub_tools(monkeypatch, retrieved)
+    ctx = make_llm_context(chunks=retrieved)
+    draft = valid_report_dict(ctx)
+    finding = draft["environmental_findings"][0]
+    finding["text"] = (
+        finding["text"] + " ERA5-Land agrees on the sign of the anomaly."
+    )
+    provider = FakeProvider.with_text(json.dumps(draft))
+
+    result = workflow.run_agent(make_scenario(), deps, provider)
+
+    assert result.status == "complete", result.problems
+    assert result.report is not None and result.report.fallback is False
+
+
+def test_trace_keeps_the_draft_and_repair_texts(monkeypatch):
+    deps, retrieved = make_deps()
+    stub_tools(monkeypatch, retrieved)
+    ctx = make_llm_context(chunks=retrieved)
+    bad = valid_report_dict(ctx)
+    bad["summary"]["tool_output_ids"] = ["environmental_bundle"]
+    good = valid_report_dict(ctx)
+    provider = FakeProvider(
+        [
+            FakeProvider.with_text(json.dumps(bad))._script[0],
+            FakeProvider.with_text(json.dumps(good))._script[0],
+        ]
+    )
+
+    result = workflow.run_agent(
+        make_scenario(),
+        deps,
+        provider,
+        AgentConfig(max_llm_calls=2, max_repair_attempts=1),
+    )
+
+    assert result.status == "complete"
+    assert "environmental_bundle" in result.trace.draft_text
+    assert result.trace.repair_text != ""
+    assert "environmental_bundle" not in result.trace.repair_text
+
+
+def test_trace_repair_text_stays_empty_without_a_repair(monkeypatch):
+    deps, retrieved = make_deps()
+    stub_tools(monkeypatch, retrieved)
+
+    result = workflow.run_agent(make_scenario(), deps, draft_provider(retrieved))
+
+    assert result.status == "complete"
+    assert result.trace.draft_text != ""
+    assert result.trace.repair_text == ""

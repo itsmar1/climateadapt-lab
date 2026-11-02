@@ -83,7 +83,10 @@ records (status, timing, error codes), per-tool records (ok, timing, input /
 output summaries), validator verdicts, token usage, outcome, problems,
 warnings. Secrets can never appear (the scenario carries no credentials);
 retrieved passage text is excluded (chunk ids + scores only) so a trace is not
-a corpus redistribution channel; long summaries are cut with a marker. Traces
+a corpus redistribution channel; long summaries are cut with a marker. Since
+P22 the trace also keeps the model draft and repair outputs verbatim
+(`draft_text`/`repair_text`, needed to debug validator rejections; they carry
+no credentials). Traces
 are returned in-memory; scripts persist them under git-ignored `data/`.
 
 ## 6. Live end-to-end run — RAN 2026-10-31 (1 call, owner-tasked)
@@ -121,3 +124,34 @@ copying, and at most one repair attempt (`max_repair_attempts`, default 0;
 `scripts/run_agent.py` enables it with `--repair 1 --max-llm-calls 2`).
 No model draft has been accepted yet; do not present draft acceptance as
 demonstrated.
+
+## 7. Live end-to-end run — RAN 2026-11-02 (2 calls, owner-run)
+
+`scripts/run_agent.py` on the reference scenario with the P18 prompt + one
+repair (`--repair 1 --max-llm-calls 2`):
+
+```text
+status: partial (all 7 stages ok; draft produced, repair also rejected)
+tool_calls: 5; llm_calls: 2; total: 91.1 s
+tokens: prompt=61698 completion=24625
+problems: 7 (undeclared-number x5, efficacy-claim x1, draft-rejected x1)
+saved: data\agent_runs\run-20261102T141454Z.json + -trace.json (git-ignored)
+```
+
+The first draft had 7 problems (all `undeclared-number '5'`); the repair fixed
+two spots but introduced an `efficacy-claim` in `ranked_recommendations[0]`
+and was rejected with 6. P22 diagnosis (offline, CONFIRMED): H1 CONFIRMED —
+the `5` is the validator matching the dataset name `ERA5`/`ERA5-Land`
+(`_strip_known` only strips full `data_source` echoes; only ERA5 findings
+flagged; exact problem string reproduced offline). H2 CONFIRMED as mechanism
+(the code fires only on an efficacy-regex match in a ranked narrative); the
+exact phrase is unknowable because the trace did not keep the repair output.
+
+P22 changes: **yes, the validator was changed — one narrow bug fix** (dataset
+identifier digits exempt via `DATASET_IDENTIFIER_RE`; all other rules
+untouched and test-pinned), ranked-narrative efficacy rules + a compliant
+example in the system prompt, offending sentence + matched phrase carried into
+the repair turn, and `draft_text`/`repair_text` now kept on the trace. No model
+draft has been accepted yet; do not present draft acceptance as demonstrated.
+Owner retry budget: at most 2 runs × 2 calls; if still rejected after the
+second run, stop and report (see KI-35).

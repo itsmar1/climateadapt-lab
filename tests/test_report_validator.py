@@ -439,3 +439,80 @@ def test_valid_draft_survives_a_copy_round_trip():
     draft = copy.deepcopy(valid_report_dict(ctx))
     assert validate_report(draft, ctx).valid
     assert validate_report(json.loads(json.dumps(draft)), ctx).valid
+
+
+# --- P22: dataset identifiers are not numeric claims --------------------------
+
+
+def test_dataset_identifiers_are_not_numeric_claims():
+    ctx = make_llm_context()
+    draft = valid_report_dict(ctx)
+    finding = draft["environmental_findings"][0]
+    finding["text"] = (
+        finding["text"] + " ERA5-Land agrees on the sign of the anomaly."
+    )
+    draft["limitations"].append("Sources are CHIRPS v3 and ERA5-Land.")
+    # No new declarations: identifier digits must not need any.
+
+    result = validate_report(draft, ctx)
+
+    assert result.valid, result.problems
+
+
+def test_real_number_beside_a_dataset_name_is_still_rejected():
+    ctx = make_llm_context()
+    draft = valid_report_dict(ctx)
+    finding = draft["environmental_findings"][0]
+    finding["text"] = finding["text"] + " ERA5-Land total was 5 mm."
+
+    result = validate_report(draft, ctx)
+
+    assert not result.valid
+    assert "undeclared-number" in codes(result.problems)
+    assert any("'5'" in p for p in result.problems)
+
+
+def test_version_digits_detached_from_the_product_name_are_still_rejected():
+    ctx = make_llm_context()
+    draft = valid_report_dict(ctx)
+    finding = draft["environmental_findings"][0]
+    finding["text"] = finding["text"] + " Version 3 agrees with version 5."
+    # Bare "3"/"5" are numeric claims even though the products carry versions.
+
+    result = validate_report(draft, ctx)
+
+    assert not result.valid
+    assert "undeclared-number" in codes(result.problems)
+
+
+def test_undeclared_number_problem_quotes_the_offending_sentence():
+    ctx = make_llm_context()
+    draft = valid_report_dict(ctx)
+    finding = draft["environmental_findings"][0]
+    finding["text"] = finding["text"] + " The grid cell is 5 km wide."
+
+    result = validate_report(draft, ctx)
+
+    assert not result.valid
+    problems = [p for p in result.problems if p.startswith("[undeclared-number]")]
+    assert len(problems) == 1
+    assert "'5'" in problems[0]
+    assert "The grid cell is 5 km wide." in problems[0]
+
+
+def test_efficacy_problem_quotes_the_matched_phrase_and_sentence():
+    ctx = make_llm_context()
+    draft = valid_report_dict(ctx)
+    narrative = draft["ranked_recommendations"][0]["narrative"]
+    narrative["text"] = (
+        "Test drip (test-drip): ranked with score 0.85. "
+        "It reduces water use."
+    )
+
+    result = validate_report(draft, ctx)
+
+    assert not result.valid
+    problems = [p for p in result.problems if p.startswith("[efficacy-claim]")]
+    assert len(problems) == 1
+    assert "reduces" in problems[0]
+    assert "It reduces water use." in problems[0]
