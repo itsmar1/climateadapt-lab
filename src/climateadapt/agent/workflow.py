@@ -8,7 +8,10 @@ at most one repair attempt inside the validate stage — same prompt plus the
 validator's problems — and the repair output is validated exactly as before.
 Outcomes:
 
-* ``complete`` — the model draft passed validation and is returned.
+* ``complete`` — a validator-accepted report is returned: either the model
+  draft as-is (``ai-accepted``) or a P23 composite keeping every valid model
+  statement and replacing each failing one with the deterministic fallback's
+  counterpart (``ai-partial``), re-validated as a whole before shipping.
 * ``partial`` — any tool failure, limit breach, or invalid draft: the labelled
   deterministic fallback built from whatever deterministic outputs exist.
 * ``failed`` — no report could be grounded (bad inputs, no bundle, no ranking).
@@ -48,6 +51,11 @@ from climateadapt.agent.trace import (
     summarize,
 )
 from climateadapt.api.errors import domain_error_status
+from climateadapt.llm.composite import (
+    build_composite,
+    count_model_statements,
+    stamp_accepted,
+)
 from climateadapt.llm.fallback import build_fallback_report
 from climateadapt.llm.prompts import (
     build_repair_request,
@@ -485,6 +493,7 @@ def run_agent(
             return ",".join(sorted({p[1:].split("]", 1)[0] for p in problems}))
 
         accepted_report = None
+        first_report = None
         first_problems: list[str] = []
         first_was_parse_error = False
         try:
@@ -503,36 +512,33 @@ def run_agent(
         else:
             verdict = validate_report_tool(draft, _validation_context())
             result.tool_calls_made += 1
-            if verdict.valid and verdict.report is not None:
-                accepted_report = verdict.report
-                trace.tool_calls.append(
-                    ToolCallRecord(
-                        name="validate_report", ok=True,
-                        duration_ms=(time.monotonic() - started_mono) * 1000,
-                        output_summary="verdict=accepted",
-                    )
-                )
-                _record_stage(trace, "validate", "ok", started_at, started_mono,
-                              detail="Draft accepted.")
-                trace.validator_verdicts.append("[accepted]")
-            else:
+            first_report = verdict.report
+            if not verdict.valid:
                 first_problems = verdict.problems
-                trace.tool_calls.append(
-                    ToolCallRecord(
-                        name="validate_report", ok=True,
-                        duration_ms=(time.monotonic() - started_mono) * 1000,
-                        output_summary="verdict=rejected("
-                        + _code_list(verdict.problems) + ")",
-                    )
+            trace.tool_calls.append(
+                ToolCallRecord(
+                    name="validate_report", ok=True,
+                    duration_ms=(time.monotonic() - started_mono) * 1000,
+                    output_summary=(
+                        "verdict=accepted" if verdict.valid
+                        else "verdict=rejected(" + _code_list(verdict.problems) + ")"
+                    ),
                 )
+            )
 
-        if accepted_report is None and first_problems and (
+        repair_ran = False
+        second_report = None
+        second_problems: list[str] = []
+        second_was_parse_error = False
+        if first_problems and (
             config.max_repair_attempts >= 1
             and result.llm_calls < config.max_llm_calls
         ):
             # Single repair attempt: same prompt plus rejection feedback, then
-            # the identical parse + validate path. Any failure falls through
-            # to the deterministic fallback via _Abort.
+            # the identical parse + validate path. The decision below picks
+            # the attempt with fewer problems as the composite base; the
+            # repair is not assumed better.
+            repair_ran = True
             repair_request = build_repair_request(
                 request, response.content, first_problems
             )
@@ -576,6 +582,7 @@ def run_agent(
                 )
             except ValueError as exc:
                 second_problems = [str(exc)]
+                second_was_parse_error = True
                 result.tool_calls_made += 1
                 trace.tool_calls.append(
                     ToolCallRecord(
@@ -584,84 +591,175 @@ def run_agent(
                         output_summary="verdict=rejected(repair-parse)",
                     )
                 )
-                trace.validator_verdicts.extend(first_problems)
-                trace.validator_verdicts.extend(second_problems)
-                _record_stage(
-                    trace, "validate", "ok", started_at, started_mono,
-                    detail="Repair rejected: unparsable.",
+            else:
+                repair_verdict = validate_report_tool(
+                    repair_draft, _validation_context()
                 )
-                result.problems.extend(second_problems)
-                result.warnings.append(
-                    f"[repair] First draft rejected ({len(first_problems)} problems); "
-                    "repair unparsable."
-                )
-                raise _Abort("draft-rejected") from exc
-            repair_verdict = validate_report_tool(
-                repair_draft, _validation_context()
-            )
-            result.tool_calls_made += 1
-            if repair_verdict.valid and repair_verdict.report is not None:
-                accepted_report = repair_verdict.report
+                result.tool_calls_made += 1
+                second_report = repair_verdict.report
+                if not repair_verdict.valid:
+                    second_problems = repair_verdict.problems
                 trace.tool_calls.append(
                     ToolCallRecord(
                         name="validate_report", ok=True,
                         duration_ms=(time.monotonic() - started_mono) * 1000,
-                        output_summary="verdict=accepted(repair)",
+                        output_summary=(
+                            "verdict=accepted(repair)" if repair_verdict.valid
+                            else "verdict=rejected(repair:"
+                            + _code_list(repair_verdict.problems) + ")"
+                        ),
                     )
                 )
+
+        # P23 decision: parsed attempts are candidates; the fewest-problems
+        # attempt is the base (ties go to the first draft). A clean base is
+        # accepted as-is; otherwise statement-level compositing replaces each
+        # failing statement, and the composite is re-validated as a whole.
+        candidates: list[tuple[str, Report, list[str]]] = []
+        if first_report is not None:
+            candidates.append(("first draft", first_report, first_problems))
+        if repair_ran and second_report is not None:
+            candidates.append(("repair", second_report, second_problems))
+        if not candidates and not repair_ran and first_was_parse_error:
+            trace.validator_verdicts.append(
+                first_problems[0].split("]")[0] + "]"
+            )
+        else:
+            trace.validator_verdicts.extend(first_problems)
+            if repair_ran:
+                trace.validator_verdicts.extend(second_problems)
+        if not candidates:
+            # Nothing parseable from either attempt: full fallback as before.
+            if repair_ran:
+                if second_was_parse_error:
+                    no_candidate_detail = "Repair rejected: unparsable."
+                    repair_outcome = "repair unparsable."
+                else:
+                    no_candidate_detail = (
+                        f"Draft rejected ({len(second_problems)} problems "
+                        "after repair)."
+                    )
+                    repair_outcome = "repair rejected."
                 _record_stage(
                     trace, "validate", "ok", started_at, started_mono,
-                    detail=f"Draft accepted on repair "
+                    detail=no_candidate_detail,
+                )
+                result.problems.extend(second_problems)
+                result.warnings.append(
+                    f"[repair] First draft rejected ({len(first_problems)} problems); "
+                    f"{repair_outcome}"
+                )
+            else:
+                if first_was_parse_error:
+                    no_candidate_detail = "Draft rejected: unparsable."
+                else:
+                    no_candidate_detail = (
+                        f"Draft rejected ({len(first_problems)} problems)."
+                    )
+                _record_stage(
+                    trace, "validate", "ok", started_at, started_mono,
+                    detail=no_candidate_detail,
+                )
+                result.problems.extend(first_problems)
+            raise _Abort("draft-rejected")
+
+        base_name, base_report, base_problems = min(
+            candidates, key=lambda candidate: len(candidate[2])
+        )
+        if not base_problems:
+            accepted_report = stamp_accepted(base_report)
+            if base_name == "repair":
+                _record_stage(
+                    trace, "validate", "ok", started_at, started_mono,
+                    detail="Draft accepted on repair "
                     f"(first attempt had {len(first_problems)} problems).",
                 )
-                trace.validator_verdicts.extend(first_problems)
                 trace.validator_verdicts.append("[repair-accepted]")
                 result.warnings.append(
                     f"[repair] First draft rejected ({len(first_problems)} problems); "
                     "repair accepted."
                 )
             else:
+                _record_stage(trace, "validate", "ok", started_at, started_mono,
+                              detail="Draft accepted.")
+                trace.validator_verdicts.append("[accepted]")
+        else:
+            assert deps.manifest is not None
+            donor = build_fallback_report(
+                bundle, ranking, retrieved, deps.manifest, base_problems
+            )
+            composite = build_composite(base_report, donor, base_problems)
+            if composite is None:
+                _record_stage(
+                    trace, "validate", "ok", started_at, started_mono,
+                    detail=f"Draft rejected ({len(base_problems)} problems; "
+                    f"base: {base_name}).",
+                )
+                result.problems.extend(base_problems)
+                if repair_ran:
+                    result.warnings.append(
+                        f"[repair] First draft rejected ({len(first_problems)} problems); "
+                        "repair rejected."
+                    )
+                raise _Abort("draft-rejected")
+            check_tool_budget()
+            recheck = validate_report_tool(
+                composite.report.model_dump(mode="json"), _validation_context()
+            )
+            result.tool_calls_made += 1
+            if not recheck.valid or recheck.report is None:
                 trace.tool_calls.append(
                     ToolCallRecord(
                         name="validate_report", ok=True,
                         duration_ms=(time.monotonic() - started_mono) * 1000,
-                        output_summary="verdict=rejected(repair:"
-                        + _code_list(repair_verdict.problems) + ")",
+                        output_summary="verdict=rejected(composite:"
+                        + _code_list(recheck.problems) + ")",
                     )
                 )
+                trace.validator_verdicts.extend(recheck.problems)
                 _record_stage(
                     trace, "validate", "ok", started_at, started_mono,
-                    detail=f"Draft rejected ({len(repair_verdict.problems)} problems "
-                    "after repair).",
+                    detail="Draft rejected (composite failed re-validation).",
                 )
-                trace.validator_verdicts.extend(first_problems)
-                trace.validator_verdicts.extend(repair_verdict.problems)
-                result.problems.extend(repair_verdict.problems)
-                result.warnings.append(
-                    f"[repair] First draft rejected ({len(first_problems)} problems); "
-                    "repair rejected."
-                )
+                result.problems.extend(base_problems)
+                if repair_ran:
+                    result.warnings.append(
+                        f"[repair] First draft rejected ({len(first_problems)} problems); "
+                        "repair rejected."
+                    )
                 raise _Abort("draft-rejected")
+            trace.tool_calls.append(
+                ToolCallRecord(
+                    name="validate_report", ok=True,
+                    duration_ms=(time.monotonic() - started_mono) * 1000,
+                    output_summary="verdict=accepted(composite)",
+                )
+            )
+            accepted_report = composite.report
+            model_count, total_count = count_model_statements(composite.report)
+            fixed_codes = sorted({
+                code
+                for codes in (
+                    *composite.replaced.values(), *composite.dropped.values()
+                )
+                for code in codes
+            })
+            _record_stage(
+                trace, "validate", "ok", started_at, started_mono,
+                detail=f"Composite accepted (base: {base_name}, "
+                f"{len(base_problems)} problems; {len(composite.replaced)} replaced, "
+                f"{len(composite.dropped)} dropped; "
+                f"{model_count} of {total_count} model-written).",
+            )
+            trace.validator_verdicts.append("[composite-accepted]")
+            result.warnings.append(
+                f"[composite] Base: {base_name} ({len(base_problems)} "
+                f"problem{'s' if len(base_problems) != 1 else ''}); "
+                f"{len(composite.replaced)} replaced, {len(composite.dropped)} dropped "
+                f"({', '.join(fixed_codes)}); {model_count} of {total_count} "
+                "model-written."
+            )
 
-        if accepted_report is None:
-            # No repair configured, repair budget exhausted, or the first
-            # attempt failed without repair: reject exactly as before.
-            if first_was_parse_error:
-                _record_stage(
-                    trace, "validate", "ok", started_at, started_mono,
-                    detail="Draft rejected: unparsable.",
-                )
-                trace.validator_verdicts.append(
-                    first_problems[0].split("]")[0] + "]"
-                )
-            else:
-                _record_stage(
-                    trace, "validate", "ok", started_at, started_mono,
-                    detail=f"Draft rejected ({len(first_problems)} problems).",
-                )
-                trace.validator_verdicts.extend(first_problems)
-            result.problems.extend(first_problems)
-            raise _Abort("draft-rejected")
 
         # 7a. finalize an accepted draft.
         check_bounds("finalize")

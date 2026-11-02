@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from climateadapt.llm.composite import statement_locations
 from climateadapt.llm.report import (
     FALLBACK_GENERATOR,
     EvidenceItem,
@@ -244,7 +245,7 @@ def build_fallback_report(
         constraints_output_id(o["intervention_id"]) for o in ranking.get("excluded", [])
     )
 
-    return Report(
+    report = Report(
         generator=FALLBACK_GENERATOR,
         fallback=True,
         fallback_note=_note(problems),
@@ -264,4 +265,12 @@ def build_fallback_report(
         ],
         data_coverage=coverage,
         provenance_refs=provenance_refs,
+        acceptance="fallback",
+    )
+    return report.model_copy(
+        update={
+            "statement_origins": {
+                location: "platform" for location in statement_locations(report)
+            }
+        }
     )

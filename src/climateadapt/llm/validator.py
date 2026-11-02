@@ -101,7 +101,16 @@ full data_source echo stays a numeric claim and must be declared.
 MAX_EVIDENCE_CHARS = 200
 """Cap for offending sentences quoted in problem strings (repair evidence)."""
 
-_SENTENCE_RE = re.compile(r"[^.!?;]+(?:[.!?;]|$)")
+_SENTENCE_RE = re.compile(
+    r".*?(?:[;!?]|(?<!\be\.g)(?<!\bi\.e)(?<!\betc)\.(?=\s+[A-Z0-9])"
+    r"|\.(?=\s*$)|\s*$)",
+    re.DOTALL,
+)
+"""Sentence spans; a period ends one only before a capital/digit or the end.
+
+A period between digits ("7.8") or inside an abbreviation ("e.g. ...") is not
+a sentence end, so offending-sentence evidence is never cut mid-number (P23).
+Only the quoted context changes — which numerals are flagged is untouched."""
 
 
 def _sentence_around(text: str, start: int) -> str:

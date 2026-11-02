@@ -38,6 +38,8 @@ export function traceFixture(): NonNullable<ScenarioDetailFixture['trace']> {
     started_at: '2026-10-31T00:00:00+00:00',
     ended_at: '2026-10-31T00:00:01+00:00',
     duration_ms_total: 1000,
+    draft_text: '',
+    repair_text: '',
     scenario: {},
     config: {},
     component_versions: {},
@@ -488,6 +490,26 @@ export function reportFixtureFull(fallback: boolean): ReportModel {
     assumptions: ['Synthetic assumption.'],
     data_coverage: statementFixture('Synthetic coverage.'),
     provenance_refs: ['bundle', 'chirps_spi'],
+  };
+}
+
+export function partialReportFixture(): ReportModel {
+  const base = reportFixtureFull(false);
+  return {
+    ...base,
+    generator: 'fake:test-model',
+    acceptance: 'ai-partial',
+    statement_origins: {
+      summary: 'model',
+      'environmental_findings[0]': 'model',
+      'ranked_recommendations[0]': 'model',
+      'excluded_options[0]': 'model',
+      'limitations[0]': 'platform',
+      'assumptions[0]': 'model',
+      data_coverage: 'model',
+    },
+    replaced_statements: { 'limitations[0]': ['undeclared-number'] },
+    dropped_statements: {},
   };
 }
 

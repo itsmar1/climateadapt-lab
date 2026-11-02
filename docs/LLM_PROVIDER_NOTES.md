@@ -321,7 +321,42 @@ sentence + matched phrase into the repair turn, and the trace keeps
 2 runs × 2 calls with the gate set (same command as above); if still rejected
 after the second run, stop and report.
 
-## 7. Using your own key (judges and reviewers)
+## 7. 2026-11-02 live run of the P22 build + P23 acceptance change — RAN (owner)
+
+Owner ran the P22 prompt/validator live (reference scenario, same command as
+§6):
+
+```text
+status: partial (all 7 stages ok; first draft unparsable, repair rejected)
+tool_calls: 5; llm_calls: 2; total: 91.0 s
+tokens: prompt=60629 completion=24391
+problems: 5 (first draft 1, repair 4, plus draft-rejected)
+saved: data\agent_runs\run-20261102T155950Z.json + -trace.json (git-ignored)
+```
+
+The P22 fixes held: no ERA5 `'5'` flag, no efficacy-claim. The first draft hit
+`finish=length` (16000/16000 completion tokens, cut mid-string → 1
+`invalid-json` problem). The repair was valid JSON with 4 `undeclared-number`
+problems: `'0'`/`'7'` ("soil moisture layer 0-7 cm"), `'7.8'` (land-fallback
+km), `'0.05'` (CHIRPS resolution). None is declarable — layer ranges,
+resolutions, and the nested `land_fallback.distance_km` (tool value
+7.842441576259394; the model wrote the warning's rounded 7.8) are not registry
+values — so all four rejections are correct. Cost: confirm from the Baseten
+dashboard, not from an estimate.
+
+P23 changes what happens next (no new live call yet — all offline-tested).
+**The validator is unchanged except the sentence-splitter fix** (evidence
+quotes no longer split on decimal points or `e.g.`; which numerals flag is
+untouched). The prompt now states the strict policy — a numeral only if it
+appears in the registry with exactly that value, everything else words — and
+the repair turn is told to "replace the number with words or delete the
+sentence; do not add new numbers". Acceptance is statement-level
+(owner-approved, see `AGENT_WORKFLOW.md` §8): valid model statements ship,
+failing ones are replaced by the fallback counterpart, the composite is
+re-validated as a whole, and anything else falls back. Owner budget: at most
+2 runs; if still `fallback` after two, stop and report.
+
+## 8. Using your own key (judges and reviewers)
 
 Base URL, model ID, and key are all plain environment configuration — no code
 change is needed to point the app at your own Baseten account. Never commit a

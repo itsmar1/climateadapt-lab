@@ -156,6 +156,11 @@ def format_registry_block(
         '"environmental_bundle", "recommendations", JSON paths like '
         '"entries[0].result.spi", and any id not listed above.'
     )
+    lines.append(
+        "NUMERALS (strict): write a numeral only if it appears above with exactly "
+        "that value (copy verbatim and declare it). Any other number — layer "
+        "ranges, resolutions, distances, counts — must be words, never digits."
+    )
     lines.append(_worked_example(registry))
     return "\n".join(lines)
 
@@ -219,7 +224,9 @@ def build_repair_request(
         "\n\nPREVIOUS DRAFT REJECTED — FIX EVERY PROBLEM BELOW\n"
         "Your previous output failed validation. Output ONE corrected JSON "
         "object matching the same schema and rules (verbatim ids, declared "
-        "numbers, exact citations). Problems to fix:\n"
+        "numbers, exact citations). For each number problem, replace the number "
+        "with words or delete the sentence; do not add new numbers. "
+        "Problems to fix:\n"
         f"{problem_lines}\n"
         "Previous invalid draft (excerpt, fix it; do not repeat its mistakes):\n"
         f"{excerpt}"

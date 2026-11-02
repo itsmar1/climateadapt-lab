@@ -153,5 +153,40 @@ untouched and test-pinned), ranked-narrative efficacy rules + a compliant
 example in the system prompt, offending sentence + matched phrase carried into
 the repair turn, and `draft_text`/`repair_text` now kept on the trace. No model
 draft has been accepted yet; do not present draft acceptance as demonstrated.
-Owner retry budget: at most 2 runs × 2 calls; if still rejected after the
+That retry has now run (`run-20261102T155950Z`: 1 problem, then 4 after repair).
+Statement-level acceptance is implemented (see §8); the budget for it is
+at most 2 owner runs; if still rejected after the
 second run, stop and report (see KI-35).
+
+## 8. Statement-level acceptance — IMPLEMENTED P23 (owner-approved), live UNVERIFIED
+
+One bad sentence no longer discards an otherwise valid model report, without
+weakening any validation. After validation, problems already carry statement
+locations, so the workflow (`llm/composite.py` + validate stage) keeps every
+model statement with no problems and replaces each failing one with the
+deterministic fallback's counterpart — matched by section plus indicator id /
+intervention id / chunk id / position. A failing statement with no safe
+counterpart is dropped. Evidence cited by replaced statements is completed
+from the fallback's own entries; anything else unresolvable fails closed.
+
+Rules that keep this honest:
+
+- Problems with no statement location (missing section, schema failure,
+  citation-set failure, bad refs) force the full fallback — no compositing.
+- The composite is re-validated with the unchanged validator and ships only
+  when fully valid; otherwise the full fallback ships. Nothing reaches a user
+  that the validator has not accepted as a whole.
+- The base is the parsed attempt (first draft or repair) with fewer problems;
+  unparsable attempts are excluded and ties go to the first draft. Both
+  attempts' problems stay in the trace (`[composite-accepted]` marks the path).
+- Every counted statement carries `model`/`platform` provenance
+  (`statement_origins`); replaced/dropped locations keep their problem codes
+  (`replaced_statements`, `dropped_statements`). Report `acceptance` is
+  `ai-accepted` (all model), `ai-partial` (mixed, with "N of M model-written"
+  counts), or `fallback`. `ai-partial` is never labelled fully accepted: the
+  UI badge, the collapsed "why" section, the per-statement chips, and the
+  Markdown export all show the mix.
+
+No model draft has been accepted yet (neither whole nor partial); do not
+present draft acceptance as demonstrated. Owner retry budget: at most 2 live
+runs; if still `fallback` after two, stop and report (see KI-35).

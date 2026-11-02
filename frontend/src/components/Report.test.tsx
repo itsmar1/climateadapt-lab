@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import ReportView from './ReportView';
 import {
   evidenceItemFixture,
+  partialReportFixture,
   reportFixtureFull,
   statementFixture,
 } from '../test/fixtures';
@@ -32,6 +33,17 @@ describe('ReportView', () => {
     render(<ReportView report={reportFixtureFull(false)} />);
     expect(screen.getByText('AI-generated narrative')).toBeInTheDocument();
     expect(screen.queryByText('Computed by the platform')).not.toBeInTheDocument();
+  });
+
+  it('marks each statement with its authorship on mixed reports', () => {
+    render(<ReportView report={partialReportFixture()} />);
+    expect(
+      screen.getByText('Mixed: 6/7 statements model-written'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('AI-generated narrative')).not.toBeInTheDocument();
+    expect(screen.queryByText('Computed by the platform')).not.toBeInTheDocument();
+    expect(screen.getAllByText('AI-written')).toHaveLength(6);
+    expect(screen.getAllByText('Platform-written')).toHaveLength(1);
   });
 
   it('links claims to evidence with chips, pages, and platform values', () => {

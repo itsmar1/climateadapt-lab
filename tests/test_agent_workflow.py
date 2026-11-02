@@ -166,7 +166,8 @@ def test_validator_rejection_yields_the_labelled_fallback(monkeypatch):
     stub_tools(monkeypatch, retrieved)
     ctx = make_llm_context(chunks=retrieved)
     draft = valid_report_dict(ctx)
-    draft["summary"]["text"] = "Extreme drought everywhere."
+    # Non-compositable failure (P23): cited evidence with no evidence[] entry.
+    draft["summary"]["evidence_ids"] = [sorted(ctx.chunks)[1]]
     provider = FakeProvider.with_text(json.dumps(draft))
 
     result = run_agent(make_scenario(), deps, provider)
@@ -175,8 +176,8 @@ def test_validator_rejection_yields_the_labelled_fallback(monkeypatch):
     assert result.report is not None
     assert result.report.fallback is True
     assert result.report.generator == "deterministic-fallback"
-    assert any(p.startswith("[drought-label]") for p in result.problems)
-    assert any("drought-label" in v for v in result.trace.validator_verdicts)
+    assert any(p.startswith("[missing-evidence-entry]") for p in result.problems)
+    assert any("missing-evidence-entry" in v for v in result.trace.validator_verdicts)
     assert result.trace.outcome == "partial"
 
 

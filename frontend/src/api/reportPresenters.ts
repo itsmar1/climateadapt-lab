@@ -39,6 +39,94 @@ export function isPlatformReport(report: Report): boolean {
   return report.fallback || report.generator === 'deterministic-fallback';
 }
 
+export type Acceptance = 'ai-accepted' | 'ai-partial' | 'fallback';
+
+/** How the report was accepted; legacy reports without stamps use the flag. */
+export function acceptanceOf(report: Report): Acceptance {
+  if (
+    report.acceptance === 'ai-accepted' ||
+    report.acceptance === 'ai-partial' ||
+    report.acceptance === 'fallback'
+  ) {
+    return report.acceptance;
+  }
+  return isPlatformReport(report) ? 'fallback' : 'ai-accepted';
+}
+
+/** True when some statements are model-written and some platform-written. */
+export function isPartialReport(report: Report): boolean {
+  return acceptanceOf(report) === 'ai-partial';
+}
+
+/** Counted-statement locations in render order (backend vocabulary). */
+export function statementLocations(report: Report): string[] {
+  const locations = ['summary'];
+  report.environmental_findings.forEach((_, index) => {
+    locations.push(`environmental_findings[${index}]`);
+  });
+  (report.ranked_recommendations ?? []).forEach((_, index) => {
+    locations.push(`ranked_recommendations[${index}]`);
+  });
+  (report.excluded_options ?? []).forEach((_, index) => {
+    locations.push(`excluded_options[${index}]`);
+  });
+  (report.limitations ?? []).forEach((_, index) => {
+    locations.push(`limitations[${index}]`);
+  });
+  (report.assumptions ?? []).forEach((_, index) => {
+    locations.push(`assumptions[${index}]`);
+  });
+  locations.push('data_coverage');
+  return locations;
+}
+
+/** (model-written, total) counted statements; legacy reports use the flag. */
+export function modelStatementCounts(report: Report): { model: number; total: number } {
+  const origins = report.statement_origins ?? {};
+  const keys = Object.keys(origins);
+  if (keys.length > 0) {
+    return {
+      model: keys.filter((key) => origins[key] === 'model').length,
+      total: keys.length,
+    };
+  }
+  const total = statementLocations(report).length;
+  return isPlatformReport(report) ? { model: 0, total } : { model: total, total };
+}
+
+/** Authorship of one statement, or null when the report predates stamps. */
+export function statementOrigin(
+  report: Report,
+  location: string,
+): 'model' | 'platform' | null {
+  const origin = (report.statement_origins ?? {})[location];
+  if (origin === 'model' || origin === 'platform') {
+    return origin;
+  }
+  return null;
+}
+
+export interface ChangedStatement {
+  location: string;
+  codes: string[];
+}
+
+/** Replaced statements (composite location) with the codes that forced it. */
+export function replacedStatements(report: Report): ChangedStatement[] {
+  return Object.entries(report.replaced_statements ?? {}).map(([location, codes]) => ({
+    location,
+    codes,
+  }));
+}
+
+/** Dropped statements (model location) with their codes. */
+export function droppedStatements(report: Report): ChangedStatement[] {
+  return Object.entries(report.dropped_statements ?? {}).map(([location, codes]) => ({
+    location,
+    codes,
+  }));
+}
+
 export interface ScoreRow {
   component: string;
   value: number;

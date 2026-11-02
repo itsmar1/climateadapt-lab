@@ -4,6 +4,12 @@ import { downloadMarkdown, reportToMarkdown } from '../api/export';
 import type { FallbackPoint } from '../api/geo';
 import { fallbackPoints, formatCoord } from '../api/geo';
 import { toCardModel } from '../api/presenters';
+import {
+  droppedStatements,
+  isPartialReport,
+  modelStatementCounts,
+  replacedStatements,
+} from '../api/reportPresenters';
 import type { GeoMarker } from './GeoMap';
 import GeoMap from './GeoMap';
 import IndicatorCard from './IndicatorCard';
@@ -56,6 +62,14 @@ function formatPoint(lat: number, lon: number): string {
 function reportBadge(report: ScenarioDetail['report']): ReactNode {
   if (!report) {
     return <span className="badge">No report</span>;
+  }
+  if (isPartialReport(report)) {
+    const { model, total } = modelStatementCounts(report);
+    return (
+      <span className="badge">
+        {`AI report: ${model}/${total} statements model-written (validated)`}
+      </span>
+    );
   }
   if (report.fallback) {
     return (
@@ -117,6 +131,14 @@ export default function ResultsView({
   const entries = detail.bundle?.entries ?? [];
   const fallback = detail.report?.fallback === true;
   const groups = groupProblems(detail.problems);
+  const partial = detail.report ? isPartialReport(detail.report) : false;
+  const replaced = detail.report ? replacedStatements(detail.report) : [];
+  const dropped = detail.report ? droppedStatements(detail.report) : [];
+  const changedCount = replaced.length + dropped.length;
+  const changedLabel =
+    changedCount === 1
+      ? 'Why 1 statement is platform-written'
+      : `Why ${changedCount} statements are platform-written`;
   const points = fallbackPoints(entries);
   const requested = { lat: detail.scenario.latitude, lon: detail.scenario.longitude };
   const markers: GeoMarker[] = [
@@ -188,6 +210,26 @@ export default function ResultsView({
             No report could be grounded. The problems below explain why; missing
             values are shown as missing, never filled in.
           </div>
+        )}
+        {partial && changedCount > 0 && (
+          <details className="problems">
+            <summary>
+              {changedLabel}
+            </summary>
+            <ul className="tight">
+              {replaced.map(({ location, codes }) => (
+                <li key={`replaced-${location}`}>
+                  <code className="inline">{location}</code> — replaced ({codes.join(', ')})
+                </li>
+              ))}
+              {dropped.map(({ location, codes }) => (
+                <li key={`dropped-${location}`}>
+                  <code className="inline">{location}</code> — dropped, no platform
+                  counterpart ({codes.join(', ')})
+                </li>
+              ))}
+            </ul>
+          </details>
         )}
         {detail.problems.length > 0 && (
           <details className="problems">

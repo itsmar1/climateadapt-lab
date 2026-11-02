@@ -99,7 +99,12 @@ class ExcludedOption(BaseModel):
 
 
 class Report(BaseModel):
-    """The validated report contract (model draft or deterministic fallback)."""
+    """The validated report contract (model draft or deterministic fallback).
+
+    P23 acceptance stamps (``acceptance``, ``statement_origins``,
+    ``replaced_statements``, ``dropped_statements``) are written by the
+    workflow after validation; the validator ignores them.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
@@ -116,6 +121,16 @@ class Report(BaseModel):
     assumptions: list[str] = Field(default_factory=list)
     data_coverage: Statement
     provenance_refs: list[str] = Field(min_length=1)
+    acceptance: Literal["ai-accepted", "ai-partial", "fallback"] | None = None
+    """How the report was accepted (P23; stamped by the workflow, not the model)."""
+    statement_origins: dict[str, Literal["model", "platform"]] = Field(
+        default_factory=dict
+    )
+    """Counted-statement location -> authorship, validator vocabulary (P23)."""
+    replaced_statements: dict[str, list[str]] = Field(default_factory=dict)
+    """Composite location -> problem codes that forced replacement (P23)."""
+    dropped_statements: dict[str, list[str]] = Field(default_factory=dict)
+    """Model location -> codes for statements with no safe counterpart (P23)."""
 
 
 class ToolOutput(BaseModel):

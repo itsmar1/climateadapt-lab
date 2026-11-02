@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { reportToMarkdown } from './export';
 import {
   fullDetailFixture,
+  partialReportFixture,
   reportFixtureFull,
   scenarioDetailFixture,
 } from '../test/fixtures';
@@ -61,6 +62,21 @@ describe('reportToMarkdown', () => {
     );
     expect(text).toContain('AI-generated narrative');
     expect(text).not.toContain('Computed by the platform');
+  });
+
+  it('marks mixed reports with counts, origins, and replaced codes', () => {
+    const text = reportToMarkdown(
+      fullDetailFixture({ report: partialReportFixture() }),
+    );
+    expect(text).toContain(
+      'Mixed report: 6 of 7 statements model-written (generator `fake:test-model`), validated',
+    );
+    expect(text).toContain('## Statement origins');
+    expect(text).toContain('- limitations[0]: replaced (undeclared-number).');
+    expect(text).toContain('*Origin: AI-written.*');
+    expect(text).toContain('*Origin: platform-written.*');
+    expect(text).not.toContain('AI-generated narrative (generator');
+    expect(text).not.toContain('Computed by the platform (generator');
   });
 
   it('is honest when no report was stored', () => {

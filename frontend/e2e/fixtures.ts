@@ -232,6 +232,29 @@ export const partialDetail = {
   warnings: [],
 };
 
+/** Mixed run: ai-partial report with one replaced limitation. */
+export const partialAiDetail = {
+  ...baseDetail('complete'),
+  bundle: completeDetail.bundle,
+  ranking: completeDetail.ranking,
+  report: {
+    ...completeDetail.report,
+    acceptance: 'ai-partial',
+    statement_origins: {
+      summary: 'model',
+      'environmental_findings[0]': 'model',
+      'limitations[0]': 'platform',
+      data_coverage: 'model',
+    },
+    replaced_statements: { 'limitations[0]': ['undeclared-number'] },
+    dropped_statements: {},
+  },
+  problems: [],
+  warnings: [
+    '[composite] Base: repair (4 problems); 1 replaced, 0 dropped (undeclared-number); 3 of 4 model-written.',
+  ],
+};
+
 export const demoList = {
   version: 1,
   snapshots: [

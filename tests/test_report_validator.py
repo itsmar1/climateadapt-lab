@@ -516,3 +516,60 @@ def test_efficacy_problem_quotes_the_matched_phrase_and_sentence():
     assert len(problems) == 1
     assert "reduces" in problems[0]
     assert "It reduces water use." in problems[0]
+
+
+# --- P23: sentence splitter keeps decimals and abbreviations whole -------------
+
+
+def test_offending_sentence_is_not_cut_at_a_decimal_point():
+    ctx = make_llm_context()
+    draft = valid_report_dict(ctx)
+    finding = draft["environmental_findings"][0]
+    finding["text"] = (
+        "CHIRPS SPI is -0.517 for a window total of 76.87 mm, using 30 "
+        "reference years. The window mean is 0.097 and growing."
+    )
+    # 0.097 is nowhere declared; the quoted sentence must stay whole.
+
+    result = validate_report(draft, ctx)
+
+    assert not result.valid
+    problems = [p for p in result.problems if p.startswith("[undeclared-number]")]
+    assert len(problems) == 1
+    assert "'0.097'" in problems[0]
+    assert "The window mean is 0.097 and growing." in problems[0]
+
+
+def test_offending_sentence_is_not_cut_at_an_abbreviation():
+    ctx = make_llm_context()
+    draft = valid_report_dict(ctx)
+    finding = draft["environmental_findings"][0]
+    finding["text"] = (
+        "CHIRPS SPI is -0.517 for a window total of 76.87 mm, using 30 "
+        "reference years. Values e.g. 5 km grids are coarse."
+    )
+
+    result = validate_report(draft, ctx)
+
+    assert not result.valid
+    problems = [p for p in result.problems if p.startswith("[undeclared-number]")]
+    assert len(problems) == 1
+    assert "Values e.g. 5 km grids are coarse." in problems[0]
+
+
+def test_offending_sentence_still_ends_at_a_real_boundary():
+    ctx = make_llm_context()
+    draft = valid_report_dict(ctx)
+    finding = draft["environmental_findings"][0]
+    finding["text"] = (
+        "CHIRPS SPI is -0.517 for a window total of 76.87 mm, using 30 "
+        "reference years. First claim here. The grid cell is 5 km wide."
+    )
+
+    result = validate_report(draft, ctx)
+
+    assert not result.valid
+    problems = [p for p in result.problems if p.startswith("[undeclared-number]")]
+    assert len(problems) == 1
+    assert "The grid cell is 5 km wide." in problems[0]
+    assert "First claim here" not in problems[0]

@@ -1,17 +1,24 @@
 import { describe, expect, it } from 'vitest';
 import {
+  acceptanceOf,
+  droppedStatements,
   echoDisplay,
   evidenceChips,
   evidenceIndex,
   evidenceLevelName,
   formatPlatformNumber,
   formatScore,
+  isPartialReport,
   isPlatformReport,
+  modelStatementCounts,
+  replacedStatements,
   scoreBreakdown,
   scoreInputsOf,
+  statementOrigin,
 } from './reportPresenters';
 import {
   evidenceItemFixture,
+  partialReportFixture,
   rankedOptionFixture,
   reportFixtureFull,
   statementFixture,
@@ -120,6 +127,40 @@ describe('scoreInputsOf', () => {
       indicatorStatuses: [],
       exclusionReasons: null,
     });
+  });
+});
+
+describe('acceptanceOf / isPartialReport', () => {
+  it('reads stamped reports and falls back to the flag for legacy ones', () => {
+    expect(acceptanceOf(partialReportFixture())).toBe('ai-partial');
+    expect(isPartialReport(partialReportFixture())).toBe(true);
+    expect(acceptanceOf(reportFixtureFull(true))).toBe('fallback');
+    expect(acceptanceOf(reportFixtureFull(false))).toBe('ai-accepted');
+    expect(isPartialReport(reportFixtureFull(false))).toBe(false);
+  });
+});
+
+describe('modelStatementCounts / statementOrigin', () => {
+  it('counts from origins, legacy from the flag, unknown locations null', () => {
+    const partial = partialReportFixture();
+    expect(modelStatementCounts(partial)).toEqual({ model: 6, total: 7 });
+    expect(statementOrigin(partial, 'summary')).toBe('model');
+    expect(statementOrigin(partial, 'limitations[0]')).toBe('platform');
+    expect(statementOrigin(partial, 'limitations[9]')).toBe(null);
+    expect(modelStatementCounts(reportFixtureFull(true))).toEqual({ model: 0, total: 7 });
+    expect(modelStatementCounts(reportFixtureFull(false))).toEqual({ model: 7, total: 7 });
+    expect(statementOrigin(reportFixtureFull(false), 'summary')).toBe(null);
+  });
+});
+
+describe('replacedStatements / droppedStatements', () => {
+  it('lists changed statements with codes, empty for pure reports', () => {
+    expect(replacedStatements(partialReportFixture())).toEqual([
+      { location: 'limitations[0]', codes: ['undeclared-number'] },
+    ]);
+    expect(droppedStatements(partialReportFixture())).toEqual([]);
+    expect(replacedStatements(reportFixtureFull(false))).toEqual([]);
+    expect(droppedStatements(reportFixtureFull(true))).toEqual([]);
   });
 });
 

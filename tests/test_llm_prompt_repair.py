@@ -257,9 +257,9 @@ def test_repair_failure_serves_the_labelled_fallback(monkeypatch):
     stub_tools(monkeypatch, retrieved)
     ctx = make_llm_context(chunks=retrieved)
     bad = valid_report_dict(ctx)
-    bad["summary"]["tool_output_ids"] = ["environmental_bundle"]
+    bad["summary"]["evidence_ids"] = [sorted(ctx.chunks)[1]]  # cited, not listed
     worse = valid_report_dict(ctx)
-    worse["summary"]["tool_output_ids"] = ["still-invented"]
+    worse["summary"]["evidence_ids"] = [sorted(ctx.chunks)[1]]
     provider = FakeProvider(
         [
             FakeProvider.with_text(json.dumps(bad))._script[0],
@@ -278,7 +278,7 @@ def test_repair_failure_serves_the_labelled_fallback(monkeypatch):
     assert result.report is not None and result.report.fallback is True
     assert result.report.generator == FALLBACK_GENERATOR
     assert result.llm_calls == 2
-    assert any(p.startswith("[unknown-tool-output]") for p in result.problems)
+    assert any(p.startswith("[missing-evidence-entry]") for p in result.problems)
     assert "[repair-accepted]" not in result.trace.validator_verdicts
 
 
@@ -287,7 +287,7 @@ def test_no_repair_by_default_single_call_falls_back(monkeypatch):
     stub_tools(monkeypatch, retrieved)
     ctx = make_llm_context(chunks=retrieved)
     bad = valid_report_dict(ctx)
-    bad["summary"]["tool_output_ids"] = ["environmental_bundle"]
+    bad["summary"]["evidence_ids"] = [sorted(ctx.chunks)[1]]  # cited, not listed
     provider = FakeProvider.with_text(json.dumps(bad))
 
     result = workflow.run_agent(make_scenario(), deps, provider)
@@ -402,6 +402,51 @@ def test_trace_keeps_the_draft_and_repair_texts(monkeypatch):
     assert "environmental_bundle" in result.trace.draft_text
     assert result.trace.repair_text != ""
     assert "environmental_bundle" not in result.trace.repair_text
+
+
+# --- P23: strict numeric policy ----------------------------------------------
+
+
+def test_system_prompt_states_the_strict_numeric_policy():
+    from climateadapt.llm.prompts import load_system_prompt
+
+    system = load_system_prompt()
+
+    assert "ONLY if it appears" in system
+    assert "the first ERA5-Land soil layer" in system
+    assert "the dataset's native grid" in system
+    assert "never write it as a number" in system
+    assert "Compliant limitation example" in system
+
+
+def test_registry_block_states_the_numeric_policy():
+    ctx = make_llm_context()
+    block = format_registry_block(ctx.registry, sorted(ctx.chunks))
+
+    assert "write a numeral only if it appears above with exactly that value" in block
+    assert "must be words, never digits" in block
+
+
+def test_repair_request_tells_the_model_to_replace_numbers_with_words():
+    first = build_report_request(
+        bundle_json="{}",
+        ranking_json="{}",
+        evidence_block="()",
+        generator_label="fake:test-model",
+    )
+    problems = [
+        "[undeclared-number] limitations[2]: numeral '7.8' is not a declared "
+        "tool-output value. Offending sentence: 'fallback 7.8 km'."
+    ]
+
+    repair = build_repair_request(first, '{"limitations": ["fallback 7.8 km"]}', problems)
+
+    user_text = repair.messages[1].content
+    assert (
+        "replace the number with words or delete the sentence; "
+        "do not add new numbers" in user_text
+    )
+    assert "fallback 7.8 km" in user_text
 
 
 def test_trace_repair_text_stays_empty_without_a_repair(monkeypatch):

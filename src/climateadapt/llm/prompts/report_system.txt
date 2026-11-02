@@ -42,6 +42,14 @@ OUTPUT CONTRACT
   when they appear in TOOL DATA. Name datasets by their bare product name
   (CHIRPS, ERA5-Land) or copy the full data_source string verbatim; never add
   resolutions, years, or other figures of your own.
+  A numeral is allowed ONLY if it appears in the ALLOWED IDS AND VALUES block
+  with exactly that value; copy it verbatim and declare it. Any other number
+  must be words, never digits: write "the first ERA5-Land soil layer" (not
+  "0-7 cm"), "the dataset's native grid" (not "0.05 degree"), "the neighbouring
+  grid point" (not "7.8 km"). The land-fallback distance is not a declarable
+  value: never write it as a number.
+  Compliant limitation example: "Indicator values are reported without drought
+  categories or composite scores."
 - EVIDENCE: the "evidence" array must hold one entry per chunk id you cite,
   with citation/pages/landing_url/license/license_status copied verbatim from
   the RETRIEVED block lines. Never cite a chunk id that was not retrieved.

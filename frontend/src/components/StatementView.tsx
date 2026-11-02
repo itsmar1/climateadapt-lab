@@ -5,6 +5,11 @@ interface StatementViewProps {
   statement: Statement;
   /** Chunk-id → E-number map from the report's evidence list. */
   evidenceIndex: Map<string, number>;
+  /**
+   * Statement authorship for mixed (ai-partial) reports; null/undefined hides
+   * the chip (pure reports use the report-level badge instead).
+   */
+  origin?: 'model' | 'platform' | null;
 }
 
 /**
@@ -13,7 +18,11 @@ interface StatementViewProps {
  * and platform-copied numbers. Numerals in prose are never authoritative on
  * their own; the chips carry the traced values.
  */
-export default function StatementView({ statement, evidenceIndex }: StatementViewProps) {
+export default function StatementView({
+  statement,
+  evidenceIndex,
+  origin = null,
+}: StatementViewProps) {
   function scrollToEvidence(n: number): void {
     document.getElementById(`ev-${n}`)?.scrollIntoView?.();
   }
@@ -21,9 +30,19 @@ export default function StatementView({ statement, evidenceIndex }: StatementVie
   const chips = evidenceChips(statement, evidenceIndex);
   const toolOutputIds = statement.tool_output_ids ?? [];
   const numbers = statement.numbers ?? [];
+  const originLabel = origin === 'platform' ? 'Platform-written' : 'AI-written';
+  const originTitle =
+    origin === 'platform' ? 'Computed by the platform' : 'AI-generated narrative';
   return (
     <div className="statement">
       <p style={{ margin: '0 0 6px' }}>{statement.text}</p>
+      {origin !== null && (
+        <p className="meta">
+          <span className="chip" title={originTitle}>
+            {originLabel}
+          </span>
+        </p>
+      )}
       {chips.length > 0 && (
         <p className="meta">
           Evidence:{' '}

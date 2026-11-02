@@ -54,7 +54,7 @@ Implemented: CHIRPS + ERA5-Land point connectors with provenance and coverage
 gates; precipitation, SPI, temperature, and soil-moisture indicators; BM25 +
 dense-E5/Qdrant hybrid retrieval with verified citations; versioned
 intervention catalog with deterministic constraints and transparent ranking;
-fixed 7-stage agent pipeline with a validated-or-fallback report guarantee;
+fixed 7-stage agent pipeline where the model drafts, the platform validates every statement, failing statements are replaced by deterministic counterparts, and the labelled deterministic fallback ships if the whole report cannot be validated;
 scenario API + SQLite history; React UI (map picker, results map, cited
 report, demo page); tracked demo snapshots; Dockerfiles + compose stack +
 CI workflow; classical CropHarvest vision baseline (MLflow-tracked).

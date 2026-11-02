@@ -1224,11 +1224,21 @@ export interface components {
         /**
          * Report
          * @description The validated report contract (model draft or deterministic fallback).
+         *
+         *     P23 acceptance stamps (``acceptance``, ``statement_origins``,
+         *     ``replaced_statements``, ``dropped_statements``) are written by the
+         *     workflow after validation; the validator ignores them.
          */
         Report: {
+            /** Acceptance */
+            acceptance?: ("ai-accepted" | "ai-partial" | "fallback") | null;
             /** Assumptions */
             assumptions?: string[];
             data_coverage: components["schemas"]["Statement"];
+            /** Dropped Statements */
+            dropped_statements?: {
+                [key: string]: string[];
+            };
             /** Environmental Findings */
             environmental_findings: components["schemas"]["Statement"][];
             /** Evidence */
@@ -1250,12 +1260,20 @@ export interface components {
             provenance_refs: string[];
             /** Ranked Recommendations */
             ranked_recommendations?: components["schemas"]["RankedRecommendation"][];
+            /** Replaced Statements */
+            replaced_statements?: {
+                [key: string]: string[];
+            };
             /**
              * Schema Version
              * @default 1
              * @constant
              */
             schema_version: 1;
+            /** Statement Origins */
+            statement_origins?: {
+                [key: string]: "model" | "platform";
+            };
             summary: components["schemas"]["Statement"];
         };
         /**
@@ -1285,6 +1303,11 @@ export interface components {
                 [key: string]: unknown;
             };
             /**
+             * Draft Text
+             * @default
+             */
+            draft_text: string;
+            /**
              * Duration Ms Total
              * @default 0
              */
@@ -1301,6 +1324,11 @@ export interface components {
             outcome: string;
             /** Problems */
             problems?: string[];
+            /**
+             * Repair Text
+             * @default
+             */
+            repair_text: string;
             /** Run Id */
             run_id: string;
             /** Scenario */

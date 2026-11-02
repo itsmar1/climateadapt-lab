@@ -8,6 +8,7 @@ import ResultsView, { groupProblems } from './ResultsView';
 import {
   failedEntry,
   fullDetailFixture,
+  partialReportFixture,
   scenarioDetailFixture,
   skippedEntry,
   soilEntryOk,
@@ -174,6 +175,23 @@ describe('ResultsView', () => {
     render(<ResultsView detail={fallback} onNew={() => undefined} />);
     expect(screen.getByText('Platform fallback report')).toBeInTheDocument();
     expect(screen.queryByText('AI report accepted')).not.toBeInTheDocument();
+  });
+
+  it('badges ai-partial reports with counts and lists replaced statements', () => {
+    const detail = scenarioDetailFixture({
+      status: 'complete',
+      report: partialReportFixture(),
+    });
+    render(<ResultsView detail={detail} onNew={() => undefined} />);
+    expect(
+      screen.getByText('AI report: 6/7 statements model-written (validated)'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('AI report accepted')).not.toBeInTheDocument();
+    expect(screen.queryByText('Platform fallback report')).not.toBeInTheDocument();
+    expect(screen.getByText('Why 1 statement is platform-written')).toBeInTheDocument();
+    expect(screen.getByText('limitations[0]')).toBeInTheDocument();
+    expect(screen.getByText(/replaced \(/)).toBeInTheDocument();
+    expect(screen.getByText(/undeclared-number/)).toBeInTheDocument();
   });
 
   it('groups problems by code with counts under a collapsed summary', () => {

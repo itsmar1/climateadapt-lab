@@ -2218,8 +2218,24 @@
    },
    "Report": {
     "additionalProperties": false,
-    "description": "The validated report contract (model draft or deterministic fallback).",
+    "description": "The validated report contract (model draft or deterministic fallback).\n\nP23 acceptance stamps (``acceptance``, ``statement_origins``,\n``replaced_statements``, ``dropped_statements``) are written by the\nworkflow after validation; the validator ignores them.",
     "properties": {
+     "acceptance": {
+      "anyOf": [
+       {
+        "enum": [
+         "ai-accepted",
+         "ai-partial",
+         "fallback"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Acceptance"
+     },
      "assumptions": {
       "items": {
        "type": "string"
@@ -2229,6 +2245,16 @@
      },
      "data_coverage": {
       "$ref": "#/components/schemas/Statement"
+     },
+     "dropped_statements": {
+      "additionalProperties": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "title": "Dropped Statements",
+      "type": "object"
      },
      "environmental_findings": {
       "items": {
@@ -2298,11 +2324,32 @@
       "title": "Ranked Recommendations",
       "type": "array"
      },
+     "replaced_statements": {
+      "additionalProperties": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "title": "Replaced Statements",
+      "type": "object"
+     },
      "schema_version": {
       "const": 1,
       "default": 1,
       "title": "Schema Version",
       "type": "integer"
+     },
+     "statement_origins": {
+      "additionalProperties": {
+       "enum": [
+        "model",
+        "platform"
+       ],
+       "type": "string"
+      },
+      "title": "Statement Origins",
+      "type": "object"
      },
      "summary": {
       "$ref": "#/components/schemas/Statement"
@@ -2380,6 +2427,11 @@
       "title": "Config",
       "type": "object"
      },
+     "draft_text": {
+      "default": "",
+      "title": "Draft Text",
+      "type": "string"
+     },
      "duration_ms_total": {
       "default": 0.0,
       "title": "Duration Ms Total",
@@ -2401,6 +2453,11 @@
       },
       "title": "Problems",
       "type": "array"
+     },
+     "repair_text": {
+      "default": "",
+      "title": "Repair Text",
+      "type": "string"
      },
      "run_id": {
       "title": "Run Id",

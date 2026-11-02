@@ -12,13 +12,18 @@ import type {
   Statement,
 } from './client';
 import {
+  droppedStatements,
   echoDisplay,
   evidenceIndex,
   formatPlatformNumber,
   formatScore,
+  isPartialReport,
   isPlatformReport,
+  modelStatementCounts,
+  replacedStatements,
   scoreBreakdown,
   scoreInputsOf,
+  statementOrigin,
 } from './reportPresenters';
 
 function statementRefs(
@@ -72,7 +77,7 @@ function rankedSection(detail: ScenarioDetail, report: Report, lines: string[]):
   for (const option of detail.ranking?.ranked ?? []) {
     byId.set(option.intervention_id, option);
   }
-  for (const rec of rankedRecs) {
+  for (const [position, rec] of rankedRecs.entries()) {
     lines.push(`### ${rec.name} (\`${rec.intervention_id}\`)`, '');
     const ranked = byId.get(rec.intervention_id);
     if (ranked) {
@@ -116,6 +121,7 @@ function rankedSection(detail: ScenarioDetail, report: Report, lines: string[]):
     }
     lines.push('', rec.narrative.text, '');
     statementRefs(rec.narrative, evidenceIndex(report.evidence ?? []), lines);
+    pushOrigin(report, `ranked_recommendations[${position}]`, lines);
     lines.push('');
   }
 }
@@ -131,7 +137,7 @@ function excludedSection(detail: ScenarioDetail, report: Report, lines: string[]
   for (const option of detail.ranking?.excluded ?? []) {
     byId.set(option.intervention_id, option);
   }
-  for (const excluded of excludedOpts) {
+  for (const [position, excluded] of excludedOpts.entries()) {
     lines.push(`### ${excluded.name} (\`${excluded.intervention_id}\`)`, '');
     lines.push(`Reason codes: ${excluded.reason_codes.join(', ')}.`, '');
     const ranking = byId.get(excluded.intervention_id);
@@ -144,7 +150,26 @@ function excludedSection(detail: ScenarioDetail, report: Report, lines: string[]
     }
     lines.push(excluded.narrative.text, '');
     statementRefs(excluded.narrative, evidenceIndex(report.evidence ?? []), lines);
+    pushOrigin(report, `excluded_options[${position}]`, lines);
     lines.push('');
+  }
+}
+
+function originLine(origin: 'model' | 'platform' | null): string | null {
+  if (origin === null) {
+    return null;
+  }
+  return origin === 'model' ? '*Origin: AI-written.*' : '*Origin: platform-written.*';
+}
+
+/** Append one statement's origin marker (mixed reports only, else nothing). */
+function pushOrigin(report: Report, location: string, lines: string[]): void {
+  if (!isPartialReport(report)) {
+    return;
+  }
+  const line = originLine(statementOrigin(report, location));
+  if (line) {
+    lines.push(line, '');
   }
 }
 
@@ -164,8 +189,13 @@ export function reportToMarkdown(detail: ScenarioDetail): string {
     return lines.join('\n');
   }
   const platform = isPlatformReport(report);
+  const partial = isPartialReport(report);
+  const { model, total } = modelStatementCounts(report);
   lines.push(
-    platform
+    partial
+      ? `Mixed report: ${model} of ${total} statements model-written ` +
+        `(generator \`${report.generator}\`), validated; platform statements marked.`
+      : platform
       ? `Computed by the platform (generator \`${report.generator}\`).`
       : `AI-generated narrative (generator \`${report.generator}\`), validated ` +
         'against retrieved sources; numbers below are platform values.',
@@ -174,15 +204,31 @@ export function reportToMarkdown(detail: ScenarioDetail): string {
   if (report.fallback && report.fallback_note) {
     lines.push(`Deterministic fallback: ${report.fallback_note}`, '');
   }
+  if (partial) {
+    const replaced = replacedStatements(report);
+    const dropped = droppedStatements(report);
+    if (replaced.length + dropped.length > 0) {
+      lines.push('## Statement origins', '');
+      for (const { location, codes } of replaced) {
+        lines.push(`- ${location}: replaced (${codes.join(', ')}).`);
+      }
+      for (const { location, codes } of dropped) {
+        lines.push(`- ${location}: dropped, no platform counterpart (${codes.join(', ')}).`);
+      }
+      lines.push('');
+    }
+  }
   const index = evidenceIndex(report.evidence ?? []);
 
   lines.push('## Summary', '', report.summary.text, '');
   statementRefs(report.summary, index, lines);
+  pushOrigin(report, 'summary', lines);
   lines.push('');
 
   lines.push('## Environmental findings', '');
   report.environmental_findings.forEach((finding, position) => {
     statementBlock(`Finding ${position + 1}`, finding, index, lines);
+    pushOrigin(report, `environmental_findings[${position}]`, lines);
   });
 
   rankedSection(detail, report, lines);
@@ -209,16 +255,22 @@ export function reportToMarkdown(detail: ScenarioDetail): string {
   });
 
   lines.push('## Limitations', '');
-  for (const limitation of report.limitations) {
-    lines.push(`- ${limitation}`);
+  for (const [position, limitation] of report.limitations.entries()) {
+    const limitationMarker = originLine(
+      isPartialReport(report) ? statementOrigin(report, `limitations[${position}]`) : null,
+    );
+    lines.push(`- ${limitation}${limitationMarker ? ` ${limitationMarker}` : ''}`);
   }
   lines.push('');
 
   const assumptions = report.assumptions ?? [];
   if (assumptions.length > 0) {
     lines.push('## Assumptions', '');
-    for (const assumption of assumptions) {
-      lines.push(`- ${assumption}`);
+    for (const [position, assumption] of assumptions.entries()) {
+      const assumptionMarker = originLine(
+        isPartialReport(report) ? statementOrigin(report, `assumptions[${position}]`) : null,
+      );
+      lines.push(`- ${assumption}${assumptionMarker ? ` ${assumptionMarker}` : ''}`);
     }
     lines.push('');
   }
@@ -226,6 +278,7 @@ export function reportToMarkdown(detail: ScenarioDetail): string {
   lines.push('## Data coverage', '');
   lines.push(report.data_coverage.text, '');
   statementRefs(report.data_coverage, index, lines);
+  pushOrigin(report, 'data_coverage', lines);
   lines.push('');
 
   lines.push('## Provenance', '');
