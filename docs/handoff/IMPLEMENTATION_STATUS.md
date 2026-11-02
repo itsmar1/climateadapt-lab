@@ -353,14 +353,14 @@ Retrieval evaluation so far: 10 of 15 queries evaluable, 5 skipped (q01, q03, q0
 
 ## 7. Missing components (vs. blueprint and owner goals)
 
-- Dense retrieval (multilingual E5 + Qdrant); RAG API routes.
+- ~~Dense retrieval (multilingual E5 + Qdrant);~~ **Delivered 2026-10-31 (P07)** — this bullet was stale; corrected P21. Still missing: RAG API routes.
 - Area/polygon analysis (all analyses are single-point); crop context/calendar; vegetation (Sentinel-2/NDVI); WaPOR.
 - ~~Intervention catalog, constraints, ranking, evidence strength metadata (Milestone 5).~~ **Delivered 2026-10-31 (P08):** engine + 3-entry v1 catalog; catalog *growth* still needs owner-approved sources.
 - ~~LLM provider adapter (Baseten), report schema, agent workflow (Milestone 6).~~ **Adapter + schema + validator delivered 2026-10-31 (P09):** `src/climateadapt/llm/` with 51 offline tests and one gated live call (fallback served, see §2.11). **Agent workflow delivered 2026-10-31 (P10):** fixed pipeline in `src/climateadapt/agent/` with 22 offline tests and one gated live run (see §2.12).
 - ~~Scenario persistence/history, API auth and rate limiting.~~ **Persistence delivered 2026-10-31 (P11):** scenario CRUD + SQLite history (see §2.13). API auth and rate limiting still missing (documented limitation, KI-28).
 - ~~**React + Vite frontend** (no `frontend/` directory expected).~~ **Input/analysis screens delivered 2026-10-31 (P12):** form, polling, indicator cards + chart (see §2.14). Recommendations/report UI delivered 2026-10-31 (P13, see §2.15).
 - ~~Computer-vision baseline (CropHarvest) — deferred.~~ **Delivered 2026-11-01 (P16, classical only):** logreg + random forest on CropHarvest v14 with MLflow tracking and 543k-row held-out eval (see §2.18, `docs/VISION_BASELINE.md`). Neural model, Optuna and the `vision` lockfile extra remain future work.
-- ~~MLOps: Docker/Compose, GitHub Actions CI/CD, MLflow, Optuna, Airflow, PostgreSQL/PostGIS, Prometheus, Evidently, Grafana. Of the owner's eleven named tools only Pytest and FastAPI exist.~~ **Partially delivered 2026-11-01 (P15):** Dockerfiles + compose stack + CI workflow authored (`docker compose config` CONFIRMED; image builds, container starts, and CI's first execution UNVERIFIED — owner must run). Prometheus, MLflow, Optuna, Evidently, Airflow, Grafana, PostgreSQL explicitly NOT IMPLEMENTED per the owner's core-only decision (see §2.17, KI-30).
+- ~~MLOps: Docker/Compose, GitHub Actions CI/CD, MLflow, Optuna, Airflow, PostgreSQL/PostGIS, Prometheus, Evidently, Grafana. Of the owner's eleven named tools only Pytest and FastAPI exist.~~ **Partially delivered 2026-11-01 (P15):** Dockerfiles + compose stack + CI workflow authored (`docker compose config` CONFIRMED; image builds, container starts, and CI's first execution UNVERIFIED — owner must run). **P21 update 2026-11-02:** backend image built + `/health` OK is now REPORTED by the owner (after the `libexpat1`/`libgomp1` fix, commit `670d74c`, present in the tree); frontend image build, compose-run serving, and CI's first execution remain UNVERIFIED. Prometheus, MLflow, Optuna, Evidently, Airflow, Grafana, PostgreSQL explicitly NOT IMPLEMENTED per the owner's core-only decision (see §2.17, KI-30).
 
 ## 8. Unresolved questions for the owner
 

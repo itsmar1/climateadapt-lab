@@ -35,7 +35,8 @@
 - Neural vision model + Optuna (deferred; classical baseline delivered).
 - 3 corpus manual PDFs; page-level gold annotations; owner review of RAG labels.
 - No model draft has ever been accepted — every live run served the fallback
-  (KI-35: prompt must state the registry vocabulary first).
+  (KI-35: the P18 prompt states the registry vocabulary, but no live run has
+  tested it yet — owner live run pending).
 
 ## 3. Known limitations (must accompany any demo)
 
@@ -62,8 +63,10 @@ real-data snapshots (`GET /v1/demo/snapshots`); frontend Demo page (`#/demo`).
 Three audited snapshots ship in tracked `demo/snapshots/` (P19; zero keys on a
 fresh clone). Walk-through + fallback plan: `docs/DEMO_SCRIPT.md`; real results
 at four locations: `docs/DEMO_RUNS.md`. Prove the clone path with
-`scripts/verify_fresh_clone.ps1`. Docker path (`docker compose up --build`) is
-authored but its build/run is UNVERIFIED — confirm before demoing from it.
+`scripts/verify_fresh_clone.ps1`. Docker path (`docker compose up --build`):
+backend image + `/health` REPORTED OK by the owner (P21); frontend image,
+compose serving, and CI's first run still UNVERIFIED — confirm before
+demoing from containers (see §6 owner list).
 
 ## 5. How model access is configured
 
@@ -79,10 +82,10 @@ authored but its build/run is UNVERIFIED — confirm before demoing from it.
 ## 6. Pre-share safety checklist
 
 - [ ] `git status` shows no `.env`, no `data/`, no corpus PDFs/text, no run
-      debris (P-final state 2026-11-01: clean — only intended doc/config edits
-      plus `docs/FINAL_VERIFICATION.md` and this file).
-- [ ] Stage `.env.docker.example` (placeholder-only, un-ignored in P-final;
-      verify again with `git diff --cached` that it holds no key).
+      debris (P21 state 2026-11-02: clean — only intended P21 doc edits plus
+      `docs/SUBMISSION_PACKET.md`; verify again at commit time).
+- [x] `.env.docker.example` tracked (placeholder-only, key line empty —
+      verified P21 with `git ls-files` + content check).
 - [ ] Confirm `.gitignore` still covers `.env`, `data/`, `corpus/**/*.pdf`,
       `corpus/**/*.txt`, `corpus/raw/` (`git check-ignore data .env`).
 - [ ] Do not ship `data/` (caches, corpus text, sqlite, snapshots),

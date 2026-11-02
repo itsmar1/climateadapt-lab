@@ -47,18 +47,18 @@ Provisional proxies used by the roadmap (assumptions, to be replaced by the real
 |---|---|---|
 | Language/tooling | Python 3.11, `uv`, pytest, ruff | Implemented, CONFIRMED running on owner's Windows machine (Python 3.11.17, pytest 9.1.1) |
 | Backend | FastAPI + Pydantic v2 | Implemented (15 route decorators: sync + job endpoints, scenarios, demo; CONFIRMED) |
-| Frontend | **React + Vite** (supersedes blueprint's Streamlit/Plotly) | Input/analysis (P12) + recommendations/report UI (P13) delivered; demo/e2e in P14 |
+| Frontend | **React + Vite** (supersedes blueprint's Streamlit/Plotly) | Input/analysis (P12) + recommendations/report UI (P13) + demo/e2e (P14) + interactive Leaflet map and results restyle (P20) delivered |
 | Rainfall data | CHIRPS v3 Final monthly, 0.05°, 60°S–60°N, 1981→ | Implemented, real-data CONFIRMED |
 | Climate data | ERA5-Land monthly means via Copernicus CDS, 0.1° grid, 1950→ | Implemented, real-data CONFIRMED (tp, t2m, swvl1) |
 | Indicators | Percentage anomaly (prototype), SPI (gamma, Thom fit), temperature window anomaly, SPI fit diagnostics | Implemented, real-data CONFIRMED |
 | RAG | BM25 + RRF implemented; dense retrieval (multilingual-E5-small + Qdrant-local) implemented (P07) | Implemented; RAG API routes not built |
 | Embeddings | `intfloat/multilingual-e5-small` (384-d) with `query: `/`passage: ` prefixes | Implemented, tested with fake embedder; real-model runs gated |
 | Vector DB | Qdrant client local mode (in-memory or path, no server) | Implemented (fingerprinted local indexing) |
-| Agent | Fixed 7-stage pipeline, tools per blueprint (LangGraph deliberately not adopted) | Implemented (P10; live runs gated) |
-| Recommendation | Structured intervention catalog v1 + deterministic constraints/ranking | Implemented (P09) |
+| Agent | Fixed 7-stage pipeline, tools per blueprint (LangGraph deliberately not adopted) | Implemented (P10); P18 added the registry-vocabulary prompt + one repair attempt (fake-provider-tested only) — no model draft accepted yet (KI-35 open) |
+| Recommendation | Structured intervention catalog v1 + deterministic constraints/ranking | Implemented (P08; was misstated as P09 — fixed P21) |
 | Computer vision | Classical logreg/RF baseline on CropHarvest crop/non-crop (P16); neural deferred | Implemented + evaluated, MLflow-tracked |
 | Persistence | SQLite scenario store (schema v1, WAL) + scenario CRUD routes (PostgreSQL not adopted) | Implemented (P11) |
-| MLOps tools named by owner | MLflow, Pytest, Optuna, CI/CD, Docker, FastAPI, Airflow, PostgreSQL, Prometheus, Evidently, Grafana | Pytest, FastAPI, Docker, CI exist; MLflow runs for vision only (outside `uv.lock`); rest explicitly not implemented (P15 core-only) |
+| MLOps tools named by owner | MLflow, Pytest, Optuna, CI/CD, Docker, FastAPI, Airflow, PostgreSQL, Prometheus, Evidently, Grafana | Pytest, FastAPI exist; backend image built + `/health` OK REPORTED by owner (post-`libexpat1`/`libgomp1` fix in tree); frontend image build, compose run, and CI first execution UNVERIFIED; MLflow runs for vision only (outside `uv.lock`); rest explicitly not implemented (P15 core-only) |
 
 ## 6. Intended architecture (target)
 
@@ -70,9 +70,9 @@ Blueprint MVP ("must work reliably"): location and coverage validation; CHIRPS +
 
 ## 7. What is implemented vs. planned (summary)
 
-Implemented (details and evidence in `IMPLEMENTATION_STATUS.md`): configuration; CHIRPS and ERA5-Land point connectors with caching, provenance, coverage checks; precipitation anomaly, SPI, temperature and soil-moisture anomalies, SPI diagnostics; full v1 API (sync + job endpoints, scenarios, demo mode) plus health; CLI scripts; curated source manifest, PDF fetch/ingest/chunk, BM25, RRF, dense E5 + Qdrant retrieval, citations, evaluation harness (5 of 8 documents ingested); recommendation catalog + ranking; LLM provider adapter + agent workflow with gated live runs; scenario persistence; React frontend (input/analysis, recommendations/report, demo, e2e); Docker + CI; classical CropHarvest vision baseline with MLflow tracking.
+Implemented (details and evidence in `IMPLEMENTATION_STATUS.md`): configuration; CHIRPS and ERA5-Land point connectors with caching, provenance, coverage checks; precipitation anomaly, SPI, temperature and soil-moisture anomalies, SPI diagnostics; full v1 API (sync + job endpoints, scenarios, demo mode) plus health; CLI scripts; curated source manifest, PDF fetch/ingest/chunk, BM25, RRF, dense E5 + Qdrant retrieval, citations, evaluation harness (5 of 8 documents ingested); recommendation catalog + ranking; LLM provider adapter + agent workflow with gated live runs (no draft accepted yet, KI-35); scenario persistence; React frontend (input/analysis, recommendations/report, demo, e2e, interactive map); Docker + CI (backend build REPORTED by owner; frontend/CI UNVERIFIED); classical CropHarvest vision baseline with MLflow tracking.
 
-Planned / not built: RAG API routes; Optuna tuning; neural vision model; Airflow/Prometheus/Evidently/Grafana/PostgreSQL (explicitly out, P15 core-only); Sentinel-2/WaPOR/SAM.
+Planned / not built: RAG API routes; Optuna tuning; neural vision model; Airflow/Prometheus/Evidently/Grafana/PostgreSQL (explicitly out, P15 core-only); Sentinel-2/WaPOR/SAM; hosted deployment (local + compose only).
 
 ## 8. Decisions that changed since the blueprint
 

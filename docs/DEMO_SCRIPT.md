@@ -1,85 +1,115 @@
-# Demo script — ClimateAdapt Lab
+# Demo script — 3-minute video (P21)
 
-A reproducible 10-minute walk-through. Two tracks: **live run** (needs the
-backend + caches) and **snapshots** (needs only demo mode; works offline and
-under rate limits). Real outputs for every step live in `docs/DEMO_RUNS.md`.
+180 seconds, four timed beats mapped to the provisional rubric
+(`PROJECT_CONTEXT.md` §3 — the official rubric is still unknown, KI-32).
+Recording setup: captured snapshots plus **one warmed live run**, so the
+video never waits on a cold download. All numbers below are real outputs
+recorded in `docs/DEMO_RUNS.md`.
 
-## Prerequisites
+## Pre-warm (do once, ~10 minutes before recording)
+
+Goal: the reference live run finishes in seconds on camera. Cold CDS legs
+take minutes and have exceeded the 900 s agent budget on slow links — never
+record cold.
 
 ```powershell
+# Terminal 1 — backend with snapshots on (repo root)
 uv sync --extra dev
-```
-
-Backend (repo root):
-
-```powershell
-# Live track:
-uv run uvicorn climateadapt.api.main:app --reload
-# Snapshots track (same server, demo endpoints on):
 $env:CLIMATEADAPT_DEMO_MODE = 'true'
-uv run uvicorn climateadapt.api.main:app --reload
-```
+uv run uvicorn climateadapt.api.main:app --reload   # http://127.0.0.1:8000/docs
 
-Frontend (needs Node 20.19+; this machine keeps a portable Node under
-untracked `node-tmp/` because the system Node is v16):
+# Terminal 2 — frontend
+cd frontend
+npm install        # first time only (needs Node 20.19+)
+npm run dev        # http://localhost:5173
+```
 
 ```powershell
-cd frontend
-npm install
-npm run dev     # strict http://localhost:5173 (matches API CORS default)
+# Terminal 3 — fire the reference scenario once to warm every cache
+$body = @{
+  latitude = 30.43; longitude = -9.61; target_end_month = "2024-03"
+  timescale_months = 3; reference_start_year = 1991; reference_end_year = 2020
+  min_reference_years = 30; land_fallback_max_km = 15.0
+  indicators = @("chirps_spi", "era5_spi", "era5_temperature_anomaly",
+    "era5_soil_moisture_anomaly")
+  query = "deficit irrigation scheduling"; top_k = 5; exclude_reference = $true
+  crop = "wheat"; has_water_source = $true; has_irrigation_equipment = $true
+  production_system = "irrigated"; season = "2024-03"
+} | ConvertTo-Json
+$created = Invoke-RestMethod -Uri http://127.0.0.1:8000/v1/scenarios `
+  -Method Post -Body $body -ContentType "application/json"
+do {
+  Start-Sleep -Seconds 5
+  $d = Invoke-RestMethod "http://127.0.0.1:8000/v1/scenarios/$($created.scenario_id)"
+  $d.status
+} until ($d.status -in @('complete', 'partial', 'failed'))
 ```
 
-Open http://localhost:5173 in a browser.
+Checklist before pressing record: `$d.status` reached `partial` (no-key
+fallback — the expected demo configuration, $0 spent); `#/demo` lists three
+snapshots; a second run of the same scenario returns in seconds; screen at
+1280×800 or wider so the map and strip fit one frame.
 
-## Track A — live run (reference point, warm caches)
+## Beat 1 — Impact, 0:00–0:20
 
-1. The form opens with the reference scenario prefilled: 30.43, −9.61,
-   target 2024-03, 3-month window, reference 1991–2020, wheat, irrigated.
-   Point at the map: click/drag the marker (or a preset — Norway shows the
-   outside-CHIRPS-band note live), then back to Morocco. Press **Run analysis**.
-2. **Expected:** "Analysis running" for ~6 s (warm) with 2 s polling, then
-   the Results page: the summary strip (location, window, reference, status,
-   "Platform fallback report" badge), the Location map (teal requested point,
-   ochre ERA5-Land grid point actually used), four indicator cards (CHIRPS SPI
-   −0.517, ERA5 SPI −0.375, temperature +2.22 °C, soil −0.0505 m³/m³), the
-   deterministic ranking (Deficit irrigation + Irrigation scheduling at 0.750,
-   one exclusion with reasons, Unknown badges everywhere benefit/cost/risk is
-   unstated), and the cited report with evidence links, platform-value chips,
-   and the always-visible limitations. Section chips jump down the page.
-3. Without a Baseten key (the expected demo configuration) the report shows
-   the **Deterministic fallback** banner and a `[provider-auth]` problem.
-   Say so out loud: no model ran; every number is computed.
-4. Open **History**: the run is listed with its status badge; failed runs
-   expand to show problems. Press **Export report (Markdown)** to download
-   the cited report.
+SHOW: title + the New-analysis map.
+SAY: "Agronomists and planners facing drought must choose between adaptation
+options — deficit irrigation, scheduling, water harvesting — with scattered
+evidence. ClimateAdapt Lab turns one location and season into computed
+indicators, cited science, and ranked options with explicit unknowns."
 
-## Track B — cached snapshots (offline-proof)
+## Beat 2 — Meta tooling, 0:20–0:50
 
-1. Click **Demo** (or open `#/demo`). Three stored real-data runs are listed
-   with capture timestamps: Morocco (4/4 ok),
-   Norway (CHIRPS `outside_coverage`, ERA5 ok), Atlantic (ERA5 `missing_data`
-   — the masked-point path). (A fourth, Punjab, exists only in the local
-   git-ignored cache — its CHIRPS entry failed on sandbox-blocked egress.)
-2. Open each. **Expected:** the identical results UI plus the amber
-   **Cached real-data snapshot** banner ("Stored results, not a live run").
-3. If the list shows "Demo mode is disabled", the server was started without
-   `CLIMATEADAPT_DEMO_MODE=true` — restart it with the flag. Snapshots ship
-   in tracked `demo/snapshots/`; regenerate with
-   `scripts/capture_demo_snapshot.py` (see its `--help`).
+SHOW: results strip with the "Platform fallback report" badge; open "Why this
+is the platform fallback".
+SAY: "Meta's Muse Spark model drafts the report through Baseten — tool-calling
+verified live. But the model never gets the last word: every draft is
+validated against the schema, the citations, and the computed numbers. This
+draft was rejected, so you see the labelled deterministic fallback instead —
+no AI narrative, no invented values."
 
-## Fallback plan (say what is happening, then switch tracks)
+## Beat 3 — Technical depth, 0:50–1:20
 
-| Failure | What the audience sees | Presenter action |
-|---|---|---|
-| No Baseten key / model error | Fallback banner + `[provider-auth]` problem | Expected: "deterministic mode, no AI narrative" |
-| Cold CDS location, minutes pass | Progress polls, possible `[total-timeout]` partial | Switch to Track B; the Norway snapshot already shows fresh-CDS values |
-| CHIRPS remote reads fail | `download_error` entry, ERA5 cards still render | "CHIRPS needs its tile host; ERA5-Land carries the demo" |
-| Backend down entirely | "Backend could not be reached" | Restart `uvicorn`; if it stays down, narrate the snapshot JSONs in `demo/snapshots/` directly |
+SHOW: one indicator card (expand Limitations & provenance); the Location map
+with both markers; citation chips in the report.
+SAY: "Every value carries provenance, units, reference period, and
+limitations. The CHIRPS band is shaded because coverage is honest, not
+assumed. ERA5-Land fell back to a neighbouring grid cell, and the map shows
+both points with the distance. No severity labels anywhere — the tests forbid
+them. 792 backend tests, 96 frontend tests, 7 end-to-end, all green."
+
+## Beat 4 — Live demo, 1:20–3:00
+
+- 1:20 — Click the **Morocco (reference)** preset, press **Run analysis**.
+  The warmed run lands in seconds.
+- 1:40 — Scroll the strip: location, window, 1991–2020 reference, status
+  badges. Open Indicators; point at CHIRPS SPI −0.517 vs ERA5 SPI −0.375 —
+  "two products, both shown, disagreement is uncertainty."
+- 2:05 — Recommendations: two options tied at 0.750 with score breakdowns,
+  one exclusion with reasons, Unknown badges where sources are silent.
+- 2:20 — Report: evidence chips E1…En, verbatim citations with pages and
+  licence notes, always-visible limitations. Press **Export report
+  (Markdown)**.
+- 2:35 — **Demo** page: open Norway — CHIRPS `outside_coverage`, ERA5 fine;
+  open Atlantic — ERA5 `missing_data` on a masked point, never zeros.
+- 2:55 — Close: "Computed where computable, cited where stated, honest
+  everywhere else."
+
+## Fallback plan (if anything fails mid-take)
+
+| Failure | Presenter action |
+|---|---|
+| Live run hangs (cold cache) | Cut; show the Morocco snapshot — identical UI plus the amber banner |
+| Backend down | Restart `uvicorn`; if it stays down, narrate `demo/snapshots/*.json` |
+| No network for map tiles | Markers and shading still render; say tiles need connectivity |
+| Draft accepted with a key | Only if pre-tested; otherwise record keyless (fallback is the design) |
 
 ## Do not claim
 
-- That any location outside `docs/DEMO_RUNS.md` was tested.
-- That SPI values or anomalies were validated against ground truth.
-- That a snapshot is a live result (it is bannered; repeat it once).
+- Any location outside `docs/DEMO_RUNS.md` was tested.
+- SPI values or anomalies were validated against ground truth.
+- A snapshot is a live result (it is bannered; repeat it once).
 - Any severity label, composite score, cost, or benefit the sources do not
   state — the UI never shows them; neither should the presenter.
+- That Docker/CI are verified: backend image + `/health` are owner-REPORTED;
+  frontend image, compose serving, and CI's first run are UNVERIFIED.

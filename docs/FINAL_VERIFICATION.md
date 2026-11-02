@@ -220,3 +220,29 @@ per the Tile Usage Policy (read 2026-11-02); no geocoding; no CSP exists to
 update. Screenshots in `docs/screenshots/` show blank tile backgrounds
 because `tile.openstreetmap.org` times out in the sandbox — re-capture on a
 networked machine (command in README).
+
+## 11. P21 addendum (2026-11-02; submission-readiness re-verification)
+
+Docs-only change (no `src/`/`tests/`/`scripts/`/`frontend/src` edits, so the
+P20 frontend gates stand on identical code: 96/96 Vitest, 7/7 Playwright,
+`tsc`/eslint/build clean).
+
+- Backend suite re-run fresh: `84 failed, 792 passed, 1 skipped, 82 warnings
+  in 1710.73s (0:28:30)` — same 84 sandbox socket-blocked API tests
+  (19/16/2/17/12/18 per file, all `PermissionError: [WinError 10013]`),
+  zero assertion failures. Ran as `uv run --no-sync pytest -q` with
+  `UV_CACHE_DIR` redirected to git-ignored `node-tmp/uv-cache` (sandbox
+  blocks the global uv lock; `--no-sync` per README, so vision tools outside
+  `uv.lock` are not stripped). Owner must still run the suite once
+  unsandboxed and expect fully green.
+- `uv run ruff check .` (same env): **All checks passed!**, exit 0.
+- Secret scan: no private-key blocks anywhere; tracked `*.env*` files are
+  `.env.example` + `.env.docker.example` only, both with empty key values;
+  live keys exist solely in git-ignored `.env` / `.env.docker` (contents not
+  reproduced anywhere). No `.pdf`, `.env`, sqlite, `data/`, `corpus/raw/`,
+  or run-debris paths are tracked (`git ls-files` checked).
+- Docker/CI status: backend image + `/health` REPORTED OK by the owner
+  (post-`libexpat1`/`libgomp1`, commit `670d74c` in tree); frontend image
+  build, compose serving, and CI's first GitHub run remain UNVERIFIED.
+- `.env.docker.example` (placeholder-only, key line empty) is now tracked —
+  the §6 pre-share item asking to stage it is done.

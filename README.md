@@ -1,20 +1,70 @@
 # ClimateAdapt Lab
 
-Evidence-grounded AI agent for agricultural drought adaptation (Meta Global Developer AI
-Hackathon project). **Status (P-final reconciliation 2026-11-01; P00 audit in `docs/handoff/AUDIT_REPORT.md`, final evidence in `docs/FINAL_VERIFICATION.md`):**
-Milestones 0-2 are implemented (tested data connectors and precipitation/temperature
-indicators). Scientific RAG first batch is partially complete (BM25 + RRF retrieval,
-citations, evaluation harness; 5 of 8 corpus documents ingested; dense E5 + Qdrant retrieval delivered (P07);
-RAG API routes still missing). Recommendation engine delivered 2026-10-31 (P08: versioned
-catalog, deterministic constraints/ranking, `scripts/validate_catalog.py`; see
-`docs/RECOMMENDATION_ENGINE.md`). Agent pipeline delivered 2026-10-31 (P10: fixed
-workflow, `docs/AGENT_WORKFLOW.md`; scenario API + SQLite persistence in P11).
-React input/analysis UI delivered 2026-10-31 (P12: `frontend/`, 42 Vitest tests
-green; recommendations/report UI delivered 2026-10-31 (P13: cited report, ranking panel, history, Markdown export; 79 Vitest tests green). Demo mode + e2e delivered (P14), Docker + CI authored but UNVERIFIED (P15), classical CropHarvest vision baseline delivered (P16, MLflow-tracked; see `docs/VISION_BASELINE.md`).
-Interactive map + results restyle delivered 2026-11-02 (P20: Leaflet picker with CHIRPS-band shading and snapshot presets, results map with fallback grid points, summary strip, video-ready layout; screenshots in `docs/screenshots/`).
-Verified 2026-11-02 (P20): frontend 96/96 Vitest + 7/7 Playwright, tsc/eslint/build clean. Backend unchanged since the P19 run (792 passed + 84 sandbox-blocked socket tests, WinError 10013, zero assertion failures, in 19 min 01 s; `ruff check .` clean — suite not re-run, no backend files touched);
-details in `docs/handoff/IMPLEMENTATION_STATUS.md`, issues in `docs/handoff/KNOWN_ISSUES.md`.
-Full evidence: `docs/FINAL_VERIFICATION.md`; submission checklist: `docs/SUBMISSION_CHECKLIST.md`.
+Evidence-grounded AI agent for agricultural drought adaptation (Meta Global
+Developer AI Hackathon project). Pick a location and season: the platform
+computes environmental indicators from CHIRPS and ERA5-Land, retrieves cited
+scientific evidence, ranks adaptation options with deterministic rules, and has
+Meta's Muse Spark model draft a validated, traceable report. Deterministic
+Python computes and enforces; the LLM only explains — every number is computed,
+every claim is cited, and uncertainty stays visible. No severity scores, no
+invented benefits, no hidden imputation.
+
+![Scenario form with the Leaflet location picker](docs/screenshots/01-form-map.png)
+
+**Status (P21, 2026-11-02):** backend 792 passed + 84 sandbox-blocked socket
+tests (zero assertion failures), frontend 96/96 Vitest + 7/7 Playwright,
+`ruff check .` clean; details in `docs/handoff/IMPLEMENTATION_STATUS.md`,
+issues in `docs/handoff/KNOWN_ISSUES.md`, evidence in
+`docs/FINAL_VERIFICATION.md`, submission checklist in
+`docs/SUBMISSION_CHECKLIST.md`.
+
+## Quickstart — zero keys (~5 minutes)
+
+Prereqs: Python 3.11 + `uv`, Node 20.19+.
+
+```powershell
+git clone <repo-url>; cd climateadapt-lab
+uv sync --extra dev
+$env:CLIMATEADAPT_DEMO_MODE = 'true'
+uv run uvicorn climateadapt.api.main:app --reload   # http://127.0.0.1:8000/docs
+cd frontend; npm install; npm run dev               # http://localhost:5173
+```
+
+Open http://localhost:5173 and click **Demo**: three audited real-data
+snapshots (Morocco 4/4 indicators ok, Norway with CHIRPS `outside_coverage`,
+Atlantic with ERA5 `missing_data` on a masked point) — zero keys, zero model
+calls, zero downloads, no `.env` needed. Live CHIRPS reads also work without
+credentials; only fresh ERA5-Land downloads need a Copernicus account file.
+
+## With a model key — live reports
+
+```powershell
+copy .env.example .env   # then set CLIMATEADAPT_BASETEN_API_KEY in .env (never commit it)
+$env:CLIMATEADAPT_RUN_LIVE_LLM = "1"; uv run python scripts/llm_smoke.py   # ≈$0.002 check
+```
+
+New scenarios then draft reports with `meta-models/muse-spark-open-1026`
+through Baseten; drafts that fail client-side validation fall back to the
+labelled deterministic report (no model draft has been accepted yet — KI-35).
+Full key setup: "Add your model key" below and `docs/LLM_PROVIDER_NOTES.md`.
+
+## Implemented / Not implemented (honest list)
+
+Implemented: CHIRPS + ERA5-Land point connectors with provenance and coverage
+gates; precipitation, SPI, temperature, and soil-moisture indicators; BM25 +
+dense-E5/Qdrant hybrid retrieval with verified citations; versioned
+intervention catalog with deterministic constraints and transparent ranking;
+fixed 7-stage agent pipeline with a validated-or-fallback report guarantee;
+scenario API + SQLite history; React UI (map picker, results map, cited
+report, demo page); tracked demo snapshots; Dockerfiles + compose stack +
+CI workflow; classical CropHarvest vision baseline (MLflow-tracked).
+
+Not implemented: LangGraph (fixed validated pipeline chosen by recorded
+decision, `docs/AGENT_WORKFLOW.md`); Airflow, Grafana, PostgreSQL, Prometheus,
+Evidently, Optuna (core-only decision, KI-30); MLflow anywhere except the
+vision baseline; vision model deployment (trained and evaluated locally only);
+RAG API routes; any hosted deployment (local + compose only); no accepted
+model draft yet (KI-35 open).
 
 ## Scientific scope and limitations
 
