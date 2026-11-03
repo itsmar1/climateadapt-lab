@@ -38,10 +38,16 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+function goToStep(label: string): void {
+  fireEvent.click(screen.getByRole('button', { name: label }));
+}
+
 describe('ScenarioForm', () => {
   it('shows coverage hints and the fallback explanation', () => {
     render(<ScenarioForm onCreated={() => undefined} />);
     expect(screen.getByText(/CHIRPS covers 60°S–60°N/)).toBeInTheDocument();
+
+    goToStep('Evidence & indicators');
     expect(screen.getByText(/falls back to the nearest land grid point/)).toBeInTheDocument();
   });
 
@@ -85,7 +91,7 @@ describe('ScenarioForm', () => {
     render(<ScenarioForm onCreated={() => undefined} />);
 
     fireEvent.change(screen.getByLabelText('Latitude'), { target: { value: 'north' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Run analysis' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
     expect(screen.getByText('Enter a latitude between -90 and 90.')).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();
@@ -94,6 +100,7 @@ describe('ScenarioForm', () => {
   it('requires at least one indicator', () => {
     vi.stubGlobal('fetch', vi.fn());
     render(<ScenarioForm onCreated={() => undefined} />);
+    goToStep('Evidence & indicators');
 
     for (const label of [
       'CHIRPS rainfall (SPI)',
@@ -114,6 +121,7 @@ describe('ScenarioForm', () => {
     const onCreated = vi.fn();
     render(<ScenarioForm onCreated={onCreated} />);
 
+    goToStep('Evidence & indicators');
     fireEvent.click(screen.getByRole('button', { name: 'Run analysis' }));
 
     await waitFor(() => expect(onCreated).toHaveBeenCalledWith('sc-new'));
@@ -138,6 +146,7 @@ describe('ScenarioForm', () => {
     vi.stubGlobal('fetch', fetchMock);
     render(<ScenarioForm onCreated={() => undefined} />);
 
+    goToStep('Evidence & indicators');
     fireEvent.click(screen.getByRole('button', { name: 'Run analysis' }));
 
     await waitFor(() => expect(screen.getByText('field required')).toBeInTheDocument());
@@ -153,8 +162,111 @@ describe('ScenarioForm', () => {
     );
     render(<ScenarioForm onCreated={() => undefined} />);
 
+    goToStep('Evidence & indicators');
     fireEvent.click(screen.getByRole('button', { name: 'Run analysis' }));
 
     await waitFor(() => expect(screen.getByText(/server is at capacity/)).toBeInTheDocument());
+  });
+
+  it('validates each step before advancing', () => {
+    render(<ScenarioForm onCreated={() => undefined} />);
+
+    fireEvent.change(screen.getByLabelText('Latitude'), { target: { value: 'north' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+
+    expect(screen.getByText('Enter a latitude between -90 and 90.')).toBeInTheDocument();
+    // Still on step 1: step-2 fields are absent.
+    expect(screen.queryByLabelText('Crop (optional)')).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Latitude'), { target: { value: '31' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByLabelText('Crop (optional)')).toBeInTheDocument();
+  });
+
+  it('shows a live draft summary on every step', () => {
+    render(<ScenarioForm onCreated={() => undefined} />);
+
+    const summary = screen.getByTestId('form-summary');
+    expect(summary).toHaveTextContent('30.43°, -9.61°');
+    expect(summary).toHaveTextContent('4 selected');
+    expect(summary).toHaveTextContent('Up to 15 km');
+
+    fireEvent.change(screen.getByLabelText('Latitude'), { target: { value: '63.43' } });
+    expect(screen.getByTestId('form-summary')).toHaveTextContent('63.43°, -9.61°');
+
+    goToStep('Time & reference');
+    expect(screen.getByTestId('form-summary')).toHaveTextContent('1991–2020');
+  });
+
+  it('jumps to the first failing step on server errors', async () => {
+    vi.stubGlobal(
+      'fetch',
+      mockFetch([
+        {
+          body: {
+            detail: [{ loc: ['body', 'latitude'], msg: 'server says no', type: 'missing' }],
+          },
+          status: 422,
+        },
+      ]),
+    );
+    render(<ScenarioForm onCreated={() => undefined} />);
+
+    goToStep('Evidence & indicators');
+    fireEvent.click(screen.getByRole('button', { name: 'Run analysis' }));
+
+    await waitFor(() => expect(screen.getByText('server says no')).toBeInTheDocument());
+    // Jumped back to step 1 where the failing field lives.
+    expect(screen.getByText('Morocco (reference)')).toBeInTheDocument();
+  });
+
+  it('posts advanced retrieval settings', async () => {
+    const fetchMock = mockFetch([{ body: scenarioCreatedFixture(), status: 202 }]);
+    vi.stubGlobal('fetch', fetchMock);
+    render(<ScenarioForm onCreated={() => undefined} />);
+    goToStep('Evidence & indicators');
+
+    fireEvent.change(screen.getByLabelText('Evidence passages'), {
+      target: { value: '3' },
+    });
+    fireEvent.click(screen.getByLabelText('Exclude reference sections from retrieval'));
+    fireEvent.click(screen.getByRole('button', { name: 'Run analysis' }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    const [request] = fetchMock.mock.calls[0] as [Request];
+    const body = (await request.json()) as Record<string, unknown>;
+    expect(body.top_k).toBe(3);
+    expect(body.exclude_reference).toBe(false);
+  });
+
+  it('opens collapsed panels that hold errors', () => {
+    render(<ScenarioForm onCreated={() => undefined} />);
+    goToStep('Evidence & indicators');
+
+    fireEvent.change(screen.getByLabelText('Evidence passages'), {
+      target: { value: '99' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Run analysis' }));
+
+    expect(
+      screen.getByText('Enter a whole number from 1 to 20.'),
+    ).toBeInTheDocument();
+    const details = screen
+      .getByText('Advanced retrieval settings')
+      .closest('details');
+    expect(details).toHaveAttribute('open');
+  });
+
+  it('explains reference periods and land fallback inline', () => {
+    render(<ScenarioForm onCreated={() => undefined} />);
+
+    goToStep('Time & reference');
+    expect(screen.getByRole('img', { name: /Baseline years/ })).toHaveAttribute(
+      'title',
+      expect.stringContaining('Baseline years'),
+    );
+
+    goToStep('Evidence & indicators');
+    expect(screen.getByRole('img', { name: /nearest land cell/ })).toBeInTheDocument();
   });
 });

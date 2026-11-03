@@ -11,6 +11,12 @@ import {
   parseLatLon,
 } from '../api/geo';
 import GeoMap from './GeoMap';
+import {
+  CHIRPS_COVERAGE,
+  CHIRPS_SOURCE,
+  ERA5_COVERAGE,
+  ERA5_SOURCE,
+} from '../api/presenters';
 
 const INDICATORS = [
   { id: 'chirps_spi', label: 'CHIRPS rainfall (SPI)' },
@@ -18,6 +24,27 @@ const INDICATORS = [
   { id: 'era5_temperature_anomaly', label: 'ERA5-Land temperature' },
   { id: 'era5_soil_moisture_anomaly', label: 'ERA5-Land soil moisture' },
 ] as const;
+const STEPS = ['Location', 'Crop & system', 'Time & reference', 'Evidence & indicators'];
+
+/** Client-side error keys owned by each step (server errors jump to theirs). */
+const STEP_FIELDS: string[][] = [
+  ['latitude', 'longitude'],
+  [],
+  [
+    'target_end_month',
+    'timescale_months',
+    'reference_start_year',
+    'reference_end_year',
+    'min_reference_years',
+  ],
+  ['query', 'top_k', 'land_fallback_max_km', 'indicators'],
+];
+
+const REFERENCE_TIP =
+  'Baseline years each indicator is compared against. Years with incomplete data are excluded, never filled in.';
+
+const FALLBACK_TIP =
+  'When the point falls on a masked ERA5-Land cell, the nearest land cell within this distance is used instead, and the substitution is reported with its distance.';
 
 type IndicatorId = AgentScenario['indicators'][number];
 
@@ -186,6 +213,10 @@ export default function ScenarioForm({ onCreated }: { onCreated: (id: string) =>
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [step, setStep] = useState(0);
+  const [doneSteps, setDoneSteps] = useState<boolean[]>([false, false, false, false]);
+  const [fallbackOpen, setFallbackOpen] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]): void {
     setState((prev) => ({ ...prev, [key]: value }));
@@ -200,12 +231,59 @@ export default function ScenarioForm({ onCreated }: { onCreated: (id: string) =>
     }));
   }
 
+  /** Open any collapsed panel holding one of these errors so it is visible. */
+  function revealErrors(found: Record<string, string>): void {
+    if (found.land_fallback_max_km !== undefined) {
+      setFallbackOpen(true);
+    }
+    if (found.top_k !== undefined) {
+      setAdvancedOpen(true);
+    }
+  }
+
+  function firstErrorStep(found: Record<string, string>): number {
+    for (let index = 0; index < STEP_FIELDS.length; index += 1) {
+      const keys = STEP_FIELDS[index] ?? [];
+      if (keys.some((key) => found[key] !== undefined)) {
+        return index;
+      }
+    }
+    return step;
+  }
+
+  function pickStepErrors(
+    found: Record<string, string>,
+    index: number,
+  ): Record<string, string> {
+    const picked: Record<string, string> = {};
+    for (const key of STEP_FIELDS[index] ?? []) {
+      const message = found[key];
+      if (message !== undefined) {
+        picked[key] = message;
+      }
+    }
+    return picked;
+  }
+
+  function goNext(): void {
+    const found = pickStepErrors(validate(state), step);
+    setErrors(found);
+    revealErrors(found);
+    if (Object.keys(found).length > 0) {
+      return;
+    }
+    setDoneSteps((prev) => prev.map((done, index) => done || index === step));
+    setStep(step + 1);
+  }
+
   async function handleSubmit(event: FormEvent): Promise<void> {
     event.preventDefault();
     const local = validate(state);
     setErrors(local);
+    revealErrors(local);
     setSubmitError(null);
     if (Object.keys(local).length > 0) {
+      setStep(firstErrorStep(local));
       return;
     }
     setSubmitting(true);
@@ -214,7 +292,10 @@ export default function ScenarioForm({ onCreated }: { onCreated: (id: string) =>
       onCreated(created.scenario_id);
     } catch (error: unknown) {
       if (error instanceof ApiError && error.status === 422) {
-        setErrors(parseValidationErrors(error.body));
+        const mapped = parseValidationErrors(error.body);
+        setErrors(mapped);
+        revealErrors(mapped);
+        setStep(firstErrorStep(mapped));
         setSubmitError('The server rejected some fields; see the messages below.');
       } else if (error instanceof ApiError) {
         setSubmitError(error.message);
@@ -225,7 +306,6 @@ export default function ScenarioForm({ onCreated }: { onCreated: (id: string) =>
       setSubmitting(false);
     }
   }
-
   function fieldError(name: string): ReactNode {
     const message = errors[name];
     if (!message) {
@@ -253,7 +333,6 @@ export default function ScenarioForm({ onCreated }: { onCreated: (id: string) =>
   const picked = parseLatLon(state.latitude, state.longitude);
   const mapPoint = picked ?? { lat: 30.43, lon: -9.61 };
   const outsideBand = picked !== null && !isInChirpsBand(picked.lat);
-
   return (
     <form onSubmit={handleSubmit} noValidate aria-label="Scenario form">
       {submitError && (
@@ -262,6 +341,66 @@ export default function ScenarioForm({ onCreated }: { onCreated: (id: string) =>
           {submitError}
         </div>
       )}
+      <div className="summary-panel" data-testid="form-summary">
+        <strong>Draft summary</strong>
+        <dl>
+          <div style={{ display: 'contents' }}>
+            <dt>Location</dt>
+            <dd>{picked ? `${formatCoord(picked.lat)}°, ${formatCoord(picked.lon)}°` : '—'}</dd>
+          </div>
+          <div style={{ display: 'contents' }}>
+            <dt>Window</dt>
+            <dd>{`${state.targetEndMonth.trim() || '—'} · ${state.timescaleMonths.trim() || '—'}-month`}</dd>
+          </div>
+          <div style={{ display: 'contents' }}>
+            <dt>Reference</dt>
+            <dd>{`${state.referenceStartYear.trim() || '—'}–${state.referenceEndYear.trim() || '—'} (min ${state.minReferenceYears.trim() || '—'})`}</dd>
+          </div>
+          <div style={{ display: 'contents' }}>
+            <dt>Crop · system</dt>
+            <dd>{`${state.crop.trim() === '' ? 'Any crop' : state.crop.trim()} · ${state.productionSystem === '' ? 'Unknown' : state.productionSystem}`}</dd>
+          </div>
+          <div style={{ display: 'contents' }}>
+            <dt>Evidence</dt>
+            <dd>{state.query.trim() === '' ? '—' : `“${state.query.trim()}” · top ${state.topK.trim() || '—'}`}</dd>
+          </div>
+          <div style={{ display: 'contents' }}>
+            <dt>Indicators</dt>
+            <dd>{`${state.indicators.length} selected`}</dd>
+          </div>
+          <div style={{ display: 'contents' }}>
+            <dt>Land fallback</dt>
+            <dd>
+              {state.allowFallback
+                ? state.fallbackKm.trim() === ''
+                  ? 'On (distance unset)'
+                  : `Up to ${state.fallbackKm.trim()} km`
+                : 'Off'}
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <ol className="stepper" aria-label="Analysis steps">
+        {STEPS.map((label, index) => (
+          <li key={label}>
+            <button
+              type="button"
+              className={doneSteps[index] === true && index !== step ? 'step step-done' : 'step'}
+              aria-current={index === step ? 'step' : undefined}
+              onClick={() => setStep(index)}
+            >
+              <span className="step-number" aria-hidden="true">
+                {index + 1}
+              </span>
+              {label}
+            </button>
+          </li>
+        ))}
+      </ol>
+
+      {step === 0 && (
+        <div>
       <div className="field field-full">
         <span id="location-picker-label">Location picker</span>
         <div className="preset-row" role="group" aria-label="Demo locations">
@@ -307,7 +446,7 @@ export default function ScenarioForm({ onCreated }: { onCreated: (id: string) =>
           </p>
         )}
       </div>
-      <div className="form-grid">
+          <div className="form-grid">
         <div className="field">
           <label htmlFor="latitude">Latitude</label>
           <input
@@ -332,59 +471,27 @@ export default function ScenarioForm({ onCreated }: { onCreated: (id: string) =>
           <p className="hint">Demo point 30.43, −9.61 (Souss-Massa, Morocco).</p>
           {fieldError('longitude')}
         </div>
-        <div className="field">
-          <label htmlFor="targetEndMonth">Target end month</label>
-          <input
-            id="targetEndMonth"
-            type="month"
-            value={state.targetEndMonth}
-            onChange={(event) => set('targetEndMonth', event.target.value)}
-          />
-          <p className="hint">End of the analysis window (YYYY-MM).</p>
-          {fieldError('target_end_month')}
+          </div>
+          <ul className="coverage-list" aria-label="Dataset coverage">
+            <li>
+              <strong>CHIRPS v3 Final</strong> — {CHIRPS_COVERAGE}.{' '}
+              <span className="subtle">Source: {CHIRPS_SOURCE}.</span>
+            </li>
+            <li>
+              <strong>ERA5-Land monthly means</strong> — {ERA5_COVERAGE}.{' '}
+              <span className="subtle">Source: {ERA5_SOURCE}.</span>
+            </li>
+          </ul>
+          <div className="actions">
+            <button type="button" className="primary" onClick={goNext}>
+              Next
+            </button>
+          </div>
         </div>
-        <div className="field">
-          <label htmlFor="timescaleMonths">Timescale (months)</label>
-          <input
-            id="timescaleMonths"
-            inputMode="numeric"
-            value={state.timescaleMonths}
-            onChange={(event) => set('timescaleMonths', event.target.value)}
-          />
-          <p className="hint">Window length, 1–48 months.</p>
-          {fieldError('timescale_months')}
-        </div>
-        <div className="field">
-          <label htmlFor="referenceStartYear">Reference start year</label>
-          <input
-            id="referenceStartYear"
-            inputMode="numeric"
-            value={state.referenceStartYear}
-            onChange={(event) => set('referenceStartYear', event.target.value)}
-          />
-          {fieldError('reference_start_year')}
-        </div>
-        <div className="field">
-          <label htmlFor="referenceEndYear">Reference end year</label>
-          <input
-            id="referenceEndYear"
-            inputMode="numeric"
-            value={state.referenceEndYear}
-            onChange={(event) => set('referenceEndYear', event.target.value)}
-          />
-          {fieldError('reference_end_year')}
-        </div>
-        <div className="field">
-          <label htmlFor="minReferenceYears">Minimum reference years</label>
-          <input
-            id="minReferenceYears"
-            inputMode="numeric"
-            value={state.minReferenceYears}
-            onChange={(event) => set('minReferenceYears', event.target.value)}
-          />
-          <p className="hint">Years with incomplete data are excluded, never filled in.</p>
-          {fieldError('min_reference_years')}
-        </div>
+      )}
+      {step === 1 && (
+        <div>
+          <div className="form-grid">
         <div className="field">
           <label htmlFor="crop">Crop (optional)</label>
           <input
@@ -441,6 +548,92 @@ export default function ScenarioForm({ onCreated }: { onCreated: (id: string) =>
             onChange={(event) => set('season', event.target.value)}
           />
         </div>
+          </div>
+          <div className="actions">
+            <button type="button" className="ghost" onClick={() => setStep(0)}>
+              Back
+            </button>
+            <button type="button" className="primary" onClick={goNext}>
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+      {step === 2 && (
+        <div>
+          <div className="form-grid">
+        <div className="field">
+          <label htmlFor="targetEndMonth">Target end month</label>
+          <input
+            id="targetEndMonth"
+            type="month"
+            value={state.targetEndMonth}
+            onChange={(event) => set('targetEndMonth', event.target.value)}
+          />
+          <p className="hint">End of the analysis window (YYYY-MM).</p>
+          {fieldError('target_end_month')}
+        </div>
+        <div className="field">
+          <label htmlFor="timescaleMonths">Timescale (months)</label>
+          <input
+            id="timescaleMonths"
+            inputMode="numeric"
+            value={state.timescaleMonths}
+            onChange={(event) => set('timescaleMonths', event.target.value)}
+          />
+          <p className="hint">Window length, 1–48 months.</p>
+          {fieldError('timescale_months')}
+        </div>
+        <div className="field">
+          <label htmlFor="referenceStartYear">
+            Reference start year
+            <span className="tip" role="img" aria-label={REFERENCE_TIP} title={REFERENCE_TIP}>
+              ?
+            </span>
+          </label>
+          <input
+            id="referenceStartYear"
+            inputMode="numeric"
+            value={state.referenceStartYear}
+            onChange={(event) => set('referenceStartYear', event.target.value)}
+          />
+          {fieldError('reference_start_year')}
+        </div>
+        <div className="field">
+          <label htmlFor="referenceEndYear">Reference end year</label>
+          <input
+            id="referenceEndYear"
+            inputMode="numeric"
+            value={state.referenceEndYear}
+            onChange={(event) => set('referenceEndYear', event.target.value)}
+          />
+          {fieldError('reference_end_year')}
+        </div>
+        <div className="field">
+          <label htmlFor="minReferenceYears">Minimum reference years</label>
+          <input
+            id="minReferenceYears"
+            inputMode="numeric"
+            value={state.minReferenceYears}
+            onChange={(event) => set('minReferenceYears', event.target.value)}
+          />
+          <p className="hint">Years with incomplete data are excluded, never filled in.</p>
+          {fieldError('min_reference_years')}
+        </div>
+          </div>
+          <div className="actions">
+            <button type="button" className="ghost" onClick={() => setStep(1)}>
+              Back
+            </button>
+            <button type="button" className="primary" onClick={goNext}>
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+      {step === 3 && (
+        <div>
+          <div className="form-grid">
         <div className="field field-full">
           <label htmlFor="query">Evidence question</label>
           <input
@@ -451,16 +644,37 @@ export default function ScenarioForm({ onCreated }: { onCreated: (id: string) =>
           <p className="hint">Guides scientific-evidence retrieval for the report.</p>
           {fieldError('query')}
         </div>
-        <div className="field">
-          <label htmlFor="topK">Evidence passages</label>
-          <input
-            id="topK"
-            inputMode="numeric"
-            value={state.topK}
-            onChange={(event) => set('topK', event.target.value)}
-          />
-          {fieldError('top_k')}
+        <div className="field field-full">
+          <span id="indicators-label" style={{ fontWeight: 600, fontSize: 14 }}>
+            Indicators
+          </span>
+          <div className="check-list" role="group" aria-labelledby="indicators-label">
+            {INDICATORS.map((entry) => (
+              <label key={entry.id} className="check-row">
+                <input
+                  type="checkbox"
+                  checked={state.indicators.includes(entry.id)}
+                  onChange={() => toggleIndicator(entry.id)}
+                />
+                {entry.label}
+              </label>
+            ))}
+          </div>
+          {fieldError('indicators')}
         </div>
+          </div>
+          <div className="field field-full">
+            <details
+              className="card-details"
+              open={fallbackOpen}
+              onToggle={(event) => setFallbackOpen(event.currentTarget.open)}
+            >
+              <summary>
+                ERA5-Land land fallback
+                <span className="tip" role="img" aria-label={FALLBACK_TIP} title={FALLBACK_TIP}>
+                  ?
+                </span>
+              </summary>
         <div className="field field-full">
           <div className="check-row">
             <input
@@ -492,30 +706,54 @@ export default function ScenarioForm({ onCreated }: { onCreated: (id: string) =>
             {fieldError('land_fallback_max_km')}
           </div>
         )}
-        <div className="field field-full">
-          <span id="indicators-label" style={{ fontWeight: 600, fontSize: 14 }}>
-            Indicators
-          </span>
-          <div className="check-list" role="group" aria-labelledby="indicators-label">
-            {INDICATORS.map((entry) => (
-              <label key={entry.id} className="check-row">
+            </details>
+          </div>
+          <div className="field field-full">
+            <details
+              className="card-details"
+              open={advancedOpen}
+              onToggle={(event) => setAdvancedOpen(event.currentTarget.open)}
+            >
+              <summary>Advanced retrieval settings</summary>
+        <div className="field">
+          <label htmlFor="topK">Evidence passages</label>
+          <input
+            id="topK"
+            inputMode="numeric"
+            value={state.topK}
+            onChange={(event) => set('topK', event.target.value)}
+          />
+          {fieldError('top_k')}
+        </div>
+              <label className="check-row">
                 <input
                   type="checkbox"
-                  checked={state.indicators.includes(entry.id)}
-                  onChange={() => toggleIndicator(entry.id)}
+                  checked={state.excludeReference}
+                  onChange={(event) => set('excludeReference', event.target.checked)}
                 />
-                {entry.label}
+                Exclude reference sections from retrieval
               </label>
-            ))}
+              <p className="hint">
+                Bibliography sections never answer an adaptation question; excluding
+                them keeps evidence passages substantive. On by default.
+              </p>
+            </details>
           </div>
-          {fieldError('indicators')}
+          <p className="hint">
+            Cached results return in seconds. A first run at a new location can take
+            several minutes: the satellite archives serve one area at a time, and the
+            page polls until the run completes.
+          </p>
+          <div className="actions">
+            <button type="button" className="ghost" onClick={() => setStep(2)}>
+              Back
+            </button>
+            <button type="submit" className="primary" disabled={submitting}>
+              {submitting ? 'Creating…' : 'Run analysis'}
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="actions">
-        <button type="submit" className="primary" disabled={submitting}>
-          {submitting ? 'Creating…' : 'Run analysis'}
-        </button>
-      </div>
+      )}
     </form>
   );
 }

@@ -40,22 +40,22 @@ export default function ReferenceChart({ model, referenceLabel }: ReferenceChart
           y={bandY}
           width={Math.max(2, Math.abs(hiX - loX))}
           height={bandH}
-          fill="#e4e9ef"
+          fill="#1c3f31"
           rx={3}
         />
-        <line x1={meanX} y1={bandY - 6} x2={meanX} y2={bandY + bandH + 6} stroke="#1a56db" strokeWidth={2.5} />
-        <circle cx={targetX} cy={bandY + bandH / 2} r={6} fill="#1b2430" />
-        <text x={targetX} y={bandY - 12} textAnchor="middle" fontSize={11} fill="#1b2430">
+        <line x1={meanX} y1={bandY - 6} x2={meanX} y2={bandY + bandH + 6} stroke="#35d492" strokeWidth={2.5} />
+        <circle cx={targetX} cy={bandY + bandH / 2} r={6} fill="#e9f1ec" />
+        <text x={targetX} y={bandY - 12} textAnchor="middle" fontSize={11} fill="#e9f1ec">
           {model.targetLabel}: {model.target} {model.unit}
         </text>
-        <text x={pad} y={height - 26} fontSize={10.5} fill="#55606e">
-          ref mean {model.mean} {model.unit}
+        <text x={pad} y={height - 26} fontSize={10.5} fill="#a6bab0">
+          Reference mean {model.mean} {model.unit}
         </text>
-        <text x={width - pad} y={height - 26} textAnchor="end" fontSize={10.5} fill="#55606e">
+        <text x={width - pad} y={height - 26} textAnchor="end" fontSize={10.5} fill="#a6bab0">
           {model.nYears} years
           {model.percentilePct === null ? '' : ` · ${model.percentilePct.toFixed(1)}th pct`}
         </text>
-        <text x={pad} y={height - 10} fontSize={10.5} fill="#55606e">
+        <text x={pad} y={height - 10} fontSize={10.5} fill="#a6bab0">
           {model.sd === null ? 'No reference spread reported' : 'Band: reference mean ± 1 std dev'}
         </text>
       </svg>

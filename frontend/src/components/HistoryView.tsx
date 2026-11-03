@@ -102,7 +102,7 @@ function HistoryRow({
         )}
         {confirming ? (
           <>
-            <button type="button" className="primary" disabled={busy} onClick={remove}>
+            <button type="button" className="danger" disabled={busy} onClick={remove}>
               Confirm delete
             </button>
             <button

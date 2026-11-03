@@ -10,7 +10,7 @@ const APP_URL = pathToFileURL(
 test('presets set coordinates and flag the outside-band point', async ({
   page,
 }) => {
-  await page.goto(APP_URL);
+  await page.goto(`${APP_URL}#/new`);
   await expect(page.locator('.geo-map')).toBeVisible();
 
   await page.getByRole('button', { name: 'Trøndelag, Norway' }).click();
@@ -27,7 +27,7 @@ test('presets set coordinates and flag the outside-band point', async ({
 test('clicking the real map writes coordinates back to the inputs', async ({
   page,
 }) => {
-  await page.goto(APP_URL);
+  await page.goto(`${APP_URL}#/new`);
   const map = page.locator('.geo-map');
   await expect(map).toBeVisible();
 
@@ -56,7 +56,8 @@ test('results map marks the requested and actually-used points', async ({
     route.fulfill({ json: partialDetail }),
   );
 
-  await page.goto(APP_URL);
+  await page.goto(`${APP_URL}#/new`);
+  await page.getByRole('button', { name: 'Evidence & indicators' }).click();
   await page.getByRole('button', { name: 'Run analysis' }).click();
   await expect(page.getByRole('heading', { name: 'Results' })).toBeVisible({
     timeout: 15000,
@@ -71,6 +72,7 @@ test('results map marks the requested and actually-used points', async ({
   ).toBeVisible();
 
   // Problems stay collapsed under their grouped summary until opened.
+  await page.getByRole('tab', { name: 'Provenance & methods' }).click();
   const summary = page.getByText(/Why this is the platform fallback/);
   await expect(summary).toBeVisible();
   await expect(summary).toContainText('3 problems in 2 groups');

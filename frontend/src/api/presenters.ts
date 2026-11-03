@@ -40,6 +40,7 @@ export interface IndicatorCardModel {
   errorType: string | null;
   errorMessage: string | null;
   chart: ChartModel | null;
+  method: string | null;
 }
 
 type ResultRecord = Record<string, unknown>;
@@ -95,9 +96,32 @@ const TITLES: Record<string, string> = {
   era5_soil_moisture_anomaly: 'Soil moisture anomaly (ERA5-Land)',
 };
 
+// Verified method note for window anomalies (backend indicators/window_anomaly.py:
+// day-weighted window mean minus the mean of same-calendar-month reference
+// windows; a difference in the variable's units, never a percentage).
+const ANOMALY_METHOD =
+  'Day-weighted window mean minus the mean of same-calendar-month reference '
+  + 'windows (a difference in native units, not a percentage); incomplete '
+  + 'reference years are excluded, never filled in.';
+
+function methodFor(indicator: string, result: ResultRecord): string | null {
+  if (indicator === 'chirps_spi' || indicator === 'era5_spi') {
+    return asString(result.method);
+  }
+  if (
+    indicator === 'era5_temperature_anomaly' ||
+    indicator === 'era5_soil_moisture_anomaly'
+  ) {
+    return ANOMALY_METHOD;
+  }
+  return null;
+}
+
 // Verified dataset facts (backend coverage + dataset docs).
-const CHIRPS_COVERAGE = 'Land 60°S–60°N · 1981–present · 0.05° grid';
-const ERA5_COVERAGE = 'Global · 1950–present · 0.1° grid';
+export const CHIRPS_COVERAGE = 'Land 60°S–60°N · 1981–present · 0.05° grid';
+export const ERA5_COVERAGE = 'Global · 1950–present · 0.1° grid';
+export const CHIRPS_SOURCE = 'UC Santa Barbara Climate Hazards Center';
+export const ERA5_SOURCE = 'Copernicus Climate Change Service (CDS)';
 
 function coverageFor(indicator: string): string {
   if (indicator === 'chirps_spi') {
@@ -333,6 +357,7 @@ export function toCardModel(entry: BundleIndicatorResult): IndicatorCardModel {
     errorType: null,
     errorMessage: null,
     chart: null,
+    method: methodFor(entry.indicator, result),
   };
 
   if (entry.status === 'failed') {

@@ -244,6 +244,15 @@ Handoff date: 2026-10-28. Sources: owner's pasted logs and Claude's delivered co
 - **Options for the owner:** (a) accept + keep the documented exception; (b) drop `react-leaflet` and drive Leaflet (BSD-2-Clause) directly from a small React wrapper (~150 lines + mock rewrites; GeoMap's public props could stay). Do not silently revert the README/`FINAL_VERIFICATION.md` notes.
 - **Resolution:** owner picks (a) or (b); until then this stays open.
 
+- **P26 UI redesign (2026-11-03; CONFIRMED):** the v2 dark theme, Overview route,
+  stepper form, tabbed results, method notes, trace-methods tab, and 5 regenerated
+  screenshots shipped with all gates green (118 Vitest, 9 Playwright incl. a
+  console-error guard) and no backend change. Leaflet/react-leaflet kept per this
+  issue's decision; zoom controls, popups, and attribution restyled for the dark
+  theme with OSM attribution fully readable. Tile pixels stay blank in offline
+  sandboxes (blocked egress, pre-existing); re-capture shots on a networked
+  machine for the video.
+
 ### KI-37 — `verify_fresh_clone.ps1` failed on the owner's machine (High for the judge path) — ✅ RESOLVED 2026-11-02
 - **Evidence (owner run, REPORTED):** `Start-Job -WorkingDirectory` failed with
   `A parameter cannot be found that matches parameter name 'WorkingDirectory'` (that

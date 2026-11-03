@@ -17,8 +17,9 @@ export interface GeoMarker {
   position: [number, number];
   popupTitle: string;
   popupLines: string[];
-  /** Requested point (teal) vs grid point actually used (ochre). */
-  tone: 'request' | 'used';
+  /** Requested point (turquoise) vs grid point actually used (ochre).
+   * Overview reuse: 'demo' (captured real run) vs 'history' (your analysis). */
+  tone: 'request' | 'used' | 'demo' | 'history';
   draggable?: boolean;
 }
 
@@ -52,12 +53,14 @@ function dotIcon(tone: GeoMarker['tone']): L.DivIcon {
 const ICONS: Record<GeoMarker['tone'], L.DivIcon> = {
   request: dotIcon('request'),
   used: dotIcon('used'),
+  demo: dotIcon('demo'),
+  history: dotIcon('history'),
 };
 
 const BAND_STYLE: L.PathOptions = {
   stroke: false,
-  fillColor: '#7a6a4f',
-  fillOpacity: 0.28,
+  fillColor: '#b98a2f',
+  fillOpacity: 0.22,
   interactive: false,
 };
 

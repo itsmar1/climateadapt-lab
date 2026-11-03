@@ -26,6 +26,7 @@ afterEach(() => {
 describe('App', () => {
   // Spans two production poll cycles (2s each); needs more than the 5s default.
   it('runs form → progress → results end to end', async () => {
+    window.location.hash = '#/new';
     const running = scenarioDetailFixture({ status: 'running' });
     const done = scenarioDetailFixture({ status: 'complete' });
     vi.stubGlobal(
@@ -38,6 +39,10 @@ describe('App', () => {
     );
 
     render(<App />);
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Evidence & indicators' }),
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Run analysis' }));
 
     await waitFor(() => expect(screen.getByText('Analysis running')).toBeInTheDocument());
@@ -112,5 +117,30 @@ describe('App', () => {
       expect(screen.getByText('Demo snapshots')).toBeInTheDocument(),
     );
     expect(screen.getByText('Reference: Souss-Massa, Morocco')).toBeInTheDocument();
+  });
+
+  it('lands on the overview by default', async () => {
+    vi.stubGlobal(
+      'fetch',
+      mockFetch([
+        { body: demoListFixture([]) },
+        { body: scenarioListFixture([], 0) },
+      ]),
+    );
+
+    render(<App />);
+
+    expect(
+      screen.getByRole('heading', {
+        name: 'From satellite archives to a citable adaptation report',
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Start an analysis' })).toHaveAttribute(
+      'href',
+      '#/new',
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId('overview-counts')).toBeInTheDocument(),
+    );
   });
 });

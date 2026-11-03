@@ -61,6 +61,14 @@ describe('toCardModel', () => {
     expect(model.chart?.unit).toBe('m³/m³');
   });
 
+  it('exposes a method note for SPI and window-anomaly cards', () => {
+    expect(toCardModel(spiEntryOk()).method).toContain('Gamma distribution');
+    expect(toCardModel(tempEntryOkWithFallback()).method).toContain(
+      'Day-weighted window mean',
+    );
+    expect(toCardModel(soilEntryOk()).method).toContain('Day-weighted window mean');
+  });
+
   it('maps a failed entry to a typed error without values', () => {
     const model = toCardModel(failedEntry());
     expect(model.status).toBe('failed');

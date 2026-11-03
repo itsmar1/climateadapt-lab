@@ -54,6 +54,11 @@ export default function IndicatorCard({ model }: { model: IndicatorCardModel }) 
       <p className="meta">
         <strong>Source:</strong> {model.dataSource} · {model.coverage}
       </p>
+      {model.method && (
+        <p className="meta">
+          <strong>Method:</strong> {model.method}
+        </p>
+      )}
       <p className="meta">
         <strong>Requested point:</strong> {model.requestedPoint}
         {model.usedPoint ? (

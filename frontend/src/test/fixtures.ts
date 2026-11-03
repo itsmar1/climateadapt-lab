@@ -110,6 +110,11 @@ export function spiEntryOk(): BundleEntry {
       doi: '10.1038/sdata.2015.66',
       license_note: 'Free for research.',
       limitations: ['Precipitation only; not a drought verdict.'],
+      method:
+        'Gamma distribution (Thom 1958 approximation of maximum likelihood) fitted per '
+        + 'calendar month to non-zero reference window totals; zeros as a point mass q = '
+        + 'zeros / reference years; equiprobability transform to a standard normal '
+        + 'quantile (McKee et al. 1993; WMO-No. 1090).',
     },
   };
 }

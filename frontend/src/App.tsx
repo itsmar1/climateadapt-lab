@@ -1,19 +1,25 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Sprout } from 'lucide-react';
 import type { ScenarioDetail } from './api/client';
 import { API_BASE_URL } from './api/client';
 import DemoView from './components/DemoView';
 import HistoryView from './components/HistoryView';
 import JobProgress from './components/JobProgress';
+import Overview from './components/Overview';
 import ResultsView from './components/ResultsView';
 import ScenarioForm from './components/ScenarioForm';
 
 type Route =
+  | { view: 'overview' }
   | { view: 'form' }
   | { view: 'history' }
   | { view: 'demo'; key: string | null }
   | { view: 'scenario'; id: string };
 
 function routeFromHash(): Route {
+  if (window.location.hash === '#/new') {
+    return { view: 'form' };
+  }
   if (window.location.hash === '#/scenarios') {
     return { view: 'history' };
   }
@@ -28,7 +34,7 @@ function routeFromHash(): Route {
   if (match?.[1]) {
     return { view: 'scenario', id: match[1] };
   }
-  return { view: 'form' };
+  return { view: 'overview' };
 }
 
 function ScenarioRun({ id, onBack }: { id: string; onBack: () => void }) {
@@ -43,6 +49,13 @@ function ScenarioRun({ id, onBack }: { id: string; onBack: () => void }) {
   }
   return <JobProgress key={id} scenarioId={id} onDone={handleDone} onStop={onBack} />;
 }
+
+const NAV: Array<{ view: Route['view']; label: string; href: string }> = [
+  { view: 'overview', label: 'Overview', href: '#/' },
+  { view: 'form', label: 'New analysis', href: '#/new' },
+  { view: 'history', label: 'History', href: '#/scenarios' },
+  { view: 'demo', label: 'Demo', href: '#/demo' },
+];
 
 export default function App() {
   const [route, setRoute] = useState<Route>(() => routeFromHash());
@@ -61,7 +74,7 @@ export default function App() {
   }
 
   function openForm(): void {
-    window.location.hash = '';
+    window.location.hash = '#/new';
     setRoute({ view: 'form' });
   }
 
@@ -72,17 +85,37 @@ export default function App() {
 
   return (
     <div className="app">
+      <a className="skip-link" href="#main">
+        Skip to content
+      </a>
       <header className="app-header">
-        <h1>ClimateAdapt Lab</h1>
-        <p>Evidence-grounded agricultural drought adaptation (demo)</p>
-        <nav className="app-nav" aria-label="Sections">
-          <a href="#">New analysis</a>
-          <a href="#/scenarios">History</a>
-          <a href="#/demo">Demo</a>
-        </nav>
+        <div className="brand-row">
+          <a className="brand" href="#/" aria-label="ClimateAdapt Lab home">
+            <span className="brand-mark" aria-hidden="true">
+              <Sprout size={20} />
+            </span>
+            <span className="brand-name">
+              ClimateAdapt Lab
+              <span className="brand-tag">Evidence-grounded drought adaptation</span>
+            </span>
+          </a>
+          <nav className="app-nav" aria-label="Sections">
+            {NAV.map((entry) => (
+              <a
+                key={entry.view}
+                href={entry.href}
+                aria-current={route.view === entry.view ? 'page' : undefined}
+              >
+                {entry.label}
+              </a>
+            ))}
+          </nav>
+        </div>
       </header>
-      <main>
-        {route.view === 'form' ? (
+      <main id="main">
+        {route.view === 'overview' ? (
+          <Overview />
+        ) : route.view === 'form' ? (
           <div className="card">
             <h2>New analysis</h2>
             <p className="subtle">

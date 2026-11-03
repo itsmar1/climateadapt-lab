@@ -1,4 +1,4 @@
-# Demo script — 3-minute video (P21)
+# Demo script — 3-minute video (P21, UI updated P26)
 
 180 seconds, four timed beats mapped to the provisional rubric
 (`PROJECT_CONTEXT.md` §3 — the official rubric is still unknown, KI-32).
@@ -46,13 +46,13 @@ do {
 ```
 
 Checklist before pressing record: `$d.status` reached `partial` (no-key
-fallback — the expected demo configuration, $0 spent); `#/demo` lists three
+fallback — the expected demo configuration, $0 spent); `#/demo` lists four
 snapshots; a second run of the same scenario returns in seconds; screen at
 1280×800 or wider so the map and strip fit one frame.
 
 ## Beat 1 — Impact, 0:00–0:20
 
-SHOW: title + the New-analysis map.
+SHOW: the Overview landing (purpose + coverage map with run markers).
 SAY: "Agronomists and planners facing drought must choose between adaptation
 options — deficit irrigation, scheduling, water harvesting — with scattered
 evidence. ClimateAdapt Lab turns one location and season into computed
@@ -76,18 +76,19 @@ SAY: "Every value carries provenance, units, reference period, and
 limitations. The CHIRPS band is shaded because coverage is honest, not
 assumed. ERA5-Land fell back to a neighbouring grid cell, and the map shows
 both points with the distance. No severity labels anywhere — the tests forbid
-them. 792 backend tests, 96 frontend tests, 7 end-to-end, all green."
+them. Over 800 backend checks green, 118 frontend unit tests, 9
+end-to-end — green, including a console-error guard."
 
 ## Beat 4 — Live demo, 1:20–3:00
 
-- 1:20 — Click the **Morocco (reference)** preset, press **Run analysis**.
-  The warmed run lands in seconds.
-- 1:40 — Scroll the strip: location, window, 1991–2020 reference, status
-  badges. Open Indicators; point at CHIRPS SPI −0.517 vs ERA5 SPI −0.375 —
-  "two products, both shown, disagreement is uncertainty."
-- 2:05 — Recommendations: two options tied at 0.750 with score breakdowns,
+- 1:20 — On **New analysis**, click the **Morocco (reference)** preset,
+  jump to step 4, press **Run analysis**. The warmed run lands in seconds.
+- 1:40 — Read the sticky strip: location, window, 1991–2020 reference, status
+  badges. Open the Indicators tab; point at CHIRPS SPI −0.517 vs ERA5 SPI
+  −0.375 — "two products, both shown, disagreement is uncertainty."
+- 2:05 — Evidence & options tab: two options tied at 0.750 with score breakdowns,
   one exclusion with reasons, Unknown badges where sources are silent.
-- 2:20 — Report: evidence chips E1…En, verbatim citations with pages and
+- 2:20 — Report tab: evidence chips E1…En, verbatim citations with pages and
   licence notes, always-visible limitations. Press **Export report
   (Markdown)**.
 - 2:35 — **Demo** page: open Norway — CHIRPS `outside_coverage`, ERA5 fine;

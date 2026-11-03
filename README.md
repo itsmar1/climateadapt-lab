@@ -9,7 +9,7 @@ Python computes and enforces; the LLM only explains — every number is computed
 every claim is cited, and uncertainty stays visible. No severity scores, no
 invented benefits, no hidden imputation.
 
-![Scenario form with the Leaflet location picker](docs/screenshots/01-form-map.png)
+![ClimateAdapt Lab overview with coverage map](docs/screenshots/01-overview.png)
 
 **Status (P21, 2026-11-02):** backend 792 passed + 84 sandbox-blocked socket
 tests (zero assertion failures), frontend 96/96 Vitest + 7/7 Playwright,
@@ -231,13 +231,16 @@ point (teal) from ERA5-Land grid points actually used via land fallback
 (ochre, with the backend-reported distance).
 Out of scope: authentication, mobile polish.
 
-Screenshots (P20 Playwright run, mocked backend — map tiles need network, so
+Screenshots (P26 Playwright run, mocked backend — map tiles need network, so
 they render blank in offline sandboxes; re-capture on a networked machine with
 `npm run build:e2e`, `npm run test:e2e`, then copy
 `frontend/test-results/screenshots/*.png` to `docs/screenshots/`):
 
-![Scenario form with the Leaflet location picker](docs/screenshots/01-form-map.png)
-![Results summary strip with the platform-fallback badge](docs/screenshots/04-results.png)
+![Overview with coverage map and run markers](docs/screenshots/01-overview.png)
+![Four-step new-analysis form with draft summary](docs/screenshots/02-stepper.png)
+![Results workspace with tabbed sections](docs/screenshots/03-results-tabs.png)
+![Accepted AI report with narrative badge](docs/screenshots/04-report-accepted.png)
+![Scenario history list](docs/screenshots/05-history.png)
 
 ## Demo mode (zero keys needed)
 

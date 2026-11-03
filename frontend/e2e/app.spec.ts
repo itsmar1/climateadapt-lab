@@ -26,7 +26,8 @@ test('runs form → progress → results against a mocked backend', async ({
     return route.fulfill({ json: polls < 2 ? runningDetail : completeDetail });
   });
 
-  await page.goto(APP_URL);
+  await page.goto(`${APP_URL}#/new`);
+  await page.getByRole('button', { name: 'Evidence & indicators' }).click();
   await page.getByRole('button', { name: 'Run analysis' }).click();
   await expect(page.getByText('Analysis running')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Results' })).toBeVisible({
@@ -34,6 +35,7 @@ test('runs form → progress → results against a mocked backend', async ({
   });
   await expect(page.getByText('Rainfall · SPI (CHIRPS)')).toBeVisible();
   await expect(page.getByText('-0.517', { exact: true })).toBeVisible();
+  await page.getByRole('tab', { name: 'Report' }).click();
   await expect(page.getByRole('heading', { name: 'Report' })).toBeVisible();
   await expect(page.getByText('AI-generated narrative')).toBeVisible();
 });
@@ -46,7 +48,8 @@ test('shows mixed authorship for ai-partial reports', async ({ page }) => {
     route.fulfill({ json: partialAiDetail }),
   );
 
-  await page.goto(APP_URL);
+  await page.goto(`${APP_URL}#/new`);
+  await page.getByRole('button', { name: 'Evidence & indicators' }).click();
   await page.getByRole('button', { name: 'Run analysis' }).click();
   await expect(page.getByRole('heading', { name: 'Results' })).toBeVisible({
     timeout: 15000,
@@ -70,7 +73,8 @@ test('maps a typed backend failure to its message', async ({ page }) => {
     }),
   );
 
-  await page.goto(APP_URL);
+  await page.goto(`${APP_URL}#/new`);
+  await page.getByRole('button', { name: 'Evidence & indicators' }).click();
   await page.getByRole('button', { name: 'Run analysis' }).click();
   await expect(page.getByText('field required')).toBeVisible();
 });

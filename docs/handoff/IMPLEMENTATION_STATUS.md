@@ -290,6 +290,19 @@ Diagnosis (CONFIRMED offline): P22 fixes held (no `'5'`, no efficacy-claim). Rep
 
 Result (CONFIRMED, $0 spent): the owner's live run `run-20261102T202227Z` is the first accepted draft (KI-35 resolved). Capture ran offline here (`--offline`, warm caches): re-validation clean, audit `[]`, file 119750 bytes. Badge verified against the real frontend presenter (`acceptanceOf` → `ai-accepted`, 14/14, "AI report accepted"); Vitest itself could not run here (worker-spawn timeouts under box load, same as KI-34 note — pre-existing environmental). README + demo/README + DEMO_RUNS + SUBMISSION_CHECKLIST updated to four snapshots.
 
+### 2.25 UI redesign v2 (P26 2026-11-03)
+| Path | Purpose | Evidence |
+|---|---|---|
+| `frontend/src/index.css` | Dark-theme design tokens (CSS vars), wordmark shell, tabs, stepper, sticky strip, states; Manrope + mono; all 57 old selector groups preserved | T (gates green) |
+| `frontend/src/components/Overview.tsx` | New default `#/` route: hero, coverage map (CHIRPS band + real demo/history markers), documented coverage facts, pipeline strip | T (4 new tests green) |
+| `ScenarioForm.tsx` | Same fields/body regrouped into a 4-step stepper: summary panel, per-step validation, error-step jump, tooltips, collapsible fallback/advanced panels (`exclude_reference` newly surfaced, default unchanged) | T (6 new tests green) |
+| `ResultsView.tsx` | Sticky summary strip + tabs (Indicators · Evidence & options · Report · Provenance & methods); new trace-methods block from `detail.trace`; all content moved, none deleted | T (ports + 4 new tests green) |
+| `presenters.ts` + `IndicatorCard.tsx` | Method note per card: backend `method` verbatim for SPI, verified window-anomaly note otherwise | T (new test green) |
+| `frontend/e2e/console.spec.ts` | Durable guard: zero console/page errors across routes (OSM tile egress excepted with URL attribution) | T (green) |
+| `docs/screenshots/` | Regenerated 5-shot set (overview, stepper, tabs, accepted report, history) | D (viewed) |
+
+Result (CONFIRMED): no backend change, no new endpoints, Leaflet kept (KI-36 stands), no Tailwind/shadcn/Recharts/geocoding/overlays. Deps added: `lucide-react@1.66.0` (ISC), `@fontsource-variable/manrope@5.3.0` (OFL-1.1) via npm registry, self-hosted. Contrast 20/20 pairs AA (lowest text pair 7.25:1). Gates per batch: tsc 0, eslint 0, vitest 107 → 113 → 118 green (threads pool; forks pool spawn timeouts are box load, KI-34), vite build green, Playwright 8 → 8 → 9 green. History `crop` column not built: `ScenarioSummary` has no crop field (rendered without it per spec). Mid-task lesson: one component rewrite was built from a misremembered read and failed tsc; restored from git and redone as assert-closed line surgery with diff review — verify cached reads against `git show HEAD:` before full-file rewrites.
+
 ### 2.6 Scientific RAG (`src/climateadapt/rag/`, first batch)
 | Path | Purpose | Evidence |
 |---|---|---|

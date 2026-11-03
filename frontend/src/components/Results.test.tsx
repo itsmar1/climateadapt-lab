@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import type { GeoMapProps } from './GeoMap';
 import { toCardModel } from '../api/presenters';
@@ -28,6 +28,10 @@ vi.mock('./GeoMap', () => ({
   ),
 }));
 
+function goToTab(label: string): void {
+  fireEvent.click(screen.getByRole('tab', { name: label }));
+}
+
 describe('IndicatorCard', () => {
   it('renders values, reference, source, limitations, and provenance', () => {
     render(<IndicatorCard model={toCardModel(spiEntryOk())} />);
@@ -40,6 +44,15 @@ describe('IndicatorCard', () => {
     expect(screen.getByText(/Precipitation only/)).toBeInTheDocument();
     expect(screen.getByText(/Funk et al/)).toBeInTheDocument();
     expect(screen.getByRole('img', { name: /Target value/ })).toBeInTheDocument();
+  });
+
+  it('shows the backend method note on SPI cards and the anomaly note otherwise', () => {
+    const { unmount } = render(<IndicatorCard model={toCardModel(spiEntryOk())} />);
+    expect(screen.getByText(/Gamma distribution/)).toBeInTheDocument();
+    unmount();
+
+    render(<IndicatorCard model={toCardModel(tempEntryOkWithFallback())} />);
+    expect(screen.getByText(/Day-weighted window mean/)).toBeInTheDocument();
   });
 
   it('surfaces fallback and cell-edge warnings', () => {
@@ -128,6 +141,7 @@ describe('ResultsView', () => {
     });
     render(<ResultsView detail={detail} onNew={() => undefined} />);
     expect(screen.getByText(/Deterministic fallback report/)).toBeInTheDocument();
+    goToTab('Provenance & methods');
     expect(screen.getByText('drought-label')).toBeInTheDocument();
     expect(screen.getByText('retrieval-empty')).toBeInTheDocument();
   });
@@ -148,13 +162,16 @@ describe('ResultsView', () => {
 
   it('shows ranking, report, and export for a full run', () => {
     render(<ResultsView detail={fullDetailFixture()} onNew={() => undefined} />);
+    goToTab('Evidence & options');
     expect(screen.getByRole('heading', { name: 'Recommendations' })).toBeInTheDocument();
+    expect(screen.getAllByText('Computed by the platform')).toHaveLength(1);
+    goToTab('Report');
     expect(screen.getByRole('heading', { name: 'Report' })).toBeInTheDocument();
+    expect(screen.getByText('Deficit irrigation')).toBeInTheDocument();
+    expect(screen.getAllByText('Computed by the platform')).toHaveLength(1);
     expect(
       screen.getByRole('button', { name: 'Export report (Markdown)' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('Deficit irrigation')).toBeInTheDocument();
-    expect(screen.getAllByText('Computed by the platform')).toHaveLength(2);
   });
 
   it('badges AI-accepted versus platform-fallback reports in the strip', () => {
@@ -208,6 +225,7 @@ describe('ResultsView', () => {
       problems: ['[b-code] second', '[a-code] first', '[b-code] third'],
     });
     render(<ResultsView detail={detail} onNew={() => undefined} />);
+    goToTab('Provenance & methods');
     expect(
       screen.getByText(/Why this is the platform fallback · 3 problems in 2 groups/),
     ).toBeInTheDocument();
@@ -258,10 +276,79 @@ describe('ResultsView', () => {
       trace: null,
     });
     render(<ResultsView detail={detail} onNew={() => undefined} />);
+    goToTab('Evidence & options');
     expect(screen.getByText('No ranking stored for this run.')).toBeInTheDocument();
+    goToTab('Report');
     expect(screen.getByText('No report stored for this run.')).toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: 'Export report (Markdown)' }),
     ).not.toBeInTheDocument();
+  });
+
+  it('shows one workspace panel at a time', () => {
+    render(<ResultsView detail={fullDetailFixture()} onNew={() => undefined} />);
+    expect(screen.getByText('Rainfall · SPI (CHIRPS)')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Report' })).not.toBeInTheDocument();
+
+    goToTab('Report');
+    expect(screen.getByRole('heading', { name: 'Report' })).toBeInTheDocument();
+    expect(screen.queryByText('Rainfall · SPI (CHIRPS)')).not.toBeInTheDocument();
+    // Report limitations stay visible without clicking anything.
+    expect(screen.getByRole('heading', { name: 'Limitations' })).toBeInTheDocument();
+
+    goToTab('Indicators');
+    expect(screen.getByText('Rainfall · SPI (CHIRPS)')).toBeInTheDocument();
+  });
+
+  it('shows the run trace in Provenance & methods', () => {
+    const detail = scenarioDetailFixture({
+      trace: {
+        agent_version: 1,
+        component_versions: { model: 'baseten:meta-models/muse-spark-open-1026' },
+        draft_text: '',
+        duration_ms_total: 101781,
+        ended_at: '2026-11-02T20:22:27+00:00',
+        outcome: 'complete',
+        repair_text: '',
+        run_id: 'abc123',
+        started_at: '2026-11-02T20:20:45+00:00',
+        stages: [
+          {
+            detail: '4/4 ok',
+            duration_ms: 16547,
+            error_code: null,
+            name: 'bundle',
+            started_at: '2026-11-02T20:20:45+00:00',
+            status: 'ok',
+          },
+          {
+            detail: 'finish=length',
+            duration_ms: 58594,
+            error_code: null,
+            name: 'draft',
+            started_at: '2026-11-02T20:21:05+00:00',
+            status: 'ok',
+          },
+        ],
+        usage: { llm_calls: 2, prompt_tokens: 61385, completion_tokens: 23296 },
+        validator_verdicts: ['[invalid-json] truncated', '[repair-accepted]'],
+      },
+    });
+    render(<ResultsView detail={detail} onNew={() => undefined} />);
+    goToTab('Provenance & methods');
+    expect(
+      screen.getByText('baseten:meta-models/muse-spark-open-1026'),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/101781 ms/)).toBeInTheDocument();
+    expect(screen.getByText('bundle')).toBeInTheDocument();
+    expect(screen.getByText(/61385 prompt/)).toBeInTheDocument();
+    expect(screen.getByText('[repair-accepted]')).toBeInTheDocument();
+  });
+
+  it('says so when no run trace is stored', () => {
+    const detail = scenarioDetailFixture({ trace: null });
+    render(<ResultsView detail={detail} onNew={() => undefined} />);
+    goToTab('Provenance & methods');
+    expect(screen.getByText('No run trace stored for this run.')).toBeInTheDocument();
   });
 });

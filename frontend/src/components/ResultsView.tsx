@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import type { ScenarioDetail } from '../api/client';
 import { downloadMarkdown, reportToMarkdown } from '../api/export';
@@ -115,8 +116,87 @@ function usedMarkers(points: FallbackPoint[]): GeoMarker[] {
   return markers;
 }
 
-function scrollToSection(id: string): void {
-  document.getElementById(id)?.scrollIntoView?.();
+const TABS = [
+  { id: 'indicators', label: 'Indicators' },
+  { id: 'evidence', label: 'Evidence & options' },
+  { id: 'report', label: 'Report' },
+  { id: 'provenance', label: 'Provenance & methods' },
+] as const;
+
+type TabId = (typeof TABS)[number]['id'];
+
+function asCount(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+/** Pipeline trace summary: model, stages, token usage, validator verdicts. */
+function TraceMethods({ trace }: { trace: NonNullable<ScenarioDetail['trace']> }) {
+  const versions = trace.component_versions ?? {};
+  const usage = trace.usage ?? {};
+  const llmCalls = asCount(usage.llm_calls);
+  const prompt = asCount(usage.prompt_tokens);
+  const completion = asCount(usage.completion_tokens);
+  const stages = trace.stages ?? [];
+  const verdicts = trace.validator_verdicts ?? [];
+  return (
+    <div>
+      <h3>Run trace</h3>
+      <dl className="facts">
+        <div style={{ display: 'contents' }}>
+          <dt>Model</dt>
+          <dd>
+            <code className="inline">{versions.model ?? 'not reported'}</code>
+          </dd>
+        </div>
+        <div style={{ display: 'contents' }}>
+          <dt>Outcome</dt>
+          <dd>{trace.outcome === '' ? 'not reported' : trace.outcome}</dd>
+        </div>
+        <div style={{ display: 'contents' }}>
+          <dt>Duration</dt>
+          <dd>{Math.round(trace.duration_ms_total)} ms</dd>
+        </div>
+        <div style={{ display: 'contents' }}>
+          <dt>Model calls</dt>
+          <dd>{llmCalls === null ? 'none reported' : llmCalls}</dd>
+        </div>
+        {prompt !== null && completion !== null && (
+          <div style={{ display: 'contents' }}>
+            <dt>Tokens</dt>
+            <dd>
+              {prompt} prompt · {completion} completion
+            </dd>
+          </div>
+        )}
+      </dl>
+      {stages.length > 0 && (
+        <>
+          <h3>Stages</h3>
+          <ul className="tight">
+            {stages.map((stage) => (
+              <li key={stage.name}>
+                <code className="inline">{stage.name}</code>: {stage.status} (
+                {Math.round(stage.duration_ms)} ms)
+                {stage.error_code ? ` [${stage.error_code}]` : ''}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      {verdicts.length > 0 && (
+        <>
+          <h3>Validator verdicts</h3>
+          <ul className="tight">
+            {verdicts.map((verdict) => (
+              <li key={verdict}>
+                <code className="inline">{verdict}</code>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
+  );
 }
 
 export default function ResultsView({
@@ -151,6 +231,7 @@ export default function ResultsView({
     },
     ...usedMarkers(points),
   ];
+  const [tab, setTab] = useState<TabId>('indicators');
 
   return (
     <div>
@@ -162,6 +243,7 @@ export default function ResultsView({
             Stored results, not a live run.
           </div>
         )}
+        <div className="strip-sticky">
         <div className="status-line">
           <h2 style={{ margin: 0 }}>Results</h2>
           <StatusBadge status={detail.status} />
@@ -175,28 +257,7 @@ export default function ResultsView({
           {detail.scenario.timescale_months}-month window · reference{' '}
           {detail.scenario.reference_start_year}–{detail.scenario.reference_end_year}
         </p>
-        <nav className="section-nav" aria-label="Result sections">
-          <button type="button" className="chip" onClick={() => scrollToSection('location')}>
-            Location
-          </button>
-          <button
-            type="button"
-            className="chip"
-            onClick={() => scrollToSection('indicators')}
-          >
-            Indicators
-          </button>
-          <button
-            type="button"
-            className="chip"
-            onClick={() => scrollToSection('recommendations')}
-          >
-            Recommendations
-          </button>
-          <button type="button" className="chip" onClick={() => scrollToSection('report')}>
-            Report
-          </button>
-        </nav>
+        </div>
         {fallback && (
           <div className="banner warn" role="alert">
             <strong>Deterministic fallback report</strong>
@@ -231,6 +292,123 @@ export default function ResultsView({
             </ul>
           </details>
         )}
+        <div className="actions">
+          <button type="button" className="ghost" onClick={onNew}>
+            New scenario
+          </button>
+          {detail.report && (
+            <button
+              type="button"
+              className="ghost"
+              onClick={() =>
+                downloadMarkdown(
+                  `scenario-${detail.scenario_id}-report.md`,
+                  reportToMarkdown(detail),
+                )
+              }
+            >
+              Export report (Markdown)
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="tabs" role="tablist" aria-label="Result sections">
+        {TABS.map((entry) => (
+          <button
+            key={entry.id}
+            type="button"
+            role="tab"
+            id={`tab-${entry.id}`}
+            aria-selected={tab === entry.id}
+            aria-controls={`panel-${entry.id}`}
+            onClick={() => setTab(entry.id)}
+          >
+            {entry.label}
+          </button>
+        ))}
+      </div>
+      {tab === 'indicators' && (
+        <div role="tabpanel" id="panel-indicators" aria-labelledby="tab-indicators">
+      <div className="card" id="location">
+        <h2>Location</h2>
+        <GeoMap
+          mapLabel="Result location map"
+          center={[requested.lat, requested.lon]}
+          zoom={4}
+          markers={markers}
+          fitMarkers={points.length > 0}
+        />
+        <p className="meta">
+          Teal marker: requested point ({formatPoint(requested.lat, requested.lon)}).
+          {points.length > 0
+            ? ' Ochre markers: grid points actually used (ERA5-Land land fallback).'
+            : ' No land fallback was used in this run.'}
+        </p>
+        {points.length > 0 && (
+          <ul className="tight">
+            {points.map((point) => (
+              <li key={point.indicator}>
+                Grid point used for <code className="inline">{point.indicator}</code>:{' '}
+                {formatPoint(point.used.lat, point.used.lon)}
+                {point.distanceKm !== null
+                  ? ` (${point.distanceKm.toFixed(1)} km from requested)`
+                  : ' (distance not reported)'}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <div id="indicators">
+        <h2 className="section-title">Indicators</h2>
+        {entries.length > 0 ? (
+          <div className="cards">
+            {entries.map((entry) => (
+              <IndicatorCard key={entry.indicator} model={toCardModel(entry)} />
+            ))}
+          </div>
+        ) : (
+          <div className="card">
+            <p className="subtle">No indicators computed for this run.</p>
+          </div>
+        )}
+      </div>
+        </div>
+      )}
+      {tab === 'evidence' && (
+        <div role="tabpanel" id="panel-evidence" aria-labelledby="tab-evidence">
+      {/* No extra headings here: the panels below render their own, and
+          heading names stay unique for tests and screen readers. */}
+      <div id="recommendations">
+        {detail.ranking ? (
+          <RecommendationPanel ranking={detail.ranking} />
+        ) : (
+          <div className="card">
+            <h2>Recommendations</h2>
+            <p className="subtle">No ranking stored for this run.</p>
+          </div>
+        )}
+      </div>
+        </div>
+      )}
+      {tab === 'report' && (
+        <div role="tabpanel" id="panel-report" aria-labelledby="tab-report">
+      <div id="report">
+        {detail.report ? (
+          <ReportView report={detail.report} />
+        ) : (
+          <div className="card">
+            <h2>Report</h2>
+            <p className="subtle">No report stored for this run.</p>
+          </div>
+        )}
+      </div>
+        </div>
+      )}
+      {tab === 'provenance' && (
+        <div role="tabpanel" id="panel-provenance" aria-labelledby="tab-provenance">
+          <div className="card">
+            <h2>Provenance & methods</h2>
         {detail.problems.length > 0 && (
           <details className="problems">
             <summary>
@@ -267,95 +445,14 @@ export default function ResultsView({
             </ul>
           </>
         )}
-        <div className="actions">
-          <button type="button" className="ghost" onClick={onNew}>
-            New scenario
-          </button>
-          {detail.report && (
-            <button
-              type="button"
-              className="ghost"
-              onClick={() =>
-                downloadMarkdown(
-                  `scenario-${detail.scenario_id}-report.md`,
-                  reportToMarkdown(detail),
-                )
-              }
-            >
-              Export report (Markdown)
-            </button>
-          )}
+            {detail.trace ? (
+              <TraceMethods trace={detail.trace} />
+            ) : (
+              <p className="subtle">No run trace stored for this run.</p>
+            )}
+          </div>
         </div>
-      </div>
-
-      <div className="card" id="location">
-        <h2>Location</h2>
-        <GeoMap
-          mapLabel="Result location map"
-          center={[requested.lat, requested.lon]}
-          zoom={4}
-          markers={markers}
-          fitMarkers={points.length > 0}
-        />
-        <p className="meta">
-          Teal marker: requested point ({formatPoint(requested.lat, requested.lon)}).
-          {points.length > 0
-            ? ' Ochre markers: grid points actually used (ERA5-Land land fallback).'
-            : ' No land fallback was used in this run.'}
-        </p>
-        {points.length > 0 && (
-          <ul className="tight">
-            {points.map((point) => (
-              <li key={point.indicator}>
-                Grid point used for <code className="inline">{point.indicator}</code>:{' '}
-                {formatPoint(point.used.lat, point.used.lon)}
-                {point.distanceKm !== null
-                  ? ` (${point.distanceKm.toFixed(1)} km from requested)`
-                  : ' (distance not reported)'}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div id="indicators">
-        <h2 className="section-title">Indicators</h2>
-        {entries.length > 0 ? (
-          <div className="cards">
-            {entries.map((entry) => (
-              <IndicatorCard key={entry.indicator} model={toCardModel(entry)} />
-            ))}
-          </div>
-        ) : (
-          <div className="card">
-            <p className="subtle">No indicators computed for this run.</p>
-          </div>
-        )}
-      </div>
-
-      {/* No extra headings here: the panels below render their own, and
-          heading names stay unique for tests and screen readers. */}
-      <div id="recommendations">
-        {detail.ranking ? (
-          <RecommendationPanel ranking={detail.ranking} />
-        ) : (
-          <div className="card">
-            <h2>Recommendations</h2>
-            <p className="subtle">No ranking stored for this run.</p>
-          </div>
-        )}
-      </div>
-
-      <div id="report">
-        {detail.report ? (
-          <ReportView report={detail.report} />
-        ) : (
-          <div className="card">
-            <h2>Report</h2>
-            <p className="subtle">No report stored for this run.</p>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }
