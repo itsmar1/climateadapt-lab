@@ -18,11 +18,10 @@ Pick a place and a season. The platform computes drought-relevant indicators fro
 6. [Docker demo stack](#docker-demo-stack)
 7. [Architecture](#architecture)
 8. [Scientific integrity rules](#scientific-integrity-rules)
-9. [Verification status](#verification-status)
-10. [Honest scope and limitations](#honest-scope-and-limitations)
-11. [Data sources and licences](#data-sources-and-licences)
-12. [Repository layout](#repository-layout)
-13. [Developer commands](#developer-commands)
+9. [Honest scope and limitations](#honest-scope-and-limitations)
+10. [Data sources and licences](#data-sources-and-licences)
+11. [Repository layout](#repository-layout)
+12. [Developer commands](#developer-commands)
 
 ---
 
@@ -30,9 +29,9 @@ Pick a place and a season. The platform computes drought-relevant indicators fro
 
 Drought adaptation decisions (when to irrigate, which water-saving practice to try, where to focus extension work) are made by agronomists, extension officers, NGO programme staff and regional planners who need **defensible, cited** context, not an opaque score. Existing tools either show raw maps without evidence, or generate fluent text with no guarantee that numbers and citations are real.
 
-ClimateAdapt Lab extends the author's earlier irrigation-management work (ECO DRIP, 2023) toward comparing a wider set of drought-adaptation options, with every number traceable to a data source and every claim traceable to a retrieved passage.
+ClimateAdapt Lab extends my earlier irrigation-management work (ECO DRIP, 2023) toward comparing a wider set of drought-adaptation options, with every number traceable to a data source and every claim traceable to a retrieved passage.
 
-*Intended users: agronomists, extension and NGO staff, planners, researchers. It is decision support for an advisor, not an automated emergency declaration.*
+*Intended users: farmers, agronomists, extension and NGO staff, planners, researchers. It is decision support for an advisor, not an automated emergency declaration.*
 
 ## What it does
 
@@ -54,7 +53,6 @@ Example (single point, reference scenario 30.43°N, −9.61°E, Jan–Mar 2024, 
 - **Observed result** (saved trace, reference scenario): the first draft was cut off at the token cap; the repair was accepted; 14 of 14 statements model-written; 2 model calls, 61,385 prompt and 23,296 completion tokens, ~102 s. Runs can also end in the deterministic fallback; the UI says so.
 - **Not claimed:** structured-output enforcement (this model does not enforce a schema; validation is client-side), numeric rate limits or credit figures, or that the model chooses its own tools in the live path (the pipeline is fixed and validated by design).
 
-Details and numbers: [`docs/MUSE_SPARK_EVIDENCE.md`](docs/MUSE_SPARK_EVIDENCE.md), [`docs/AGENT_WORKFLOW.md`](docs/AGENT_WORKFLOW.md), [`docs/LLM_PROVIDER_NOTES.md`](docs/LLM_PROVIDER_NOTES.md).
 
 ## Quickstart for judges
 
@@ -168,22 +166,6 @@ Enforced in code and tests, not just documentation:
 8. Hard constraints live in deterministic code. Model output is validated against retrieved sources and schemas before it reaches a user.
 9. Tests never use the network or credentials.
 
-## Verification status
-
-Labels follow the repo's convention: **CONFIRMED** (run, output recorded), **REPORTED**, **UNVERIFIED**.
-
-| Item | Status |
-|---|---|
-| Backend test suite (owner's machine, 2026-11-02) | **CONFIRMED**: 904 passed, 1 skipped. Later tasks added tests; rerun `uv run pytest -q` for the current count. <!-- [UPDATE with your final run] --> |
-| Lint (`uv run ruff check .`) | **CONFIRMED** clean |
-| Frontend (type check, lint, unit tests, build, Playwright) | **CONFIRMED** green in the build sandbox (118 unit, 9 end-to-end); run `npm run test` locally |
-| CI on GitHub | **CONFIRMED** green on first run |
-| Backend Docker image and `/health` | **CONFIRMED** by the owner |
-| Real-data runs (CHIRPS, ERA5-Land) | **CONFIRMED** on the reference point and four coverage probes. These are coverage checks, **not global validation**. |
-| Muse Spark live report accepted by validators | **CONFIRMED** (saved run `2026-11-02`, trace in the evidence file) |
-| Full-stack Docker (frontend image, compose serving), fresh-clone script servers | **CONFIRMED** |
-| Numeric model rate/context limits, credit balance | **UNVERIFIED** |
-
 ## Honest scope and limitations
 
 - **ERA5-Land vs CHIRPS** can differ strongly month to month and at coastal masked points. Differences are reported, not smoothed over.
@@ -193,7 +175,7 @@ Labels follow the repo's convention: **CONFIRMED** (run, output recorded), **REP
 
 ### Crop / non-crop vision baseline (separate experiment)
 
-Classical models (logistic regression, random forest) trained on the CropHarvest benchmark and evaluated on its six official test grids (543,055 evaluable rows) with bootstrapped confidence intervals and a leakage audit. Random forest reaches 0.797 accuracy and 0.790 macro-F1; logistic regression 0.562 and 0.559. Per-region results vary widely and one region is near chance, which is reported. Trained on a 20,000-row seeded sample of 82,654 eligible rows; the full-data run is reproducible but not executed. It is **not** a drought or intervention model and is not deployed. See [`docs/VISION_BASELINE.md`](docs/VISION_BASELINE.md).
+Classical models (logistic regression, random forest) trained on the CropHarvest benchmark and evaluated on its six official test grids (543,055 evaluable rows) with bootstrapped confidence intervals and a leakage audit. Random forest reaches 0.797 accuracy and 0.790 macro-F1; logistic regression 0.562 and 0.559. Per-region results vary widely and one region is near chance, which is reported. Trained on a 20,000-row seeded sample of 82,654 eligible rows; the full-data run is reproducible but not executed. It is **not** a drought or intervention model and is not deployed.
 
 ## Data sources and licences
 
