@@ -219,6 +219,10 @@ uv run ruff check .
 cd frontend; npm run lint; npm run test; npm run build; npm run test:e2e
 ```
 
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+
 
 ---
 
